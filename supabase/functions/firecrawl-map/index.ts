@@ -141,8 +141,38 @@ serve(async (req) => {
       );
     }
 
-    const allLinks: string[] = data.links || [];
+    let allLinks: string[] = data.links || [];
     console.log(`Firecrawl Map found ${allLinks.length} URLs`);
+
+    // If we only got sitemap files, try parsing them directly
+    if (allLinks.length <= 5 && allLinks.some(link => link.includes('sitemap'))) {
+      console.log('Only found sitemap files, attempting to parse them...');
+      const sitemapUrls = new Set<string>();
+      
+      for (const sitemapUrl of allLinks.filter(link => link.includes('sitemap'))) {
+        try {
+          const sitemapResponse = await fetch(sitemapUrl);
+          if (sitemapResponse.ok) {
+            const sitemapXml = await sitemapResponse.text();
+            // Extract URLs from sitemap XML
+            const urlMatches = sitemapXml.matchAll(/<loc>(.*?)<\/loc>/g);
+            for (const match of urlMatches) {
+              const url = match[1].trim();
+              if (url && !url.includes('sitemap')) {
+                sitemapUrls.add(url);
+              }
+            }
+          }
+        } catch (e) {
+          console.log(`Failed to parse sitemap ${sitemapUrl}:`, e);
+        }
+      }
+      
+      if (sitemapUrls.size > 0) {
+        allLinks = Array.from(sitemapUrls);
+        console.log(`Extracted ${allLinks.length} URLs from sitemaps`);
+      }
+    }
 
     // Process all URLs - NO FILTERING, just categorize
     const seenSlugs = new Set<string>();
