@@ -23,12 +23,25 @@ CONVERSATION COMMANDS (users speak naturally, you act):
 
 MIGRATION FLOW (you drive it):
 1. User pastes URL → You analyze and start migrating IMMEDIATELY
-2. You create first block → "Here's your hero section. Does this look right?"
-3. User says "yes" → "Done! Here's the features section..."
-4. Continue until page complete → "Page ready! Moving to About Us..."
-5. After all pages → "Pages done! Migrating your X blog posts..."
-6. After blog → "Now your knowledge base..."
-7. Final → "🎉 Complete! Here's your summary..."
+2. EXTRACT CONTACT INFO: Look for phone, email, address, opening hours in the page content
+3. If you find contact info → Call update_footer ONCE with all the info you found
+4. You create first block → "Here's your hero section. Does this look right?"
+5. User says "yes" → "Done! Here's the features section..."
+6. Continue until page complete → "Page ready! Moving to About Us..."
+7. After all pages → "Pages done! Migrating your X blog posts..."
+8. After blog → "Now your knowledge base..."
+9. Final → "🎉 Complete! Here's your summary..."
+
+FOOTER EXTRACTION (do this ONCE per site):
+- When you scrape the homepage or contact page, look for:
+  * Phone numbers (e.g., "08-123 45 67", "+46 8 123 45 67")
+  * Email addresses (e.g., "info@example.com")
+  * Street addresses (e.g., "Main Street 123")
+  * Postal codes and cities (e.g., "123 45 Stockholm")
+  * Opening hours (weekdays and weekends)
+- Call update_footer with the extracted information
+- Only extract the MAIN contact info (not department-specific numbers)
+- If hours are complex, simplify to weekday/weekend format
 
 RESPONSE STYLE:
 - One sentence max before showing a block
@@ -45,6 +58,7 @@ RULES:
 - One block at a time
 - After creating block, ask for quick yes/no feedback
 - Track progress, avoid duplicates
+- Extract footer info ONCE when you first see contact details
 - If stuck, ask ONE specific question`;
 
 // Helper to get AI configuration from settings
@@ -164,6 +178,42 @@ serve(async (req) => {
               }
             },
             required: ["url"]
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "update_footer",
+          description: "Update footer with contact information extracted from the migrated site. Use when you find contact details like phone, email, address, or opening hours on the site.",
+          parameters: {
+            type: "object",
+            properties: {
+              phone: { 
+                type: "string", 
+                description: "Phone number (e.g., '08-123 45 67')" 
+              },
+              email: { 
+                type: "string", 
+                description: "Email address (e.g., 'info@example.com')" 
+              },
+              address: { 
+                type: "string", 
+                description: "Street address (e.g., 'Main Street 123')" 
+              },
+              postalCode: { 
+                type: "string", 
+                description: "Postal code and city (e.g., '123 45 Stockholm')" 
+              },
+              weekdayHours: { 
+                type: "string", 
+                description: "Weekday opening hours (e.g., 'Monday–Friday: 09:00–17:00')" 
+              },
+              weekendHours: { 
+                type: "string", 
+                description: "Weekend opening hours (e.g., 'Saturday–Sunday: Closed')" 
+              }
+            }
           }
         }
       },

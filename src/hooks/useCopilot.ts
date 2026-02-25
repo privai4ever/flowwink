@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUpdateModules, useModules, type ModulesSettings, defaultModulesSettings } from '@/hooks/useModules';
 import { useCreatePage } from '@/hooks/usePages';
 import { useUpdateGeneralSettings } from '@/hooks/useSiteSettings';
+import { useUpdateFooterBlock } from '@/hooks/useGlobalBlocks';
 import { toast } from 'sonner';
 import type { ContentBlock, ContentBlockType } from '@/types/cms';
 
@@ -247,6 +248,7 @@ export function useCopilot(): UseCopilotReturn {
   const { data: currentModules } = useModules();
   const createPageMutation = useCreatePage();
   const updateGeneralSettings = useUpdateGeneralSettings();
+  const updateFooterBlock = useUpdateFooterBlock();
 
   // Persist state changes to localStorage
   useEffect(() => {
@@ -891,6 +893,32 @@ export function useCopilot(): UseCopilotReturn {
           setMessages(prev => [...prev, assistantMessage]);
           await startMigration(args.url);
           return;
+        } else if (data.toolCall.name === 'update_footer') {
+          // Footer update from extracted contact info
+          const args = data.toolCall.arguments as {
+            phone?: string;
+            email?: string;
+            address?: string;
+            postalCode?: string;
+            weekdayHours?: string;
+            weekendHours?: string;
+          };
+          
+          try {
+            // Update footer with extracted contact information
+            await updateFooterBlock.mutateAsync({
+              phone: args.phone || '',
+              email: args.email || '',
+              address: args.address || '',
+              postalCode: args.postalCode || '',
+              weekdayHours: args.weekdayHours || 'Monday–Friday: 09:00–17:00',
+              weekendHours: args.weekendHours || 'Saturday–Sunday: Closed',
+            });
+            toast.success('Footer updated with contact information');
+          } catch (err) {
+            logger.error('Failed to update footer:', err);
+            toast.error('Failed to update footer');
+          }
         } else if (data.toolCall.name.startsWith('create_') && data.toolCall.name.endsWith('_block')) {
           // Block creation - auto-approve and auto-enable required modules
           const blockType = data.toolCall.name.replace('create_', '').replace('_block', '');
