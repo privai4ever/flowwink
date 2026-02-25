@@ -263,9 +263,9 @@ export interface ChatSettings {
 
 const defaultChatSettings: ChatSettings = {
   enabled: false,
-  title: 'AI Assistent',
-  placeholder: 'Ställ en fråga...',
-  welcomeMessage: 'Hej! Hur kan jag hjälpa dig idag?',
+  title: 'AI Assistant',
+  placeholder: 'Ask a question...',
+  welcomeMessage: 'Hi! How can I help you today?',
   aiProvider: 'openai',
   openaiModel: 'gpt-4o-mini',
   openaiBaseUrl: 'https://api.openai.com/v1',

@@ -50,7 +50,7 @@ export function KbHubBlockEditor({ data, onChange, isEditing }: KbHubBlockEditor
             id="kb-hub-title"
             value={data.title || ''}
             onChange={(e) => onChange({ ...data, title: e.target.value })}
-            placeholder="Hur kan vi hjälpa dig?"
+            placeholder="How can we help you?"
           />
         </div>
 
@@ -60,7 +60,7 @@ export function KbHubBlockEditor({ data, onChange, isEditing }: KbHubBlockEditor
             id="kb-hub-subtitle"
             value={data.subtitle || ''}
             onChange={(e) => onChange({ ...data, subtitle: e.target.value })}
-            placeholder="Sök i vår kunskapsbas eller bläddra efter kategori"
+            placeholder="Search our knowledge base or browse by category"
             rows={2}
           />
         </div>
@@ -81,12 +81,12 @@ export function KbHubBlockEditor({ data, onChange, isEditing }: KbHubBlockEditor
 
         {data.showSearch !== false && (
           <div className="space-y-2">
-            <Label htmlFor="kb-hub-search-placeholder">Sökfält placeholder</Label>
+            <Label htmlFor="kb-hub-search-placeholder">Search field placeholder</Label>
             <Input
               id="kb-hub-search-placeholder"
               value={data.searchPlaceholder || ''}
               onChange={(e) => onChange({ ...data, searchPlaceholder: e.target.value })}
-              placeholder="Sök efter frågor eller svar..."
+              placeholder="Search for questions or answers..."
             />
           </div>
         )}
@@ -175,7 +175,7 @@ export function KbHubBlockEditor({ data, onChange, isEditing }: KbHubBlockEditor
                 id="kb-hub-contact-title"
                 value={data.contactTitle || ''}
                 onChange={(e) => onChange({ ...data, contactTitle: e.target.value })}
-                placeholder="Hittar du inte svaret?"
+                placeholder="Can't find the answer?"
               />
             </div>
 

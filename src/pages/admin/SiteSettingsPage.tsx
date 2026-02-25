@@ -679,7 +679,7 @@ export default function SiteSettingsPage() {
                           id="aeoDescription"
                           value={aeoData.shortDescription}
                           onChange={(e) => setAeoData(prev => ({ ...prev, shortDescription: e.target.value }))}
-                          placeholder="En kort beskrivning av verksamheten som AI-agenter kan använda..."
+                          placeholder="A short description of your business that AI agents can use..."
                           rows={3}
                         />
                         <p className="text-xs text-muted-foreground">Max 200 tecken rekommenderas</p>
@@ -701,7 +701,7 @@ export default function SiteSettingsPage() {
                           onValueChange={(value) => setAeoData(prev => ({ ...prev, primaryLanguage: value }))}
                         >
                           <SelectTrigger id="aeoLang">
-                            <SelectValue placeholder="Välj språk" />
+                            <SelectValue placeholder="Select language" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="sv">Svenska</SelectItem>
@@ -808,7 +808,7 @@ export default function SiteSettingsPage() {
                               onValueChange={(value: SchemaOrgType) => setAeoData(prev => ({ ...prev, schemaOrgType: value }))}
                             >
                               <SelectTrigger id="schemaType">
-                                <SelectValue placeholder="Välj typ" />
+                                <SelectValue placeholder="Select type" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="Organization">Organisation</SelectItem>
@@ -876,7 +876,7 @@ export default function SiteSettingsPage() {
                               onValueChange={(value: AeoSettings['sitemapChangefreq']) => setAeoData(prev => ({ ...prev, sitemapChangefreq: value }))}
                             >
                               <SelectTrigger id="changefreq">
-                                <SelectValue placeholder="Välj frekvens" />
+                                <SelectValue placeholder="Select frequency" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="daily">Dagligen</SelectItem>

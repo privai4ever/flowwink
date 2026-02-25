@@ -79,7 +79,7 @@ export function CountdownBlockEditor({ data, onChange, isEditing }: CountdownBlo
             id="title"
             value={data.title || ''}
             onChange={(e) => onChange({ ...data, title: e.target.value })}
-            placeholder="Räkna ner till..."
+            placeholder="Counting down to..."
           />
         </div>
 
@@ -111,7 +111,7 @@ export function CountdownBlockEditor({ data, onChange, isEditing }: CountdownBlo
             id="expiredMessage"
             value={data.expiredMessage || ''}
             onChange={(e) => onChange({ ...data, expiredMessage: e.target.value })}
-            placeholder="Tiden har gått ut!"
+            placeholder="Time's up!"
           />
         </div>
       </div>

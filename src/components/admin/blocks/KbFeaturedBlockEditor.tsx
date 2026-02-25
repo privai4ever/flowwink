@@ -43,7 +43,7 @@ export function KbFeaturedBlockEditor({ data, onChange, isEditing }: KbFeaturedB
           id="title"
           value={data.title || ''}
           onChange={(e) => handleChange('title', e.target.value)}
-          placeholder="Vanliga frågor"
+          placeholder="Frequently Asked Questions"
         />
       </div>
 
@@ -53,7 +53,7 @@ export function KbFeaturedBlockEditor({ data, onChange, isEditing }: KbFeaturedB
           id="subtitle"
           value={data.subtitle || ''}
           onChange={(e) => handleChange('subtitle', e.target.value)}
-          placeholder="Hitta svar på vanliga frågor"
+          placeholder="Find answers to common questions"
         />
       </div>
 

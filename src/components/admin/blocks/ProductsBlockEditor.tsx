@@ -49,7 +49,7 @@ export function ProductsBlockEditor({ data, onChange, isEditing }: ProductsBlock
           <Input
             value={data.title || ''}
             onChange={(e) => updateData({ title: e.target.value })}
-            placeholder="Våra produkter"
+            placeholder="Our Products"
           />
         </div>
 
@@ -58,7 +58,7 @@ export function ProductsBlockEditor({ data, onChange, isEditing }: ProductsBlock
           <Textarea
             value={data.subtitle || ''}
             onChange={(e) => updateData({ subtitle: e.target.value })}
-            placeholder="Utforska vårt sortiment"
+            placeholder="Explore our range"
             rows={2}
           />
         </div>
