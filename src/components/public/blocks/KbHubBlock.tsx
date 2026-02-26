@@ -57,18 +57,18 @@ interface KbArticle {
 
 export function KbHubBlock({ data }: KbHubBlockProps) {
   const {
-    title = 'Hur kan vi hjälpa dig?',
-    subtitle = 'Sök i vår kunskapsbas eller bläddra efter kategori',
-    searchPlaceholder = 'Sök efter frågor eller svar...',
+    title = 'How can we help you?',
+    subtitle = 'Search our knowledge base or browse by category',
+    searchPlaceholder = 'Search for questions or answers...',
     showSearch = true,
     showCategories = true,
     showContactCta = true,
-    contactTitle = 'Hittar du inte svaret?',
-    contactSubtitle = 'Vårt team hjälper dig gärna med dina frågor',
-    contactButtonText = 'Kontakta oss',
-    contactLink = '/kontakt',
-    emptyStateTitle = 'Inga resultat hittades',
-    emptyStateSubtitle = 'Försök med andra söktermer eller bläddra i alla kategorier',
+    contactTitle = 'Can\'t find the answer?',
+    contactSubtitle = 'Our team is happy to help with your questions',
+    contactButtonText = 'Contact us',
+    contactLink = '/contact',
+    emptyStateTitle = 'No results found',
+    emptyStateSubtitle = 'Try different search terms or browse all categories',
     layout = 'accordion',
     kbPageSlug,
   } = data;
@@ -237,9 +237,9 @@ export function KbHubBlock({ data }: KbHubBlockProps) {
         {(searchQuery || selectedCategory) && !isLoading && (
           <div className="text-center mb-6">
             <p className="text-muted-foreground">
-              {filteredArticles.length} {filteredArticles.length === 1 ? 'artikel' : 'artiklar'}
-              {selectedCategoryName && ` i "${selectedCategoryName}"`}
-              {searchQuery && ` för "${searchQuery}"`}
+              {filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}
+              {selectedCategoryName && ` in "${selectedCategoryName}"`}
+              {searchQuery && ` for "${searchQuery}"`}
             </p>
           </div>
         )}
@@ -258,7 +258,7 @@ export function KbHubBlock({ data }: KbHubBlockProps) {
             <p className="text-muted-foreground mb-6">{emptyStateSubtitle}</p>
             {searchQuery && (
               <Button variant="outline" onClick={() => setSearchQuery('')}>
-                Rensa sökning
+                Clear search
               </Button>
             )}
           </div>
@@ -306,7 +306,7 @@ export function KbHubBlock({ data }: KbHubBlockProps) {
                               <h4 className="font-medium">{article.question}</h4>
                               {article.is_featured && (
                                 <Badge variant="outline" className="mt-1 text-xs">
-                                  Populär
+                                  Featured
                                 </Badge>
                               )}
                             </div>
@@ -324,7 +324,7 @@ export function KbHubBlock({ data }: KbHubBlockProps) {
                               {/* Feedback */}
                               <div className="flex items-center gap-4 mt-6 pt-4 border-t">
                                 <span className="text-sm text-muted-foreground">
-                                  Var detta till hjälp?
+                                  Was this helpful?
                                 </span>
                                 <div className="flex gap-2">
                                   <Button variant="ghost" size="sm" className="h-8">
@@ -367,7 +367,7 @@ export function KbHubBlock({ data }: KbHubBlockProps) {
                   </h4>
                   {article.is_featured && (
                     <Badge variant="outline" className="text-xs">
-                      Populär
+                      Featured
                     </Badge>
                   )}
                 </div>
@@ -386,7 +386,7 @@ export function KbHubBlock({ data }: KbHubBlockProps) {
                 <Button asChild size="lg">
                   <Link to="/chat">
                     <MessageSquare className="h-5 w-5 mr-2" />
-                    Chatta med oss
+                    Chat with us
                   </Link>
                 </Button>
               )}

@@ -131,14 +131,14 @@ function EmptyState() {
     <Card className="border-dashed">
       <CardContent className="py-16 text-center">
         <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-        <h3 className="text-lg font-medium mb-2">Inga aktiva datakällor</h3>
+        <h3 className="text-lg font-medium mb-2">No active data sources</h3>
         <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-          Aktivera moduler som Leads, Deals eller Newsletter för att se statistik och insikter här.
+          Enable modules like Leads, Deals or Newsletter to see statistics and insights here.
         </p>
         <Button asChild>
           <Link to="/admin/settings/modules">
             <Settings className="h-4 w-4 mr-2" />
-            Hantera moduler
+            Manage modules
           </Link>
         </Button>
       </CardContent>
@@ -542,8 +542,8 @@ export default function AnalyticsDashboardPage() {
             ) : (
               <ModulePrompt 
                 icon={Users} 
-                title="Aktivera Leads" 
-                description="Aktivera Leads-modulen för att se fördelning per källa" 
+                title="Enable Leads" 
+                description="Enable the Leads module to see source distribution" 
               />
             )}
 
@@ -551,8 +551,8 @@ export default function AnalyticsDashboardPage() {
             {dealsEnabled ? (
               <Card>
                 <CardHeader>
-                  <CardTitle>Deals per steg</CardTitle>
-                  <CardDescription>Pipeline-fördelning och värde</CardDescription>
+                  <CardTitle>Deals by Stage</CardTitle>
+                  <CardDescription>Pipeline distribution and value</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {stageLoading ? (
@@ -573,7 +573,7 @@ export default function AnalyticsDashboardPage() {
                         <Tooltip
                           formatter={(value: number, name: string) => [
                             name === 'count' ? value : formatCurrency(value * 100),
-                            name === 'count' ? 'Antal' : 'Värde',
+                            name === 'count' ? 'Count' : 'Value',
                           ]}
                           contentStyle={{
                             backgroundColor: 'hsl(var(--card))',
@@ -581,12 +581,12 @@ export default function AnalyticsDashboardPage() {
                             borderRadius: '8px',
                           }}
                         />
-                        <Bar dataKey="count" name="Antal" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="count" name="Count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
                     <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                      Ingen data tillgänglig
+                      No data available
                     </div>
                   )}
                 </CardContent>
@@ -594,8 +594,8 @@ export default function AnalyticsDashboardPage() {
             ) : (
               <ModulePrompt 
                 icon={Briefcase} 
-                title="Aktivera Deals" 
-                description="Aktivera Deals-modulen för att se pipeline-statistik" 
+                title="Enable Deals" 
+                description="Enable the Deals module to see pipeline statistics" 
               />
             )}
           </div>

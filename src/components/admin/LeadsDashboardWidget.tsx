@@ -64,7 +64,7 @@ export function LeadsDashboardWidget() {
           >
             <AlertCircle className="h-4 w-4 text-amber-500" />
             <span className="text-sm">
-              {stats?.needsReview} lead{stats?.needsReview !== 1 ? 's' : ''} behöver granskas
+              {stats?.needsReview} lead{stats?.needsReview !== 1 ? 's' : ''} need{stats?.needsReview === 1 ? 's' : ''} review
             </span>
           </Link>
         )}
@@ -78,7 +78,7 @@ export function LeadsDashboardWidget() {
           </div>
         ) : recentLeads.length === 0 ? (
           <p className="text-muted-foreground text-center py-4 text-sm">
-            Inga leads ännu. Leads skapas automatiskt från formulär.
+            No leads yet. Leads are created automatically from forms.
           </p>
         ) : (
           <div className="space-y-2">

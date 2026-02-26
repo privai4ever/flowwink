@@ -11,7 +11,7 @@ export interface GeneralSettings {
 }
 
 const defaultGeneralSettings: GeneralSettings = {
-  homepageSlug: 'hem',
+  homepageSlug: 'home',
 };
 
 export interface SeoSettings {
@@ -175,7 +175,7 @@ export type ChatWidgetStyle = 'floating' | 'pill' | 'expanded';
 export type ChatWidgetSize = 'sm' | 'md' | 'lg';
 
 export interface ChatSettings {
-  // Grundläggande
+  // Core
   enabled: boolean;
   title: string;
   placeholder: string;
@@ -215,7 +215,7 @@ export interface ChatSettings {
   // General Knowledge
   allowGeneralKnowledge: boolean; // Allow AI to use its own knowledge beyond page content
   
-  // Widget-inställningar
+  // Widget settings
   widgetEnabled: boolean;
   widgetPosition: 'bottom-right' | 'bottom-left';
   widgetButtonText: string;
@@ -276,7 +276,7 @@ const defaultChatSettings: ChatSettings = {
   n8nWebhookType: 'chat',
   n8nTriggerMode: 'always',
   n8nTriggerKeywords: [],
-  systemPrompt: 'Du är en hjälpsam AI-assistent för en svensk organisation. Svara alltid på svenska om inte användaren skriver på ett annat språk.',
+  systemPrompt: 'You are a helpful AI assistant. Always respond in the same language the user writes in.',
   toolCallingEnabled: false,
   firecrawlSearchEnabled: false,
   humanHandoffEnabled: false,
@@ -286,7 +286,7 @@ const defaultChatSettings: ChatSettings = {
   allowGeneralKnowledge: false,
   widgetEnabled: false,
   widgetPosition: 'bottom-right',
-  widgetButtonText: 'Chatta med oss',
+  widgetButtonText: 'Chat with us',
   widgetStyle: 'floating',
   widgetSize: 'md',
   widgetMaxPrompts: 3,

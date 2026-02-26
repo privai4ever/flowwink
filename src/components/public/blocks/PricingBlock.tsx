@@ -180,7 +180,7 @@ export function PricingBlock({ data }: PricingBlockProps) {
                         onClick={() => handleTierAddToCart(tier)}
                       >
                         <ShoppingCart className="w-4 h-4 mr-2" />
-                        {isInCart(tier.productId!) ? 'Gå till kassan' : tier.buttonText}
+                        {isInCart(tier.productId!) ? 'Go to checkout' : tier.buttonText}
                       </Button>
                     ) : tier.buttonUrl?.startsWith('http') ? (
                       <a href={tier.buttonUrl} target="_blank" rel="noopener noreferrer" className="block">

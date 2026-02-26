@@ -128,7 +128,7 @@ export default function CompanyDetailPage() {
           address: enrichedData.address || company.address,
           website: enrichedData.website || company.website,
           notes: enrichedData.description 
-            ? `${company.notes ? company.notes + '\n\n' : ''}AI-beskrivning: ${enrichedData.description}`
+            ? `${company.notes ? company.notes + '\n\n' : ''}AI description: ${enrichedData.description}`
             : company.notes,
           enriched_at: new Date().toISOString(),
         });

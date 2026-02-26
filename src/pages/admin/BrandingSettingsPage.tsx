@@ -608,7 +608,7 @@ export default function BrandingSettingsPage() {
                           const showName = settings.showNameWithLogo === true;
                           const logoSize = settings.headerLogoSize || 'md';
                           const hasLogo = !!settings.logo;
-                          const orgName = settings.organizationName || 'Organisation';
+                          const orgName = settings.organizationName || 'Organization';
                           
                           const sizeClasses = {
                             sm: 'h-8 max-w-[160px]',

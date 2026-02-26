@@ -89,7 +89,7 @@ export function CountdownBlockEditor({ data, onChange, isEditing }: CountdownBlo
             id="subtitle"
             value={data.subtitle || ''}
             onChange={(e) => onChange({ ...data, subtitle: e.target.value })}
-            placeholder="Beskrivning..."
+            placeholder="Description..."
           />
         </div>
 

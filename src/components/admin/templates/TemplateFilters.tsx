@@ -37,11 +37,11 @@ const CATEGORY_OPTIONS: { value: CategoryFilter; label: string; icon: React.Comp
 ];
 
 const HELP_STYLE_OPTIONS: { value: HelpStyleFilter; label: string; description: string }[] = [
-  { value: 'all', label: 'Alla stilar', description: 'Visa alla hjälp-stilar' },
-  { value: 'kb-classic', label: 'KB Classic', description: 'SEO-fokuserad kunskapsbas' },
-  { value: 'ai-hub', label: 'AI Hub', description: 'Chatt-fokuserad support' },
-  { value: 'hybrid', label: 'Hybrid', description: 'Kombination av KB + chatt' },
-  { value: 'none', label: 'Ingen hjälp', description: 'Utan dedikerad hjälp-sida' },
+  { value: 'all', label: 'All styles', description: 'Show all help styles' },
+  { value: 'kb-classic', label: 'KB Classic', description: 'SEO-focused knowledge base' },
+  { value: 'ai-hub', label: 'AI Hub', description: 'Chat-focused support' },
+  { value: 'hybrid', label: 'Hybrid', description: 'Combination of KB + chat' },
+  { value: 'none', label: 'No help', description: 'Without dedicated help page' },
 ];
 
 export function TemplateFilters({
@@ -115,7 +115,7 @@ export function TemplateFilters({
       {/* Help Style filter */}
       <div className="space-y-2">
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-          Hjälp-stil
+          Help style
         </h3>
         <div className="space-y-1">
           {HELP_STYLE_OPTIONS.map((option) => {

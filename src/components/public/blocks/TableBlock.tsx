@@ -45,7 +45,7 @@ export function TableBlock({ data }: TableBlockProps) {
     return (
       <section className="py-12">
         <div className="max-w-4xl mx-auto px-4 text-center text-muted-foreground">
-          Lägg till kolumner för att visa tabellen
+          Add columns to display the table
         </div>
       </section>
     );

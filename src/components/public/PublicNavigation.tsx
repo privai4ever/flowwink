@@ -333,7 +333,7 @@ export function PublicNavigation() {
               const logoSize = headerSettings.logoSize || 'md';
               const hasLogo = !!branding?.logo;
               const hasDarkLogo = !!branding?.logoDark;
-              const orgName = branding?.organizationName || 'Organisation';
+              const orgName = branding?.organizationName || 'Organization';
               
               // Choose logo based on theme
               const currentLogo = resolvedTheme === 'dark' && hasDarkLogo 
@@ -493,7 +493,7 @@ export function PublicNavigation() {
           )}>
             <div className="flex items-center justify-between p-6 border-b">
               <Link to="/" onClick={() => setMobileMenuOpen(false)} className="font-serif font-bold text-xl">
-                {branding?.organizationName || 'Organisation'}
+                {branding?.organizationName || 'Organization'}
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}

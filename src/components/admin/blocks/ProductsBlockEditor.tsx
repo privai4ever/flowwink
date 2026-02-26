@@ -39,7 +39,7 @@ export function ProductsBlockEditor({ data, onChange, isEditing }: ProductsBlock
     <div className="space-y-6 p-4 border rounded-lg bg-card">
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
         <ShoppingBag className="h-4 w-4" />
-        Produktblock - Inställningar
+        Product Block - Settings
       </div>
 
       {/* Header Settings */}
@@ -67,7 +67,7 @@ export function ProductsBlockEditor({ data, onChange, isEditing }: ProductsBlock
       {/* Layout Settings */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Kolumner</Label>
+          <Label>Columns</Label>
           <Select
             value={String(data.columns || 3)}
             onValueChange={(value) => updateData({ columns: parseInt(value) as 2 | 3 | 4 })}
@@ -76,9 +76,9 @@ export function ProductsBlockEditor({ data, onChange, isEditing }: ProductsBlock
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2">2 kolumner</SelectItem>
-              <SelectItem value="3">3 kolumner</SelectItem>
-              <SelectItem value="4">4 kolumner</SelectItem>
+              <SelectItem value="2">2 columns</SelectItem>
+              <SelectItem value="3">3 columns</SelectItem>
+              <SelectItem value="4">4 columns</SelectItem>
             </SelectContent>
           </Select>
         </div>

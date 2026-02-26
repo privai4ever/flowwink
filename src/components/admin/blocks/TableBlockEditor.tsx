@@ -74,8 +74,8 @@ export function TableBlockEditor({ data, onChange, isEditing }: TableBlockEditor
   if (!isEditing) {
     return (
       <div className="p-4 text-center text-muted-foreground">
-        <p className="font-medium">{data.title || 'Tabell'}</p>
-        <p className="text-sm">{columns.length} kolumner, {rows.length} rader</p>
+        <p className="font-medium">{data.title || 'Table'}</p>
+        <p className="text-sm">{columns.length} columns, {rows.length} rows</p>
       </div>
     );
   }
@@ -95,12 +95,12 @@ export function TableBlockEditor({ data, onChange, isEditing }: TableBlockEditor
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="caption">Beskrivning (valfri)</Label>
+          <Label htmlFor="caption">Caption (optional)</Label>
           <Input
             id="caption"
             value={data.caption || ''}
             onChange={(e) => onChange({ ...data, caption: e.target.value })}
-            placeholder="Tabellbeskrivning under tabellen..."
+            placeholder="Table description below the table..."
           />
         </div>
       </div>
@@ -168,16 +168,16 @@ export function TableBlockEditor({ data, onChange, isEditing }: TableBlockEditor
       {/* Columns */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base font-medium">Kolumner</Label>
+          <Label className="text-base font-medium">Columns</Label>
           <Button variant="outline" size="sm" onClick={addColumn}>
             <Plus className="h-4 w-4 mr-1" />
-            Lägg till kolumn
+            Add column
           </Button>
         </div>
 
         {columns.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4 border border-dashed rounded-lg">
-            Lägg till kolumner för att skapa tabellen
+            Add columns to create the table
           </p>
         ) : (
           <div className="space-y-2">
@@ -203,9 +203,9 @@ export function TableBlockEditor({ data, onChange, isEditing }: TableBlockEditor
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="left">Vänster</SelectItem>
+                    <SelectItem value="left">Left</SelectItem>
                     <SelectItem value="center">Center</SelectItem>
-                    <SelectItem value="right">Höger</SelectItem>
+                    <SelectItem value="right">Right</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
@@ -229,13 +229,13 @@ export function TableBlockEditor({ data, onChange, isEditing }: TableBlockEditor
             <Label className="text-base font-medium">Rader</Label>
             <Button variant="outline" size="sm" onClick={addRow}>
               <Plus className="h-4 w-4 mr-1" />
-              Lägg till rad
+              Add row
             </Button>
           </div>
 
           {rows.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4 border border-dashed rounded-lg">
-              Lägg till rader för att fylla tabellen med data
+              Add rows to populate the table with data
             </p>
           ) : (
             <div className="space-y-3 overflow-x-auto">

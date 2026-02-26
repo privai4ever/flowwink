@@ -398,8 +398,8 @@ export function TemplateBlockPreview({ block, compact, primaryColor = '#6366f1' 
           <BlockPlaceholder 
             type="form" 
             icon={FileText} 
-            label="Kontaktformulär"
-            description="Anpassningsbart formulär"
+            label="Contact Form"
+            description="Customizable form"
             primaryColor={primaryColor}
           />
         );

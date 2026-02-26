@@ -38,7 +38,7 @@ export function PublicFooter() {
   });
 
   const phoneLink = settings?.phone?.replace(/[^+\d]/g, '') || '';
-  const brandName = branding?.organizationName || 'Organisation';
+  const brandName = branding?.organizationName || 'Organization';
   const brandTagline = branding?.brandTagline || '';
   const brandInitial = brandName.charAt(0);
 

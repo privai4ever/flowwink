@@ -71,7 +71,7 @@ export function BlockAnchorControl({ anchorId, onChange }: BlockAnchorControlPro
                 id="anchor-id"
                 value={anchorId || ''}
                 onChange={(e) => handleChange(e.target.value)}
-                placeholder="kontakta-oss"
+                placeholder="contact-us"
                 className="h-8 text-sm"
               />
             </div>

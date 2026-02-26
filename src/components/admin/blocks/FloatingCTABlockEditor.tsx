@@ -142,14 +142,14 @@ export function FloatingCTABlockEditor({ data, onChange, isEditing }: FloatingCT
             step={5}
           />
           <p className="text-xs text-muted-foreground">
-            CTA:n visas när användaren scrollat {data.showAfterScroll || 25}% av sidan
+            CTA appears after the user has scrolled {data.showAfterScroll || 25}% of the page
           </p>
         </div>
 
         <div className="flex items-center justify-between">
           <div>
-            <Label>Dölj vid scroll uppåt</Label>
-            <p className="text-xs text-muted-foreground">Göm när användaren scrollar upp</p>
+            <Label>Hide on scroll up</Label>
+            <p className="text-xs text-muted-foreground">Hide when the user scrolls up</p>
           </div>
           <Switch
             checked={data.hideOnScrollUp ?? false}
@@ -161,7 +161,7 @@ export function FloatingCTABlockEditor({ data, onChange, isEditing }: FloatingCT
       {/* Display Settings */}
       <div className="space-y-4">
         <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
-          Utseende
+          Appearance
         </h4>
 
         <div className="grid grid-cols-2 gap-4">
@@ -218,9 +218,9 @@ export function FloatingCTABlockEditor({ data, onChange, isEditing }: FloatingCT
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="sm">Liten</SelectItem>
+                <SelectItem value="sm">Small</SelectItem>
                 <SelectItem value="md">Medium</SelectItem>
-                <SelectItem value="lg">Stor</SelectItem>
+                <SelectItem value="lg">Large</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -237,9 +237,9 @@ export function FloatingCTABlockEditor({ data, onChange, isEditing }: FloatingCT
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="slide">Glid upp</SelectItem>
-                <SelectItem value="fade">Tona in</SelectItem>
-                <SelectItem value="scale">Zooma in</SelectItem>
+                <SelectItem value="slide">Slide up</SelectItem>
+                <SelectItem value="fade">Fade in</SelectItem>
+                <SelectItem value="scale">Scale in</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -248,8 +248,8 @@ export function FloatingCTABlockEditor({ data, onChange, isEditing }: FloatingCT
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Visa stäng-knapp</Label>
-              <p className="text-xs text-muted-foreground">Låter användaren stänga CTA:n</p>
+               <Label>Show close button</Label>
+               <p className="text-xs text-muted-foreground">Allows the user to dismiss the CTA</p>
             </div>
             <Switch
               checked={data.showCloseButton ?? true}
@@ -260,8 +260,8 @@ export function FloatingCTABlockEditor({ data, onChange, isEditing }: FloatingCT
           {data.showCloseButton && (
             <div className="flex items-center justify-between pl-4 border-l-2">
               <div>
-                <Label>Kom ihåg stängning</Label>
-                <p className="text-xs text-muted-foreground">Visa inte igen denna session</p>
+                <Label>Remember dismissal</Label>
+                <p className="text-xs text-muted-foreground">Don't show again this session</p>
               </div>
               <Switch
                 checked={data.closePersistent ?? false}
@@ -273,8 +273,8 @@ export function FloatingCTABlockEditor({ data, onChange, isEditing }: FloatingCT
           {data.variant === 'pill' && (
             <div className="flex items-center justify-between">
               <div>
-                <Label>Visa "Scrolla upp"-knapp</Label>
-                <p className="text-xs text-muted-foreground">Extra knapp för att gå till toppen</p>
+                <Label>Show "Scroll to top" button</Label>
+                <p className="text-xs text-muted-foreground">Extra button to go to the top</p>
               </div>
               <Switch
                 checked={data.showScrollTop ?? false}

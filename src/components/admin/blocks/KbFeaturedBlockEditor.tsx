@@ -75,7 +75,7 @@ export function KbFeaturedBlockEditor({ data, onChange, isEditing }: KbFeaturedB
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="columns">Kolumner (grid)</Label>
+          <Label htmlFor="columns">Columns (grid)</Label>
           <Select
             value={String(data.columns || 3)}
             onValueChange={(value) => handleChange('columns', Number(value))}
@@ -84,9 +84,9 @@ export function KbFeaturedBlockEditor({ data, onChange, isEditing }: KbFeaturedB
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2">2 kolumner</SelectItem>
-              <SelectItem value="3">3 kolumner</SelectItem>
-              <SelectItem value="4">4 kolumner</SelectItem>
+              <SelectItem value="2">2 columns</SelectItem>
+              <SelectItem value="3">3 columns</SelectItem>
+              <SelectItem value="4">4 columns</SelectItem>
             </SelectContent>
           </Select>
         </div>

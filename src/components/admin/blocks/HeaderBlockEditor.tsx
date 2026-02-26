@@ -140,12 +140,12 @@ function SubItemEditor({
         <Input
           value={subItem.url}
           onChange={(e) => onUpdate({ ...subItem, url: e.target.value })}
-          placeholder="URL (t.ex. /solutions/analytics)"
+          placeholder="URL (e.g. /solutions/analytics)"
         />
         <Input
           value={subItem.description || ''}
           onChange={(e) => onUpdate({ ...subItem, description: e.target.value })}
-          placeholder="Kort beskrivning..."
+          placeholder="Short description..."
         />
       </div>
       
@@ -281,13 +281,13 @@ function MegaMenuParentItem({
             <Input
               value={item.description || ''}
               onChange={(e) => onUpdate({ ...item, description: e.target.value })}
-              placeholder="Beskrivning"
+              placeholder="Description"
             />
           </div>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-medium">
-              {childCount} {childCount === 1 ? 'länk' : 'länkar'}
+              {childCount} {childCount === 1 ? 'link' : 'links'}
             </span>
           </div>
 
@@ -423,9 +423,9 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
       <TabsList className={cn("grid w-full", isMegaMenuVariant ? "grid-cols-5" : "grid-cols-4")}>
         <TabsTrigger value="variant">Variant</TabsTrigger>
         <TabsTrigger value="branding">Logo</TabsTrigger>
-        <TabsTrigger value="appearance">Utseende</TabsTrigger>
+        <TabsTrigger value="appearance">Appearance</TabsTrigger>
         <TabsTrigger value="navigation">Navigation</TabsTrigger>
-        {isMegaMenuVariant && <TabsTrigger value="megamenu">Mega-meny</TabsTrigger>}
+        {isMegaMenuVariant && <TabsTrigger value="megamenu">Mega Menu</TabsTrigger>}
       </TabsList>
 
       {/* Variant Selection */}
@@ -472,8 +472,8 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
 
             <div className="flex items-center justify-between">
               <div>
-                <Label>Visa namn med logotyp</Label>
-                <p className="text-sm text-muted-foreground">Visa organisationsnamn bredvid logotyp</p>
+                <Label>Show name with logo</Label>
+                <p className="text-sm text-muted-foreground">Display organization name next to logo</p>
               </div>
               <Switch
                 checked={data.showNameWithLogo === true}
@@ -727,14 +727,14 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <LayoutGrid className="h-4 w-4" />
-                Mega-meny inställningar
+                Mega menu settings
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Aktivera mega-meny</Label>
-                  <p className="text-sm text-muted-foreground">Visa dropdowns med flera kolumner</p>
+                  <Label>Enable mega menu</Label>
+                  <p className="text-sm text-muted-foreground">Show dropdowns with multiple columns</p>
                 </div>
                 <Switch
                   checked={data.megaMenuEnabled !== false}
@@ -743,7 +743,7 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>Antal kolumner i dropdown</Label>
+                <Label>Number of columns in dropdown</Label>
                 <Select
                   value={String(data.megaMenuColumns || 3)}
                   onValueChange={(value) => onChange({ ...data, megaMenuColumns: Number(value) as 2 | 3 | 4 })}
@@ -752,9 +752,9 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="2">2 kolumner</SelectItem>
-                    <SelectItem value="3">3 kolumner</SelectItem>
-                    <SelectItem value="4">4 kolumner</SelectItem>
+                    <SelectItem value="2">2 columns</SelectItem>
+                    <SelectItem value="3">3 columns</SelectItem>
+                    <SelectItem value="4">4 columns</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -818,12 +818,12 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
           {/* Quick Tips */}
           <Card className="bg-primary/5 border-primary/20">
             <CardContent className="pt-6">
-              <h4 className="font-medium text-sm mb-2">💡 Tips för mega-menyer</h4>
+              <h4 className="font-medium text-sm mb-2">💡 Tips for mega menus</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Använd emojis som ikoner för visuell klarhet (t.ex. 📊 🔒 ⚡)</li>
-                <li>• Håll beskrivningar korta och informativa</li>
-                <li>• Gruppera relaterade länkar under samma menygrupp</li>
-                <li>• Lämna URL tom på menygruppen om den bara ska öppna dropdown</li>
+                <li>• Use emojis as icons for visual clarity (e.g. 📊 🔒 ⚡)</li>
+                <li>• Keep descriptions short and informative</li>
+                <li>• Group related links under the same menu group</li>
+                <li>• Leave URL empty on the menu group if it should only open a dropdown</li>
               </ul>
             </CardContent>
           </Card>
