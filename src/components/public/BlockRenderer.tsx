@@ -51,6 +51,7 @@ import {
   ChatLauncherBlock,
   WebinarBlock,
   ParallaxSectionBlock,
+  BentoGridBlock,
 } from './blocks';
 import type { ChatLauncherBlockData } from './blocks/ChatLauncherBlock';
 import type { KbHubBlockData } from './blocks/KbHubBlock';
