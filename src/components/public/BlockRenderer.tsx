@@ -53,6 +53,7 @@ import {
   ParallaxSectionBlock,
   BentoGridBlock,
   SectionDividerBlock,
+  FeaturedCarouselBlock,
 } from './blocks';
 import type { ChatLauncherBlockData } from './blocks/ChatLauncherBlock';
 import type { KbHubBlockData } from './blocks/KbHubBlock';
@@ -95,6 +96,7 @@ import type { FloatingCTABlockData } from './blocks/FloatingCTABlock';
 import type { ParallaxSectionBlockData } from './blocks/ParallaxSectionBlock';
 import type { BentoGridBlockData } from './blocks/BentoGridBlock';
 import type { SectionDividerBlockData } from './blocks/SectionDividerBlock';
+import type { FeaturedCarouselBlockData } from './blocks/FeaturedCarouselBlock';
 
 interface BlockRendererProps {
   block: ContentBlock;
@@ -251,6 +253,8 @@ export function BlockRenderer({ block, pageId, index = 0 }: BlockRendererProps) 
         return <BentoGridBlock data={block.data as unknown as BentoGridBlockData} />;
       case 'section-divider':
         return <SectionDividerBlock data={block.data as unknown as SectionDividerBlockData} />;
+      case 'featured-carousel':
+        return <FeaturedCarouselBlock data={block.data as unknown as FeaturedCarouselBlockData} />;
       default:
         return null;
     }

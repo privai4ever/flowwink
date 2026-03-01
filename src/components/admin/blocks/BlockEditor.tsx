@@ -71,6 +71,7 @@ import { WebinarBlockEditor } from './WebinarBlockEditor';
 import { ParallaxSectionBlockEditor } from './ParallaxSectionBlockEditor';
 import { BentoGridBlockEditor } from './BentoGridBlockEditor';
 import { SectionDividerBlockEditor } from './SectionDividerBlockEditor';
+import { FeaturedCarouselBlockEditor } from './FeaturedCarouselBlockEditor';
 import type { ProductsBlockData } from '@/components/public/blocks/ProductsBlock';
 import type { CartBlockData } from '@/components/public/blocks/CartBlock';
 import type { KbFeaturedBlockData } from '@/components/public/blocks/KbFeaturedBlock';
@@ -92,6 +93,7 @@ import type { ChatLauncherBlockData } from '@/components/public/blocks/ChatLaunc
 import type { ParallaxSectionBlockData } from '@/components/public/blocks/ParallaxSectionBlock';
 import type { BentoGridBlockData } from '@/components/public/blocks/BentoGridBlock';
 import type { SectionDividerBlockData } from '@/components/public/blocks/SectionDividerBlock';
+import type { FeaturedCarouselBlockData } from '@/components/public/blocks/FeaturedCarouselBlock';
 
 interface NewsletterBlockData {
   title?: string;
@@ -154,6 +156,7 @@ type BlockDataMap = {
   'parallax-section': ParallaxSectionBlockData;
   'bento-grid': BentoGridBlockData;
   'section-divider': SectionDividerBlockData;
+  'featured-carousel': FeaturedCarouselBlockData;
 };
 
 const DEFAULT_BLOCK_DATA: BlockDataMap = {
@@ -498,6 +501,29 @@ const DEFAULT_BLOCK_DATA: BlockDataMap = {
     height: 'md',
     flip: false,
     invert: false,
+  },
+  'featured-carousel': {
+    slides: [
+      {
+        id: 'slide-1',
+        title: 'Welcome to Our Platform',
+        subtitle: 'FEATURED',
+        description: 'Discover what makes us different.',
+        image: '',
+        ctaLabel: 'Get Started',
+        ctaUrl: '#',
+        ctaVariant: 'primary',
+        textPosition: 'left',
+        overlayOpacity: 40,
+      },
+    ],
+    autoPlay: true,
+    interval: 5000,
+    height: 'md',
+    showArrows: true,
+    showDots: true,
+    pauseOnHover: true,
+    transition: 'fade',
   },
 };
 
@@ -1024,6 +1050,14 @@ export function BlockEditor({ blocks, onChange, canEdit }: BlockEditorProps) {
         return (
           <SectionDividerBlockEditor
             data={block.data as unknown as SectionDividerBlockData}
+            onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
+            isEditing={isEditing}
+          />
+        );
+      case 'featured-carousel':
+        return (
+          <FeaturedCarouselBlockEditor
+            data={block.data as unknown as FeaturedCarouselBlockData}
             onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
             isEditing={isEditing}
           />
