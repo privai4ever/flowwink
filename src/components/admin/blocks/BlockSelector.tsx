@@ -54,6 +54,7 @@ import {
    Mountain,
    LayoutGrid,
    Waves,
+   GalleryHorizontalEnd,
   Code2,
   Table2,
   Timer,
