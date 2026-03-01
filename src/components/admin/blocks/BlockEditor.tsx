@@ -1003,6 +1003,14 @@ export function BlockEditor({ blocks, onChange, canEdit }: BlockEditorProps) {
             isEditing={isEditing}
           />
         );
+      case 'bento-grid':
+        return (
+          <BentoGridBlockEditor
+            data={block.data as unknown as BentoGridBlockData}
+            onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
+            isEditing={isEditing}
+          />
+        );
       default:
         return <div className="p-4 text-muted-foreground">Unknown block type</div>;
     }
