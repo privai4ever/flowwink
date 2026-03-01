@@ -475,6 +475,21 @@ const DEFAULT_BLOCK_DATA: BlockDataMap = {
     overlayOpacity: 50,
     contentAlignment: 'center',
   },
+  'bento-grid': {
+    title: 'What We Offer',
+    subtitle: 'Explore our services and capabilities',
+    eyebrow: 'SERVICES',
+    items: [
+      { id: 'bento-1', title: 'Fast & Reliable', description: 'Lightning-fast performance you can count on.', icon: 'Zap', span: 'normal' },
+      { id: 'bento-2', title: 'Beautiful Design', description: 'Crafted with attention to every detail.', icon: 'Palette', span: 'wide' },
+      { id: 'bento-3', title: 'Secure', description: 'Enterprise-grade security built in.', icon: 'Shield', span: 'normal' },
+      { id: 'bento-4', title: 'Scalable', description: 'Grows with your business needs.', icon: 'TrendingUp', span: 'normal' },
+    ],
+    columns: 3,
+    gap: 'md',
+    variant: 'default',
+    staggeredReveal: true,
+  },
 };
 
 interface BlockEditorProps {
