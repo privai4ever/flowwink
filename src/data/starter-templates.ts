@@ -4274,7 +4274,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
             data: {
               title: '',
               items: [
-                { id: 'stat-blocks', value: '43+', label: 'Content Blocks' },
+                { id: 'stat-blocks', value: '47+', label: 'Content Blocks' },
                 { id: 'stat-roles', value: '3', label: 'Editorial Roles' },
                 { id: 'stat-modules', value: '16', label: 'Built-in Modules' },
                 { id: 'stat-api', value: '100%', label: 'API Coverage' },
