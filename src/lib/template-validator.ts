@@ -41,6 +41,8 @@ const VALID_BLOCK_TYPES: ContentBlockType[] = [
   'marquee', 'progress', 'countdown', 'embed', 'lottie', 'tabs', 
   'table', 'badge', 'social-proof', 'floating-cta', 
   'notification-toast', 'announcement-bar',
+  // Layout blocks
+  'section-divider', 'bento-grid', 'parallax-section', 'featured-carousel',
   // Module-specific blocks
   'webinar'
 ];
@@ -101,6 +103,11 @@ const BLOCK_REQUIRED_FIELDS: Record<string, string[]> = {
   'kb-accordion': [],
   'chat-launcher': [],
   'webinar': [],
+  // Layout blocks
+  'section-divider': [],
+  'bento-grid': [],
+  'parallax-section': [],
+  'featured-carousel': [],
 };
 
 /**

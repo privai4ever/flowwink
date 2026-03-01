@@ -3,11 +3,470 @@
  * 
  * E-commerce template for selling digital products.
  * Features product showcase, shopping cart, Stripe checkout, and order management.
- * 
- * NOTE: Page data is still sourced from the monolith during migration.
- * Full extraction planned for next phase.
  */
-import { STARTER_TEMPLATES } from '@/data/starter-templates';
-import type { StarterTemplate } from './types';
+import type { StarterTemplate, TemplatePage, TemplateProduct } from './types';
+import { digitalShopBlogPosts } from '@/data/template-blog-posts';
 
-export const digitalShopTemplate: StarterTemplate = STARTER_TEMPLATES.find(t => t.id === 'digital-shop')!;
+const digitalShopPages: TemplatePage[] = [
+  {
+    title: 'Home',
+    slug: 'home',
+    isHomePage: true,
+    menu_order: 1,
+    showInMenu: true,
+    meta: {
+      description: 'Premium digital products and online courses. Instant delivery, lifetime access.',
+      showTitle: false,
+      titleAlignment: 'center',
+    },
+    blocks: [
+      {
+        id: 'announcement-sale',
+        type: 'announcement-bar',
+        data: {
+          message: '🔥 Summer Sale: 30% off all products — Use code SUMMER30',
+          linkText: 'Shop Now',
+          linkUrl: '#products',
+          variant: 'gradient',
+          dismissable: true,
+          sticky: false,
+        },
+      },
+      {
+        id: 'carousel-categories',
+        type: 'featured-carousel',
+        data: {
+          slides: [
+            {
+              id: 'slide-templates',
+              title: 'Premium Templates',
+              description: 'Professional designs for presentations, websites, and more.',
+              image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1920',
+              ctaText: 'Shop Templates',
+              ctaUrl: '#products',
+              textAlignment: 'center',
+            },
+            {
+              id: 'slide-courses',
+              title: 'Online Courses',
+              description: 'Learn from industry experts with step-by-step video lessons.',
+              image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1920',
+              ctaText: 'Browse Courses',
+              ctaUrl: '#products',
+              textAlignment: 'center',
+            },
+            {
+              id: 'slide-tools',
+              title: 'Design Tools',
+              description: 'UI kits, icon packs, and design systems for modern teams.',
+              image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1920',
+              ctaText: 'View Tools',
+              ctaUrl: '#products',
+              textAlignment: 'center',
+            },
+          ],
+          autoPlay: true,
+          interval: 4000,
+          height: 'md',
+          transition: 'slide',
+        },
+      },
+      {
+        id: 'hero-shop',
+        type: 'hero',
+        data: {
+          title: 'Premium Digital Products',
+          subtitle: 'Courses, templates, and tools to grow your business. Instant delivery, lifetime access.',
+          backgroundType: 'gradient',
+          heightMode: 'auto',
+          contentAlignment: 'center',
+          overlayOpacity: 0,
+          primaryButton: { text: 'Browse Products', url: '#products' },
+          secondaryButton: { text: 'View Cart', url: '/cart' },
+        },
+      },
+      {
+        id: 'stats-proof',
+        type: 'stats',
+        data: {
+          title: '',
+          items: [
+            { id: 'stat-1', value: '10,000+', label: 'Happy Customers' },
+            { id: 'stat-2', value: '50+', label: 'Digital Products' },
+            { id: 'stat-3', value: '4.9/5', label: 'Average Rating' },
+            { id: 'stat-4', value: '24/7', label: 'Instant Delivery' },
+          ],
+          columns: 4,
+          variant: 'minimal',
+        },
+      },
+      {
+        id: 'products-featured',
+        type: 'products',
+        data: {
+          title: 'Featured Products',
+          subtitle: 'Our most popular digital products and courses',
+          productType: 'featured',
+          columns: 3,
+          showFilters: false,
+          showSearch: false,
+          variant: 'cards',
+        },
+      },
+      {
+        id: 'features-benefits',
+        type: 'features',
+        data: {
+          title: 'Why Choose Us',
+          features: [
+            { id: 'benefit-1', icon: 'Zap', title: 'Instant Delivery', description: 'Get access immediately after purchase. No waiting, no shipping.' },
+            { id: 'benefit-2', icon: 'Shield', title: 'Secure Payments', description: 'Powered by Stripe. Your payment information is always safe.' },
+            { id: 'benefit-3', icon: 'RefreshCw', title: 'Lifetime Updates', description: 'Get all future updates and improvements for free.' },
+            { id: 'benefit-4', icon: 'MessageSquare', title: 'Expert Support', description: 'Questions? Our team is here to help via email or chat.' },
+          ],
+          columns: 4,
+          layout: 'grid',
+          variant: 'minimal',
+          iconStyle: 'circle',
+        },
+      },
+      {
+        id: 'products-all',
+        type: 'products',
+        data: {
+          title: 'All Products',
+          subtitle: 'Browse our complete collection',
+          productType: 'all',
+          columns: 3,
+          showFilters: true,
+          showSearch: true,
+          variant: 'cards',
+        },
+      },
+      {
+        id: 'testimonials-reviews',
+        type: 'testimonials',
+        data: {
+          title: 'What Our Customers Say',
+          testimonials: [
+            { id: 'test-1', content: 'Best investment I made this year. The quality is outstanding and the support is incredible.', author: 'Sarah Johnson', role: 'Entrepreneur', rating: 5 },
+            { id: 'test-2', content: 'Instant delivery, lifetime access, and regular updates. Exactly what I was looking for.', author: 'Michael Chen', role: 'Designer', rating: 5 },
+            { id: 'test-3', content: 'The templates saved me weeks of work. Worth every penny!', author: 'Emma Davis', role: 'Developer', rating: 5 },
+          ],
+          layout: 'grid',
+          columns: 3,
+          showRating: true,
+          showAvatar: false,
+          variant: 'cards',
+        },
+      },
+      {
+        id: 'badge-payment',
+        type: 'badge',
+        data: {
+          title: 'Secure & Trusted',
+          badges: [
+            { id: 'b1', title: 'Stripe Verified', icon: 'shield' },
+            { id: 'b2', title: 'SSL Encrypted', icon: 'check' },
+            { id: 'b3', title: '30-Day Guarantee', icon: 'award' },
+            { id: 'b4', title: 'Instant Delivery', icon: 'check' },
+          ],
+          variant: 'minimal',
+          columns: 4,
+          size: 'sm',
+          showTitles: true,
+          grayscale: false,
+        },
+      },
+      {
+        id: 'social-proof-shop',
+        type: 'social-proof',
+        data: {
+          title: '',
+          items: [
+            { id: 'sp1', type: 'counter', icon: 'users', label: 'Happy Customers', value: '10K', suffix: '+' },
+            { id: 'sp2', type: 'rating', icon: 'star', label: 'Average Rating', value: '4.9', maxRating: 5, rating: 4.9 },
+            { id: 'sp3', type: 'activity', icon: 'eye', label: 'Recently Purchased', text: '47 purchases in the last hour' },
+          ],
+          variant: 'minimal',
+          layout: 'horizontal',
+          size: 'sm',
+          animated: true,
+        },
+      },
+      {
+        id: 'notification-purchases',
+        type: 'notification-toast',
+        data: {
+          notifications: [
+            { id: 'n1', type: 'purchase', title: 'New Purchase', message: 'Sarah from NYC bought Business Template Pack' },
+            { id: 'n2', type: 'purchase', title: 'New Purchase', message: 'James from London bought UI Design Kit Pro' },
+            { id: 'n3', type: 'purchase', title: 'New Purchase', message: 'Emma from Sydney bought Marketing Mastery Course' },
+            { id: 'n4', type: 'signup', title: 'New Member', message: 'A new Pro Member just joined from Berlin' },
+          ],
+          variant: 'default',
+          position: 'bottom-left',
+          displayDuration: 4000,
+          delayBetween: 10000,
+          initialDelay: 5000,
+          animationType: 'slide',
+        },
+      },
+      {
+        id: 'article-grid-blog',
+        type: 'article-grid',
+        data: {
+          title: 'From the Blog',
+          subtitle: 'Tips, strategies, and guides for digital product creators',
+          columns: 3,
+          limit: 3,
+          showExcerpt: true,
+          showImage: true,
+        },
+      },
+      {
+        id: 'faq-shop',
+        type: 'accordion',
+        data: {
+          title: 'Frequently Asked Questions',
+          items: [
+            { question: 'How does delivery work?', answer: 'After purchase, you\'ll receive an email with download links and access instructions. Everything is instant - no waiting!' },
+            { question: 'What payment methods do you accept?', answer: 'We accept all major credit cards (Visa, Mastercard, American Express) via Stripe. All payments are secure and encrypted.' },
+            { question: 'Do you offer refunds?', answer: 'Yes! We offer a 30-day money-back guarantee. If you\'re not satisfied, just email us for a full refund.' },
+            { question: 'Can I use these products commercially?', answer: 'Yes! All our products come with a commercial license. Use them in client projects, sell websites built with them, etc.' },
+            { question: 'Do I get updates?', answer: 'Absolutely! All purchases include lifetime updates. When we improve a product, you get the new version for free.' },
+          ],
+          variant: 'default',
+        },
+      },
+      {
+        id: 'cta-shop',
+        type: 'cta',
+        data: {
+          title: 'Ready to Get Started?',
+          subtitle: 'Browse our products and find the perfect solution for your needs.',
+          buttonText: 'Browse Products',
+          buttonUrl: '#products',
+          gradient: true,
+        },
+      },
+    ],
+  },
+  {
+    title: 'Shopping Cart',
+    slug: 'cart',
+    menu_order: 2,
+    showInMenu: false,
+    meta: {
+      description: 'Review your cart and proceed to checkout',
+      showTitle: true,
+      titleAlignment: 'center',
+    },
+    blocks: [
+      {
+        id: 'cart-block',
+        type: 'cart',
+        data: {
+          title: 'Your Cart',
+          emptyMessage: 'Your cart is empty. Browse our products to get started!',
+          checkoutButtonText: 'Proceed to Checkout',
+          continueShoppingText: 'Continue Shopping',
+          continueShoppingUrl: '/',
+        },
+      },
+    ],
+  },
+  {
+    title: 'About',
+    slug: 'about',
+    menu_order: 3,
+    showInMenu: true,
+    meta: {
+      description: 'Learn about our mission and values',
+      showTitle: true,
+      titleAlignment: 'center',
+    },
+    blocks: [
+      {
+        id: 'text-about',
+        type: 'text',
+        data: {
+          content: {
+            type: 'doc',
+            content: [
+              { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Our Story' }] },
+              { type: 'paragraph', content: [{ type: 'text', text: 'We create premium digital products that help entrepreneurs and creators build better businesses. Every product is crafted with care, tested thoroughly, and supported by our expert team.' }] },
+              { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'Our Mission' }] },
+              { type: 'paragraph', content: [{ type: 'text', text: 'To provide high-quality digital products that save time, increase productivity, and help our customers succeed.' }] },
+              { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'Why Choose Us' }] },
+              { type: 'bulletList', content: [
+                { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Quality First: ' }, { type: 'text', text: 'Every product is meticulously crafted and tested' }] }] },
+                { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Instant Delivery: ' }, { type: 'text', text: 'Get access immediately after purchase' }] }] },
+                { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Lifetime Updates: ' }, { type: 'text', text: 'All future improvements included free' }] }] },
+                { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Expert Support: ' }, { type: 'text', text: 'Our team is here to help you succeed' }] }] },
+              ] },
+            ],
+          },
+        },
+      },
+    ],
+  },
+  {
+    title: 'Contact',
+    slug: 'contact',
+    menu_order: 4,
+    showInMenu: true,
+    meta: {
+      description: 'Get in touch with our team',
+      showTitle: true,
+      titleAlignment: 'center',
+    },
+    blocks: [
+      {
+        id: 'form-contact',
+        type: 'form',
+        data: {
+          title: 'Send us a Message',
+          fields: [
+            { id: 'name', type: 'text', label: 'Name', placeholder: 'Your name', required: true, width: 'half' },
+            { id: 'email', type: 'email', label: 'Email', placeholder: 'you@example.com', required: true, width: 'half' },
+            { id: 'subject', type: 'text', label: 'Subject', placeholder: 'What is this about?', required: true, width: 'full' },
+            { id: 'message', type: 'textarea', label: 'Message', placeholder: 'Your message...', required: true, width: 'full' },
+          ],
+          submitButtonText: 'Send Message',
+          successMessage: 'Thanks for reaching out! We\'ll get back to you within 24 hours.',
+          variant: 'card',
+        },
+      },
+      {
+        id: 'contact-info',
+        type: 'contact',
+        data: {
+          title: 'Other Ways to Reach Us',
+          email: 'hello@digitalshop.com',
+          phone: '+1 (555) 123-4567',
+          hours: [
+            { day: 'Monday - Friday', time: '9:00 AM - 6:00 PM EST' },
+            { day: 'Saturday - Sunday', time: 'Email support only' },
+          ],
+        },
+      },
+    ],
+  },
+];
+
+const digitalShopProducts: TemplateProduct[] = [
+  {
+    name: 'Business Template Pack',
+    description: 'Professional templates for presentations, documents, and reports. Includes 50+ designs.',
+    price_cents: 4900,
+    currency: 'USD',
+    type: 'one_time',
+    image_url: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=300&fit=crop',
+    is_active: true,
+  },
+  {
+    name: 'UI Design Kit Pro',
+    description: 'Complete UI kit with 500+ components for web and mobile. Figma & Sketch included.',
+    price_cents: 7900,
+    currency: 'USD',
+    type: 'one_time',
+    image_url: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop',
+    is_active: true,
+  },
+  {
+    name: 'Marketing Mastery Course',
+    description: 'Complete marketing course with 40+ video lessons. Learn SEO, ads, and social media.',
+    price_cents: 19900,
+    currency: 'USD',
+    type: 'one_time',
+    image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop',
+    is_active: true,
+  },
+  {
+    name: 'Monthly Pro Membership',
+    description: 'Access all products with monthly subscription. New content added weekly.',
+    price_cents: 2900,
+    currency: 'USD',
+    type: 'recurring',
+    image_url: 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=400&h=300&fit=crop',
+    is_active: true,
+  },
+];
+
+export const digitalShopTemplate: StarterTemplate = {
+  id: 'digital-shop',
+  name: 'Digital Shop',
+  description: 'E-commerce template for selling digital products. Features product showcase, shopping cart, Stripe checkout, and order management.',
+  category: 'platform',
+  icon: 'ShoppingBag',
+  tagline: 'Perfect for digital product stores',
+  aiChatPosition: 'Widget for customer support',
+  helpStyle: 'none',
+  pages: digitalShopPages,
+  requiredModules: ['products', 'orders', 'chat', 'forms', 'blog'],
+  blogPosts: digitalShopBlogPosts,
+  products: digitalShopProducts,
+  branding: {
+    organizationName: 'Digital Shop',
+    brandTagline: 'Premium Digital Products',
+    primaryColor: '160 70% 40%',
+    accentColor: '200 80% 50%',
+    headingFont: 'Plus Jakarta Sans',
+    bodyFont: 'Inter',
+    borderRadius: 'lg',
+    shadowIntensity: 'medium',
+  },
+  chatSettings: {
+    enabled: true,
+    aiProvider: 'openai',
+    landingPageEnabled: false,
+    widgetEnabled: true,
+    widgetPosition: 'bottom-right',
+    welcomeMessage: 'Hi! Need help finding the right product? I can help!',
+    systemPrompt: 'You are a helpful sales assistant for a digital product store. Help users find products, answer questions about purchases, and provide support. Be friendly and helpful.',
+    suggestedPrompts: [
+      'What products do you recommend?',
+      'How does delivery work?',
+      'Do you offer refunds?',
+    ],
+    includeContentAsContext: true,
+    includedPageSlugs: ['*'],
+    includeKbArticles: false,
+    contentContextMaxTokens: 30000,
+    showContextIndicator: false,
+  },
+  headerSettings: {
+    variant: 'sticky',
+    stickyHeader: true,
+    backgroundStyle: 'blur',
+  },
+  footerSettings: {
+    variant: 'full',
+    email: 'hello@digitalshop.com',
+    phone: '+1 (555) 123-4567',
+    showHours: true,
+    weekdayHours: 'Mon-Fri 9-18 EST',
+    weekendHours: 'Email only',
+    showQuickLinks: true,
+    showContact: true,
+    legalLinks: [
+      { id: 'privacy', label: 'Privacy Policy', url: '/privacy-policy', enabled: true },
+      { id: 'terms', label: 'Terms of Service', url: '/terms-of-service', enabled: true },
+      { id: 'refunds', label: 'Refund Policy', url: '/refund-policy', enabled: true },
+    ],
+  },
+  seoSettings: {
+    siteTitle: 'Digital Shop',
+    titleTemplate: '%s | Digital Shop',
+    defaultDescription: 'Premium digital products and online courses. Instant delivery, lifetime access.',
+    robotsIndex: true,
+    robotsFollow: true,
+  },
+  cookieBannerSettings: {
+    enabled: true,
+  },
+  siteSettings: {
+    homepageSlug: 'home',
+  },
+};
