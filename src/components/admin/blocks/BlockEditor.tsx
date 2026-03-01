@@ -147,6 +147,7 @@ type BlockDataMap = {
   'floating-cta': FloatingCTABlockData;
   'chat-launcher': ChatLauncherBlockData;
   webinar: Record<string, unknown>;
+  'parallax-section': ParallaxSectionBlockData;
 };
 
 const DEFAULT_BLOCK_DATA: BlockDataMap = {
