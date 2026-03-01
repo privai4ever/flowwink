@@ -9183,6 +9183,15 @@ const flowwinkAgencyPages: TemplatePage[] = [
           secondaryButton: { text: 'See Product Demo', url: 'https://demo.flowwink.com' },
         },
       },
+      // SECTION DIVIDER - Transition from hero
+      {
+        id: 'divider-hero-stats',
+        type: 'section-divider',
+        data: {
+          shape: 'diagonal',
+          height: 'sm',
+        },
+      },
       // STATS - Agency metrics
       {
         id: 'stats-agency',
@@ -9194,6 +9203,24 @@ const flowwinkAgencyPages: TemplatePage[] = [
             { value: '5 min', label: 'Deploy Time', icon: 'Zap' },
             { value: '∞', label: 'Client Sites', icon: 'Layers' },
             { value: '€0', label: 'Platform Fees', icon: 'Ban' },
+          ],
+        },
+      },
+      // BENTO GRID - Agency benefits (replaces flat features)
+      {
+        id: 'bento-benefits',
+        type: 'bento-grid',
+        data: {
+          eyebrow: 'WHY FLOWWINK',
+          columns: 3,
+          variant: 'default',
+          gap: 'md',
+          staggeredReveal: true,
+          items: [
+            { id: 'ab1', title: 'White Label', description: 'Your brand, your domain. Clients never see FlowWink.', icon: 'Palette', span: 'wide', accentColor: '#8B5CF6' },
+            { id: 'ab2', title: 'Unlimited Sites', description: 'One VPS hosts 20-50 client sites. Scale without limits.', icon: 'Layers', accentColor: '#3B82F6' },
+            { id: 'ab3', title: 'Zero Fees', description: 'No per-site, per-user, or per-page charges. Ever.', icon: 'Ban', accentColor: '#10B981' },
+            { id: 'ab4', title: 'Full API', description: 'Headless delivery for custom React, Vue, or mobile apps.', icon: 'Code', span: 'wide', accentColor: '#F59E0B' },
           ],
         },
       },
