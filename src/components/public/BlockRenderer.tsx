@@ -90,6 +90,7 @@ import type { BadgeBlockData } from './blocks/BadgeBlock';
 import type { SocialProofBlockData } from './blocks/SocialProofBlock';
 import type { NotificationToastBlockData } from './blocks/NotificationToastBlock';
 import type { FloatingCTABlockData } from './blocks/FloatingCTABlock';
+import type { ParallaxSectionBlockData } from './blocks/ParallaxSectionBlock';
 
 interface BlockRendererProps {
   block: ContentBlock;
