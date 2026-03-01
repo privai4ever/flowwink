@@ -1,18 +1,24 @@
 /**
  * Template Registry
  * 
- * Aggregates all starter templates from individual files.
- * Each template lives in its own file for easier maintenance and contribution.
+ * Aggregates all starter templates. Templates are authored as TypeScript
+ * in this directory, then exported to JSON in /templates/ via:
+ * 
+ *   bun run scripts/templates-to-json.ts
+ * 
+ * The JSON files are the portable distribution format used by the
+ * import/export engine and community contributions.
  * 
  * ## Adding a New Template
  * 
  * 1. Create a new `.ts` file in this directory (e.g. `my-template.ts`)
  * 2. Export a `StarterTemplate` object from it  
  * 3. Import and add it to `ALL_TEMPLATES` below
- * 4. Run `bun run test` to validate
+ * 4. Run `bun run scripts/templates-to-json.ts` to generate JSON
+ * 5. Run `bun run test` to validate
  * 
  * See docs/TEMPLATE-AUTHORING.md for the full block reference.
- * See templates/README.md for contribution guidelines.
+ * See templates/README.md for JSON contribution guidelines.
  */
 
 // Re-export types for convenience
@@ -45,6 +51,9 @@ import type { StarterTemplate } from './types';
 
 /**
  * All available starter templates in display order.
+ * 
+ * These are the TypeScript-authored templates (source of truth).
+ * Run `bun run scripts/templates-to-json.ts` to export to /templates/*.json
  */
 export const ALL_TEMPLATES: StarterTemplate[] = [
   launchpadTemplate,

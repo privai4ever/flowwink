@@ -2,9 +2,11 @@
  * Template Importer
  * 
  * Utility to import and validate JSON templates for editing or applying.
+ * Supports importing from /templates/*.json or user-uploaded files.
  */
 
-import { StarterTemplate, TemplatePage, TemplateBlogPost } from '@/data/starter-templates';
+import { StarterTemplate, TemplatePage, TemplateBlogPost } from '@/data/templates/types';
+import { validateJsonTemplate } from '@/lib/template-json-loader';
 import { ContentBlock } from '@/types/cms';
 
 export interface ImportResult {
@@ -50,7 +52,6 @@ export function parseTemplateJson(jsonString: string): ImportResult {
         if (!page.blocks || !Array.isArray(page.blocks)) {
           warnings.push(`Page "${page.title || index}": missing or invalid blocks array`);
         } else {
-          // Validate blocks
           page.blocks.forEach((block: Partial<ContentBlock>, blockIndex: number) => {
             if (!block.id) {
               warnings.push(`Page "${page.title}", Block ${blockIndex + 1}: missing ID`);
@@ -102,33 +103,17 @@ export function parseTemplateJson(jsonString: string): ImportResult {
       parsed.icon = 'Rocket';
     }
     
-    // Ensure required defaults
-    const template: StarterTemplate = {
-      id: parsed.id || 'imported-template',
-      name: parsed.name || 'Imported Template',
-      description: parsed.description || '',
-      category: parsed.category || 'startup',
-      icon: parsed.icon || 'Rocket',
-      tagline: parsed.tagline || '',
-      aiChatPosition: parsed.aiChatPosition || 'bottom-right',
-      pages: parsed.pages || [],
-      blogPosts: parsed.blogPosts,
-      kbCategories: parsed.kbCategories,
-      products: parsed.products,
-      requiredModules: parsed.requiredModules,
-      branding: parsed.branding || {},
-      chatSettings: parsed.chatSettings,
-      headerSettings: parsed.headerSettings,
-      footerSettings: parsed.footerSettings,
-      seoSettings: parsed.seoSettings,
-      cookieBannerSettings: parsed.cookieBannerSettings,
-      siteSettings: parsed.siteSettings || { homepageSlug: 'home' },
-    };
+    if (errors.length > 0) {
+      return { success: false, template: null, errors, warnings };
+    }
+
+    // Use the shared validator to build the template object
+    const template = validateJsonTemplate(parsed);
     
     return {
-      success: errors.length === 0,
-      template: errors.length === 0 ? template : null,
-      errors,
+      success: true,
+      template,
+      errors: [],
       warnings,
     };
   } catch (e) {
