@@ -121,7 +121,8 @@ export type ContentBlockType =
   | 'notification-toast'
   | 'floating-cta'
   | 'chat-launcher'
-  | 'webinar';
+  | 'webinar'
+  | 'parallax-section';
 
 // Form field types
 export type FormFieldType = 'text' | 'email' | 'phone' | 'textarea' | 'checkbox';

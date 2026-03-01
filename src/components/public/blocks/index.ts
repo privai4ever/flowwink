@@ -48,3 +48,4 @@ export { NotificationToastBlock } from './NotificationToastBlock';
 export { FloatingCTABlock } from './FloatingCTABlock';
 export { ChatLauncherBlock } from './ChatLauncherBlock';
 export { WebinarBlock } from './WebinarBlock';
+export { ParallaxSectionBlock } from './ParallaxSectionBlock';

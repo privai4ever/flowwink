@@ -68,6 +68,7 @@ import { NotificationToastBlockEditor } from './NotificationToastBlockEditor';
 import { FloatingCTABlockEditor } from './FloatingCTABlockEditor';
 import { ChatLauncherBlockEditor } from './ChatLauncherBlockEditor';
 import { WebinarBlockEditor } from './WebinarBlockEditor';
+import { ParallaxSectionBlockEditor } from './ParallaxSectionBlockEditor';
 import type { ProductsBlockData } from '@/components/public/blocks/ProductsBlock';
 import type { CartBlockData } from '@/components/public/blocks/CartBlock';
 import type { KbFeaturedBlockData } from '@/components/public/blocks/KbFeaturedBlock';
@@ -86,6 +87,7 @@ import type { SocialProofBlockData } from '@/components/public/blocks/SocialProo
 import type { NotificationToastBlockData } from '@/components/public/blocks/NotificationToastBlock';
 import type { FloatingCTABlockData } from '@/components/public/blocks/FloatingCTABlock';
 import type { ChatLauncherBlockData } from '@/components/public/blocks/ChatLauncherBlock';
+import type { ParallaxSectionBlockData } from '@/components/public/blocks/ParallaxSectionBlock';
 
 interface NewsletterBlockData {
   title?: string;
@@ -145,6 +147,7 @@ type BlockDataMap = {
   'floating-cta': FloatingCTABlockData;
   'chat-launcher': ChatLauncherBlockData;
   webinar: Record<string, unknown>;
+  'parallax-section': ParallaxSectionBlockData;
 };
 
 const DEFAULT_BLOCK_DATA: BlockDataMap = {
@@ -459,6 +462,15 @@ const DEFAULT_BLOCK_DATA: BlockDataMap = {
     maxItems: 5,
     showPast: true,
     variant: 'default',
+  },
+  'parallax-section': {
+    title: 'Your headline here',
+    subtitle: '',
+    backgroundImage: '',
+    height: 'md',
+    textColor: 'light',
+    overlayOpacity: 50,
+    contentAlignment: 'center',
   },
 };
 
@@ -962,6 +974,14 @@ export function BlockEditor({ blocks, onChange, canEdit }: BlockEditorProps) {
           <WebinarBlockEditor
             data={block.data as Record<string, unknown>}
             onChange={(data) => handleUpdateBlock(block.id, data as Record<string, unknown>)}
+            isEditing={isEditing}
+          />
+        );
+      case 'parallax-section':
+        return (
+          <ParallaxSectionBlockEditor
+            data={block.data as unknown as ParallaxSectionBlockData}
+            onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
             isEditing={isEditing}
           />
         );

@@ -50,6 +50,7 @@ import {
   FloatingCTABlock,
   ChatLauncherBlock,
   WebinarBlock,
+  ParallaxSectionBlock,
 } from './blocks';
 import type { ChatLauncherBlockData } from './blocks/ChatLauncherBlock';
 import type { KbHubBlockData } from './blocks/KbHubBlock';
@@ -89,6 +90,7 @@ import type { BadgeBlockData } from './blocks/BadgeBlock';
 import type { SocialProofBlockData } from './blocks/SocialProofBlock';
 import type { NotificationToastBlockData } from './blocks/NotificationToastBlock';
 import type { FloatingCTABlockData } from './blocks/FloatingCTABlock';
+import type { ParallaxSectionBlockData } from './blocks/ParallaxSectionBlock';
 
 interface BlockRendererProps {
   block: ContentBlock;
@@ -139,7 +141,7 @@ export function BlockRenderer({ block, pageId, index = 0 }: BlockRendererProps) 
   const animationDelay = block.animation?.delay ?? (index * 100);
   
   // Hero and separator blocks skip animation by default unless explicitly set
-  const skipAnimation = (block.type === 'hero' || block.type === 'separator') && !block.animation?.type;
+  const skipAnimation = (block.type === 'hero' || block.type === 'separator' || block.type === 'parallax-section') && !block.animation?.type;
   
   const renderBlock = () => {
     switch (block.type) {
@@ -239,6 +241,8 @@ export function BlockRenderer({ block, pageId, index = 0 }: BlockRendererProps) 
         return <ChatLauncherBlock data={block.data as unknown as ChatLauncherBlockData} />;
       case 'webinar':
         return <WebinarBlock data={block.data as Record<string, unknown>} blockId={block.id} pageId={pageId} />;
+      case 'parallax-section':
+        return <ParallaxSectionBlock data={block.data as unknown as ParallaxSectionBlockData} />;
       default:
         return null;
     }
