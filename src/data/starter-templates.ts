@@ -7936,6 +7936,55 @@ const serviceProPages: TemplatePage[] = [
           secondaryButton: { text: 'Our Services', url: '/services' },
         },
       },
+      // SECTION DIVIDER - Transition to services
+      {
+        id: 'divider-stats-services',
+        type: 'section-divider',
+        data: {
+          shape: 'wave',
+          height: 'sm',
+        },
+      },
+      // FEATURED CAROUSEL - Service showcase
+      {
+        id: 'carousel-services',
+        type: 'featured-carousel',
+        data: {
+          slides: [
+            {
+              id: 'slide-consult',
+              title: 'Expert Consultation',
+              description: 'Get personalized advice from our team of experienced professionals.',
+              image: 'https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=1920',
+              ctaText: 'Book Now',
+              ctaUrl: '/book',
+              textAlignment: 'left',
+            },
+            {
+              id: 'slide-service',
+              title: 'Premium Services',
+              description: 'Quality craftsmanship delivered on time, every time.',
+              image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1920',
+              ctaText: 'View Services',
+              ctaUrl: '/services',
+              textAlignment: 'left',
+            },
+            {
+              id: 'slide-team',
+              title: 'Dedicated Team',
+              description: 'Skilled professionals committed to exceeding your expectations.',
+              image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920',
+              ctaText: 'Meet the Team',
+              ctaUrl: '/about',
+              textAlignment: 'left',
+            },
+          ],
+          autoPlay: true,
+          interval: 5000,
+          height: 'md',
+          transition: 'fade',
+        },
+      },
       {
         id: 'stats-1',
         type: 'stats',
