@@ -69,6 +69,7 @@ import { FloatingCTABlockEditor } from './FloatingCTABlockEditor';
 import { ChatLauncherBlockEditor } from './ChatLauncherBlockEditor';
 import { WebinarBlockEditor } from './WebinarBlockEditor';
 import { ParallaxSectionBlockEditor } from './ParallaxSectionBlockEditor';
+import { BentoGridBlockEditor } from './BentoGridBlockEditor';
 import type { ProductsBlockData } from '@/components/public/blocks/ProductsBlock';
 import type { CartBlockData } from '@/components/public/blocks/CartBlock';
 import type { KbFeaturedBlockData } from '@/components/public/blocks/KbFeaturedBlock';
@@ -88,6 +89,7 @@ import type { NotificationToastBlockData } from '@/components/public/blocks/Noti
 import type { FloatingCTABlockData } from '@/components/public/blocks/FloatingCTABlock';
 import type { ChatLauncherBlockData } from '@/components/public/blocks/ChatLauncherBlock';
 import type { ParallaxSectionBlockData } from '@/components/public/blocks/ParallaxSectionBlock';
+import type { BentoGridBlockData } from '@/components/public/blocks/BentoGridBlock';
 
 interface NewsletterBlockData {
   title?: string;
@@ -148,6 +150,7 @@ type BlockDataMap = {
   'chat-launcher': ChatLauncherBlockData;
   webinar: Record<string, unknown>;
   'parallax-section': ParallaxSectionBlockData;
+  'bento-grid': BentoGridBlockData;
 };
 
 const DEFAULT_BLOCK_DATA: BlockDataMap = {
@@ -471,6 +474,21 @@ const DEFAULT_BLOCK_DATA: BlockDataMap = {
     textColor: 'light',
     overlayOpacity: 50,
     contentAlignment: 'center',
+  },
+  'bento-grid': {
+    title: 'What We Offer',
+    subtitle: 'Explore our services and capabilities',
+    eyebrow: 'SERVICES',
+    items: [
+      { id: 'bento-1', title: 'Fast & Reliable', description: 'Lightning-fast performance you can count on.', icon: 'Zap', span: 'normal' },
+      { id: 'bento-2', title: 'Beautiful Design', description: 'Crafted with attention to every detail.', icon: 'Palette', span: 'wide' },
+      { id: 'bento-3', title: 'Secure', description: 'Enterprise-grade security built in.', icon: 'Shield', span: 'normal' },
+      { id: 'bento-4', title: 'Scalable', description: 'Grows with your business needs.', icon: 'TrendingUp', span: 'normal' },
+    ],
+    columns: 3,
+    gap: 'md',
+    variant: 'default',
+    staggeredReveal: true,
   },
 };
 
@@ -981,6 +999,14 @@ export function BlockEditor({ blocks, onChange, canEdit }: BlockEditorProps) {
         return (
           <ParallaxSectionBlockEditor
             data={block.data as unknown as ParallaxSectionBlockData}
+            onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
+            isEditing={isEditing}
+          />
+        );
+      case 'bento-grid':
+        return (
+          <BentoGridBlockEditor
+            data={block.data as unknown as BentoGridBlockData}
             onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
             isEditing={isEditing}
           />
