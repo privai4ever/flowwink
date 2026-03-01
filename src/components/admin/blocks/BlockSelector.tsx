@@ -176,6 +176,12 @@ const BLOCK_GROUPS: BlockGroup[] = [
         icon: <LayoutGrid className="h-5 w-5" />,
         description: 'Asymmetric grid layout for features',
       },
+      {
+        type: 'section-divider',
+        label: 'Section Divider',
+        icon: <Waves className="h-5 w-5" />,
+        description: 'Decorative SVG shape between sections',
+      },
     ],
   },
   {

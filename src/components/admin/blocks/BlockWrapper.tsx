@@ -63,6 +63,7 @@ const BLOCK_LABELS: Record<ContentBlockType, string> = {
   webinar: 'Webinar',
   'parallax-section': 'Parallax Section',
   'bento-grid': 'Bento Grid',
+  'section-divider': 'Section Divider',
 };
 
 interface BlockWrapperProps {

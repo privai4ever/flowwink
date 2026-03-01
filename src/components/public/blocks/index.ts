@@ -50,3 +50,4 @@ export { ChatLauncherBlock } from './ChatLauncherBlock';
 export { WebinarBlock } from './WebinarBlock';
 export { ParallaxSectionBlock } from './ParallaxSectionBlock';
 export { BentoGridBlock } from './BentoGridBlock';
+export { SectionDividerBlock } from './SectionDividerBlock';
