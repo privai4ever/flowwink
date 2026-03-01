@@ -502,6 +502,29 @@ const DEFAULT_BLOCK_DATA: BlockDataMap = {
     flip: false,
     invert: false,
   },
+  'featured-carousel': {
+    slides: [
+      {
+        id: 'slide-1',
+        title: 'Welcome to Our Platform',
+        subtitle: 'FEATURED',
+        description: 'Discover what makes us different.',
+        image: '',
+        ctaLabel: 'Get Started',
+        ctaUrl: '#',
+        ctaVariant: 'primary',
+        textPosition: 'left',
+        overlayOpacity: 40,
+      },
+    ],
+    autoPlay: true,
+    interval: 5000,
+    height: 'md',
+    showArrows: true,
+    showDots: true,
+    pauseOnHover: true,
+    transition: 'fade',
+  },
 };
 
 interface BlockEditorProps {
