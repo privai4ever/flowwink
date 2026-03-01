@@ -52,6 +52,7 @@ import {
   Layers,
    MoveHorizontal,
    Mountain,
+   LayoutGrid,
   Code2,
   Table2,
   Timer,
