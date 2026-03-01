@@ -9585,7 +9585,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
               id: 'tab-content',
               title: 'Content Management',
               icon: 'FileText',
-              content: '<h3>Visual Block Editor</h3><p>43+ block types for any layout. Drag-and-drop interface that clients can actually use.</p><ul><li>Hero, features, testimonials, pricing blocks</li><li>Version history with one-click restore</li><li>Approval workflow for quality control</li><li>Schedule publishing in advance</li></ul>',
+              content: '<h3>Visual Block Editor</h3><p>47+ block types for any layout. Drag-and-drop interface that clients can actually use.</p><ul><li>Hero, features, testimonials, pricing blocks</li><li>Version history with one-click restore</li><li>Approval workflow for quality control</li><li>Schedule publishing in advance</li></ul>',
             },
             {
               id: 'tab-clients',
