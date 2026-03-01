@@ -92,6 +92,7 @@ import type { SocialProofBlockData } from './blocks/SocialProofBlock';
 import type { NotificationToastBlockData } from './blocks/NotificationToastBlock';
 import type { FloatingCTABlockData } from './blocks/FloatingCTABlock';
 import type { ParallaxSectionBlockData } from './blocks/ParallaxSectionBlock';
+import type { BentoGridBlockData } from './blocks/BentoGridBlock';
 
 interface BlockRendererProps {
   block: ContentBlock;
