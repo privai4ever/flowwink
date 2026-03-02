@@ -380,6 +380,16 @@ export function TemplateBlockPreview({ block, compact, primaryColor = '#6366f1' 
         return <BadgeBlock data={block.data as any} />;
       case 'social-proof':
         return <SocialProofBlock data={block.data as any} />;
+      case 'parallax-section':
+        return <ParallaxSectionBlock data={block.data as unknown as ParallaxSectionBlockData} />;
+      case 'bento-grid':
+        return <BentoGridBlock data={block.data as unknown as BentoGridBlockData} />;
+      case 'section-divider':
+        return <SectionDividerBlock data={block.data as unknown as SectionDividerBlockData} />;
+      case 'featured-carousel':
+        return <FeaturedCarouselBlock data={block.data as unknown as FeaturedCarouselBlockData} />;
+      case 'chat-launcher':
+        return <ChatLauncherBlock data={block.data as unknown as ChatLauncherBlockData} />;
 
       // Blocks that require database context - show enhanced placeholders
       case 'chat':
