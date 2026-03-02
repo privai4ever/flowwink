@@ -688,6 +688,18 @@ export const serviceProTemplate: StarterTemplate = {
     robotsIndex: true,
     robotsFollow: true,
   },
+  aeoSettings: {
+    enabled: true,
+    organizationName: 'ServicePro',
+    shortDescription: 'Professional services delivered with excellence. Book online in seconds.',
+    schemaOrgEnabled: true,
+    schemaOrgType: 'LocalBusiness',
+    faqSchemaEnabled: true,
+    articleSchemaEnabled: true,
+    sitemapEnabled: true,
+    llmsTxtEnabled: true,
+    llmsFullTxtEnabled: true,
+  },
   cookieBannerSettings: {
     enabled: true,
   },

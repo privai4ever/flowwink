@@ -301,6 +301,18 @@ export const momentumTemplate: StarterTemplate = {
     robotsFollow: true,
     developmentMode: false,
   },
+  aeoSettings: {
+    enabled: true,
+    organizationName: 'Momentum',
+    shortDescription: 'Ship faster. Scale smarter. The developer platform that turns ideas into production in minutes.',
+    schemaOrgEnabled: true,
+    schemaOrgType: 'Organization',
+    faqSchemaEnabled: true,
+    articleSchemaEnabled: true,
+    sitemapEnabled: true,
+    llmsTxtEnabled: true,
+    llmsFullTxtEnabled: true,
+  },
   cookieBannerSettings: {
     enabled: true,
   },

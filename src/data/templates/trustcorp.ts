@@ -685,6 +685,18 @@ export const trustcorpTemplate: StarterTemplate = {
     robotsFollow: true,
     developmentMode: false,
   },
+  aeoSettings: {
+    enabled: true,
+    organizationName: 'TrustCorp',
+    shortDescription: 'Enterprise solutions that demand excellence, security, and scalability.',
+    schemaOrgEnabled: true,
+    schemaOrgType: 'Organization',
+    faqSchemaEnabled: true,
+    articleSchemaEnabled: true,
+    sitemapEnabled: true,
+    llmsTxtEnabled: true,
+    llmsFullTxtEnabled: true,
+  },
   cookieBannerSettings: { enabled: true },
   siteSettings: { homepageSlug: 'home' },
 };

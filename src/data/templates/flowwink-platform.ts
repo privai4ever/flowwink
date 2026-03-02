@@ -1297,6 +1297,18 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
     robotsFollow: true,
     developmentMode: false,
   },
+  aeoSettings: {
+    enabled: true,
+    organizationName: 'FlowWink',
+    shortDescription: 'Keep Your Head While Going Headless. The complete CMS with beautiful websites AND powerful APIs.',
+    schemaOrgEnabled: true,
+    schemaOrgType: 'Organization',
+    faqSchemaEnabled: true,
+    articleSchemaEnabled: true,
+    sitemapEnabled: true,
+    llmsTxtEnabled: true,
+    llmsFullTxtEnabled: true,
+  },
   cookieBannerSettings: {
     enabled: true,
   },

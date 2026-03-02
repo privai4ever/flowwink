@@ -63,6 +63,7 @@ export const BLANK_TEMPLATE: StarterTemplate = {
   headerSettings: { variant: 'sticky', stickyHeader: true, backgroundStyle: 'blur', headerShadow: 'sm', showBorder: true },
   footerSettings: { variant: 'full', email: 'hello@example.com', showBrand: true, showQuickLinks: true, showContact: true, showHours: false },
   seoSettings: { siteTitle: 'My Site', titleTemplate: '%s | My Site', defaultDescription: 'Welcome to our website.', robotsIndex: true, robotsFollow: true },
+  aeoSettings: { enabled: true, organizationName: 'My Site', shortDescription: 'Welcome to our website.', schemaOrgEnabled: true, schemaOrgType: 'Organization', faqSchemaEnabled: true, articleSchemaEnabled: true, sitemapEnabled: true, llmsTxtEnabled: true, llmsFullTxtEnabled: true },
   cookieBannerSettings: { enabled: false },
   siteSettings: { homepageSlug: 'home' },
 };
