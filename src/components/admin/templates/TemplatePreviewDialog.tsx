@@ -288,6 +288,7 @@ export function TemplatePreviewDialog({
       pages: false,
       branding: false,
       chatSettings: false,
+      headerSettings: false,
       footerSettings: false,
       seoSettings: false,
       cookieBannerSettings: false,
