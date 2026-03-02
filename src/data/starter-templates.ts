@@ -2581,7 +2581,12 @@ const momentumPages: TemplatePage[] = [
           title: 'Ship faster. Scale smarter.',
           subtitle: 'The developer platform that turns ideas into production in minutes, not months. Join 50,000+ teams building the future.',
           backgroundType: 'video',
-          videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-futuristic-devices-99786-large.mp4',
+          videoUrl: 'https://videos.pexels.com/video-files/3209828/3209828-uhd_2560_1440_25fps.mp4',
+          videoType: 'direct',
+          videoPosterUrl: 'https://images.pexels.com/videos/3209828/free-video-3209828.jpg?auto=compress&w=1920',
+          videoAutoplay: true,
+          videoLoop: true,
+          videoMuted: true,
           heightMode: 'viewport',
           contentAlignment: 'center',
           overlayOpacity: 85,
@@ -2660,10 +2665,13 @@ const momentumPages: TemplatePage[] = [
         id: 'two-col-1',
         type: 'two-column',
         data: {
+          eyebrow: 'DEVELOPMENT',
+          title: 'AI-Powered',
+          accentText: 'Development',
+          accentPosition: 'end',
           content: {
             type: 'doc',
             content: [
-              { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'AI-Powered Development' }] },
               { type: 'paragraph', content: [{ type: 'text', text: 'Stop writing boilerplate. Our AI understands your codebase and generates production-ready code that actually works.' }] },
               { type: 'bulletList', content: [
                 { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Context-aware code completion' }] }] },
@@ -2676,6 +2684,8 @@ const momentumPages: TemplatePage[] = [
           imageSrc: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800',
           imageAlt: 'Code on screen',
           imagePosition: 'right',
+          ctaText: 'Explore AI Features →',
+          ctaUrl: '/features',
         },
       },
       // Section 5: Two-Column (feature deep-dive #2, image left)
@@ -2683,10 +2693,13 @@ const momentumPages: TemplatePage[] = [
         id: 'two-col-2',
         type: 'two-column',
         data: {
+          eyebrow: 'INFRASTRUCTURE',
+          title: 'Enterprise-Grade',
+          accentText: 'Infrastructure',
+          accentPosition: 'end',
           content: {
             type: 'doc',
             content: [
-              { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Enterprise-Grade Infrastructure' }] },
               { type: 'paragraph', content: [{ type: 'text', text: 'From your first 100 users to your first 100 million. Auto-scaling, self-healing infrastructure that just works.' }] },
               { type: 'bulletList', content: [
                 { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Auto-scaling compute' }] }] },
@@ -2699,6 +2712,8 @@ const momentumPages: TemplatePage[] = [
           imageSrc: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800',
           imageAlt: 'Server infrastructure',
           imagePosition: 'left',
+          ctaText: 'View Architecture →',
+          ctaUrl: '/features',
         },
       },
       // PARALLAX SECTION - Visual break between feature deep-dives
@@ -2950,6 +2965,18 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
       robotsIndex: true,
       robotsFollow: true,
       developmentMode: false,
+    },
+    aeoSettings: {
+      enabled: true,
+      organizationName: 'Momentum',
+      shortDescription: 'Ship faster. Scale smarter. The developer platform that turns ideas into production in minutes.',
+      schemaOrgEnabled: true,
+      schemaOrgType: 'Organization',
+      faqSchemaEnabled: true,
+      articleSchemaEnabled: true,
+      sitemapEnabled: true,
+      llmsTxtEnabled: true,
+      llmsFullTxtEnabled: true,
     },
     cookieBannerSettings: {
       enabled: true,
