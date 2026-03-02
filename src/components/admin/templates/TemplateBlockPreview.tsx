@@ -533,7 +533,7 @@ export function TemplateBlockPreview({ block, compact, primaryColor = '#6366f1' 
             type="floating-cta" 
             icon={MousePointer} 
             label="Floating CTA"
-            description="Sticky call-to-action vid scroll"
+            description="Sticky call-to-action on scroll"
             primaryColor={primaryColor}
           />
         );
