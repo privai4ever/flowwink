@@ -291,7 +291,7 @@ export function TemplatePreview({ template, open, onOpenChange, onSelect }: Temp
                   {hasChat && (
                     <div className="flex items-center gap-1.5 text-cyan-600">
                       <MessageSquare className="h-3.5 w-3.5" />
-                      <span>AI-chatt</span>
+                      <span>AI Chat</span>
                     </div>
                   )}
                   {hasBlog && (
