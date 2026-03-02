@@ -147,8 +147,8 @@ export function WebinarBlock({ data, blockId, pageId }: WebinarBlockProps) {
       {/* Past */}
       {data.showPast && past.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Previous Webinars</h3>
-          <div className="space-y-4">
+          <h3 className="text-lg font-semibold mb-4 text-muted-foreground text-center">Previous Webinars</h3>
+          <div className="max-w-2xl mx-auto space-y-4">
             {past.map(webinar => (
               <WebinarCard
                 key={webinar.id}
