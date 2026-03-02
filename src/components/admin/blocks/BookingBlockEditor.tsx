@@ -43,10 +43,10 @@ export function BookingBlockEditor({ data, onChange, isEditing }: BookingBlockEd
   // Preview for non-editing mode
   if (!isEditing) {
     return (
-      <div className="p-6 text-center border-2 border-dashed rounded-lg bg-muted/30">
-        <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+      <div className="flex flex-col items-center justify-center p-6 bg-muted/30 rounded-lg border-2 border-dashed border-muted-foreground/30">
+        <Calendar className="h-10 w-10 text-muted-foreground/50 mb-3" />
         <h3 className="font-medium text-lg">{data.title || 'Booking Widget'}</h3>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1 text-center">
           {data.mode === 'embed' ? (
             <>
               {data.provider === 'calendly' && 'Calendly embed'}
@@ -86,7 +86,7 @@ export function BookingBlockEditor({ data, onChange, isEditing }: BookingBlockEd
   }
 
   return (
-    <div className="space-y-6 p-4 border rounded-lg bg-card">
+    <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
         <Calendar className="h-4 w-4" />
         Booking Block Settings
