@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TwoColumnBlockData, TiptapDocument, TextTitleSize } from '@/types/cms';
+import { TwoColumnBlockData, TiptapDocument, TextTitleSize, ImageAspectRatio, ImageFit, ImageRounded } from '@/types/cms';
 import { Bold, Italic, List, ListOrdered, ArrowLeftRight, Pin, Heading1, Heading2, Quote } from 'lucide-react';
 import { ImageUploader } from '../ImageUploader';
 import { AITiptapToolbar } from '../AITiptapToolbar';
