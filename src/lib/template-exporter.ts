@@ -151,7 +151,7 @@ export function generateTemplateCode(template: StarterTemplate): string {
 // Created: ${new Date().toISOString()}
 
 import { ContentBlock, PageMeta } from '@/types/cms';
-import { StarterTemplate, TemplatePage } from '@/data/starter-templates';
+import { StarterTemplate, TemplatePage } from '@/data/templates';
 
 const ${template.id.replace(/-/g, '_')}Pages: TemplatePage[] = [
 ${pagesCode}

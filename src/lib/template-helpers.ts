@@ -446,7 +446,7 @@ export function featuresBlock(options: {
 // Template Preview Helpers
 // ============================================
 
-import { StarterTemplate } from '@/data/starter-templates';
+import { StarterTemplate } from '@/data/templates';
 
 /**
  * Extract the hero image or generate a gradient preview URL from a template.
