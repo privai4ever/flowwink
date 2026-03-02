@@ -147,7 +147,7 @@ function BlockPlaceholder({
               className="rounded-xl p-3 text-sm text-white"
               style={{ backgroundColor: primaryColor }}
             >
-              <p className="opacity-90">Hej! Hur kan jag hjälpa dig idag?</p>
+              <p className="opacity-90">Hi! How can I help you today?</p>
             </div>
             <div className="flex gap-2">
               <div className="flex-1 h-9 bg-muted rounded-lg" />
