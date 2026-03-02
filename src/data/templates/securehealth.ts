@@ -57,6 +57,19 @@ const securehealthPages: StarterTemplate['pages'] = [
         },
       },
       {
+        id: 'parallax-care',
+        type: 'parallax-section',
+        data: {
+          backgroundImage: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1920',
+          title: 'Compassionate Care, Modern Technology',
+          subtitle: 'Where patient privacy meets medical excellence.',
+          height: 'sm',
+          textColor: 'light',
+          overlayOpacity: 65,
+          contentAlignment: 'center',
+        },
+      },
+      {
         id: 'tabs-services',
         type: 'tabs',
         data: {

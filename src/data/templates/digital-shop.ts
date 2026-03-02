@@ -102,6 +102,45 @@ const digitalShopPages: TemplatePage[] = [
         },
       },
       {
+        id: 'carousel-categories',
+        type: 'featured-carousel',
+        data: {
+          slides: [
+            {
+              id: 'slide-templates',
+              title: 'Premium Templates',
+              description: 'Professional designs for presentations, websites, and more.',
+              image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1920',
+              ctaText: 'Shop Templates',
+              ctaUrl: '#products',
+              textAlignment: 'left',
+            },
+            {
+              id: 'slide-courses',
+              title: 'Online Courses',
+              description: 'Learn from industry experts with step-by-step video lessons.',
+              image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1920',
+              ctaText: 'Browse Courses',
+              ctaUrl: '#products',
+              textAlignment: 'left',
+            },
+            {
+              id: 'slide-tools',
+              title: 'Design Tools',
+              description: 'UI kits, icon packs, and design systems for modern teams.',
+              image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1920',
+              ctaText: 'View Tools',
+              ctaUrl: '#products',
+              textAlignment: 'left',
+            },
+          ],
+          autoPlay: true,
+          interval: 5000,
+          height: 'md',
+          transition: 'fade',
+        },
+      },
+      {
         id: 'products-all',
         type: 'products',
         data: {
