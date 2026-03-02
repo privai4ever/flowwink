@@ -2,22 +2,10 @@
  * Lightweight branding provider for template previews.
  * Supplies branding context from template data instead of fetching from DB.
  */
-import { ReactNode, createContext, useContext } from 'react';
+import { ReactNode } from 'react';
+import { BrandingContext } from '@/providers/BrandingProvider';
 import type { BrandingSettings } from '@/hooks/useSiteSettings';
 
-// Mirror the same context shape as the real BrandingProvider
-interface BrandingContextValue {
-  branding: BrandingSettings | null;
-  isLoading: boolean;
-}
-
-const TemplateBrandingContext = createContext<BrandingContextValue>({
-  branding: null,
-  isLoading: false,
-});
-
-// Re-export useBranding that reads from our context
-// We override the module-level context by wrapping with this provider
 export function TemplateBrandingProvider({ 
   branding, 
   children 
@@ -41,8 +29,8 @@ export function TemplateBrandingProvider({
   };
 
   return (
-    <TemplateBrandingContext.Provider value={{ branding: fullBranding, isLoading: false }}>
+    <BrandingContext.Provider value={{ branding: fullBranding, isLoading: false }}>
       {children}
-    </TemplateBrandingContext.Provider>
+    </BrandingContext.Provider>
   );
 }
