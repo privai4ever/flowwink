@@ -463,6 +463,18 @@ export const digitalShopTemplate: StarterTemplate = {
     robotsIndex: true,
     robotsFollow: true,
   },
+  aeoSettings: {
+    enabled: true,
+    organizationName: 'Digital Shop',
+    shortDescription: 'Premium digital products and online courses. Instant delivery, lifetime access.',
+    schemaOrgEnabled: true,
+    schemaOrgType: 'Organization',
+    faqSchemaEnabled: true,
+    articleSchemaEnabled: true,
+    sitemapEnabled: true,
+    llmsTxtEnabled: true,
+    llmsFullTxtEnabled: true,
+  },
   cookieBannerSettings: {
     enabled: true,
   },

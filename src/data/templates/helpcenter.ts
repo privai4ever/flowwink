@@ -278,6 +278,18 @@ export const helpCenterTemplate: StarterTemplate = {
     robotsIndex: true,
     robotsFollow: true,
   },
+  aeoSettings: {
+    enabled: true,
+    organizationName: 'Help Center',
+    shortDescription: 'Find answers in our knowledge base or chat with AI for instant help.',
+    schemaOrgEnabled: true,
+    schemaOrgType: 'Organization',
+    faqSchemaEnabled: true,
+    articleSchemaEnabled: true,
+    sitemapEnabled: true,
+    llmsTxtEnabled: true,
+    llmsFullTxtEnabled: true,
+  },
   cookieBannerSettings: {
     enabled: true,
   },

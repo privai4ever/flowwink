@@ -794,6 +794,18 @@ export const launchpadTemplate: StarterTemplate = {
     robotsFollow: true,
     developmentMode: false,
   },
+  aeoSettings: {
+    enabled: true,
+    organizationName: 'LaunchPad',
+    shortDescription: 'The platform that scales with your ambition. Build faster, iterate smarter, grow exponentially.',
+    schemaOrgEnabled: true,
+    schemaOrgType: 'Organization',
+    faqSchemaEnabled: true,
+    articleSchemaEnabled: true,
+    sitemapEnabled: true,
+    llmsTxtEnabled: true,
+    llmsFullTxtEnabled: true,
+  },
   cookieBannerSettings: {
     enabled: true,
   },

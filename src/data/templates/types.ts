@@ -6,7 +6,7 @@
  */
 
 import { ContentBlock, PageMeta, FooterBlockData, HeaderBlockData } from '@/types/cms';
-import { BrandingSettings, ChatSettings, SeoSettings, CookieBannerSettings } from '@/hooks/useSiteSettings';
+import { BrandingSettings, ChatSettings, SeoSettings, CookieBannerSettings, AeoSettings } from '@/hooks/useSiteSettings';
 import { ModulesSettings } from '@/hooks/useModules';
 import { TemplateKbCategory } from '@/data/template-kb-articles';
 
@@ -81,6 +81,7 @@ export interface StarterTemplate {
   headerSettings?: Partial<HeaderBlockData>;
   footerSettings?: Partial<FooterBlockData>;
   seoSettings?: Partial<SeoSettings>;
+  aeoSettings?: Partial<AeoSettings>;
   cookieBannerSettings?: Partial<CookieBannerSettings>;
   
   // General settings

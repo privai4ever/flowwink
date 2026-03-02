@@ -444,6 +444,18 @@ export const securehealthTemplate: StarterTemplate = {
     robotsFollow: true,
     developmentMode: false,
   },
+  aeoSettings: {
+    enabled: true,
+    organizationName: 'SecureHealth',
+    shortDescription: 'HIPAA-compliant healthcare services with complete privacy. Your data stays on our servers.',
+    schemaOrgEnabled: true,
+    schemaOrgType: 'MedicalOrganization',
+    faqSchemaEnabled: true,
+    articleSchemaEnabled: true,
+    sitemapEnabled: true,
+    llmsTxtEnabled: true,
+    llmsFullTxtEnabled: true,
+  },
   cookieBannerSettings: { enabled: true },
   siteSettings: { homepageSlug: 'home' },
 };
