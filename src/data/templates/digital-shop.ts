@@ -440,6 +440,8 @@ export const digitalShopTemplate: StarterTemplate = {
     variant: 'sticky',
     stickyHeader: true,
     backgroundStyle: 'blur',
+    headerShadow: 'sm',
+    showBorder: false,
   },
   footerSettings: {
     variant: 'full',

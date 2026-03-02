@@ -1269,6 +1269,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
     stickyHeader: true,
     backgroundStyle: 'blur',
     headerShadow: 'sm',
+    showBorder: true,
   },
   footerSettings: {
     variant: 'full',

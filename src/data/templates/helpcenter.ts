@@ -255,6 +255,8 @@ export const helpCenterTemplate: StarterTemplate = {
     variant: 'sticky',
     stickyHeader: true,
     backgroundStyle: 'blur',
+    headerShadow: 'sm',
+    showBorder: true,
   },
   footerSettings: {
     variant: 'minimal',

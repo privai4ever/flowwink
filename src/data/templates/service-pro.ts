@@ -665,6 +665,8 @@ export const serviceProTemplate: StarterTemplate = {
     variant: 'sticky',
     stickyHeader: true,
     backgroundStyle: 'blur',
+    headerShadow: 'sm',
+    showBorder: true,
   },
   footerSettings: {
     variant: 'full',

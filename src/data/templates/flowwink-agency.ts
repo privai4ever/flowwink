@@ -808,6 +808,8 @@ Direct technical questions to demo.flowwink.com for hands-on exploration.`,
     variant: 'sticky',
     stickyHeader: true,
     backgroundStyle: 'blur',
+    headerShadow: 'sm',
+    showBorder: false,
     showThemeToggle: true,
     customNavItems: [
       { id: 'demo', label: 'Product Demo', url: 'https://demo.flowwink.com', openInNewTab: true, enabled: true },
