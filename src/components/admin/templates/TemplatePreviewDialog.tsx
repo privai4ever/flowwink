@@ -306,7 +306,7 @@ export function TemplatePreviewDialog({
 
   // Check if anything is selected
   const hasSelection = options.pages || options.branding || options.chatSettings || 
-    options.footerSettings || options.seoSettings || options.cookieBannerSettings ||
+    options.headerSettings || options.footerSettings || options.seoSettings || options.cookieBannerSettings ||
     options.blogPosts || options.kbContent || options.products;
 
   const kbArticleCount = template.kbCategories?.reduce((acc, cat) => acc + cat.articles.length, 0) || 0;
