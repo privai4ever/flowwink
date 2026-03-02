@@ -286,7 +286,7 @@ export function TemplatePreview({ template, open, onOpenChange, onSelect }: Temp
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <LayoutGrid className="h-3.5 w-3.5" />
-                    <span>{blockCount} block</span>
+                    <span>{blockCount} blocks</span>
                   </div>
                   {hasChat && (
                     <div className="flex items-center gap-1.5 text-cyan-600">
