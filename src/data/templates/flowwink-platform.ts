@@ -174,7 +174,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             subtitle: 'A complete content platform with built-in modules that just work.',
             eyebrow: 'PLATFORM',
             columns: 3,
-            variant: 'default',
+            variant: 'glass',
             gap: 'md',
             staggeredReveal: true,
             items: [
