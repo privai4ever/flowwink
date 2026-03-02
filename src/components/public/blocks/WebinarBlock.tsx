@@ -131,7 +131,7 @@ export function WebinarBlock({ data, blockId, pageId }: WebinarBlockProps) {
 
       {/* Upcoming */}
       {upcoming.length > 0 && (
-        <div className="space-y-4 mb-8">
+        <div className="max-w-2xl mx-auto space-y-4 mb-8">
           {upcoming.map(webinar => (
             <WebinarCard
               key={webinar.id}
