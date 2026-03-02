@@ -476,6 +476,37 @@ export function TemplateBlockPreview({ block, compact, primaryColor = '#6366f1' 
             primaryColor={primaryColor}
           />
         );
+      case 'kb-accordion':
+        return (
+          <BlockPlaceholder 
+            type="kb-accordion" 
+            icon={BookOpen} 
+            label="KB Accordion"
+            description="KB articles as expandable FAQ"
+            primaryColor={primaryColor}
+          />
+        );
+      case 'webinar':
+        return (
+          <BlockPlaceholder 
+            type="webinar" 
+            icon={Calendar} 
+            label="Webinar"
+            description="Upcoming webinars & registration"
+            primaryColor={primaryColor}
+          />
+        );
+      case 'smart-booking':
+        return (
+          <BlockPlaceholder 
+            type="smart-booking" 
+            icon={Calendar} 
+            label="Smart Booking"
+            description="AI-powered booking assistant"
+            primaryColor={primaryColor}
+            variant="booking"
+          />
+        );
       case 'popup':
         return (
           <BlockPlaceholder 
