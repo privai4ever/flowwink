@@ -326,10 +326,13 @@ const flowwinkAgencyPages: TemplatePage[] = [
         id: 'twocol-vps',
         type: 'two-column',
         data: {
+          eyebrow: 'HOSTING',
+          title: 'The VPS Hosting',
+          accentText: 'Math',
+          accentPosition: 'end',
           content: {
             type: 'doc',
             content: [
-              { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'The VPS Hosting Math' }] },
               { type: 'paragraph', content: [{ type: 'text', text: 'A single €20/month VPS from Hetzner, DigitalOcean, or similar can comfortably host 20-50 client sites.' }] },
               { type: 'bulletList', content: [
                 { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Docker containers for easy management' }] }] },
@@ -343,6 +346,8 @@ const flowwinkAgencyPages: TemplatePage[] = [
           imageSrc: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800',
           imageAlt: 'Server infrastructure',
           imagePosition: 'right',
+          ctaText: 'Calculate Your Savings →',
+          ctaUrl: '/pricing',
         },
       },
       {
