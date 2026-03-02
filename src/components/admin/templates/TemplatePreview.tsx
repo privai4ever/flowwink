@@ -33,6 +33,8 @@ import {
 } from "lucide-react";
 import { TemplateBlockPreview } from "./TemplateBlockPreview";
 import { ContentBlock } from "@/types/cms";
+import { createContext } from 'react';
+import type { BrandingSettings } from '@/hooks/useSiteSettings';
 
 interface TemplatePreviewProps {
   template: StarterTemplate | null;
