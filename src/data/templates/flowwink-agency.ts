@@ -420,10 +420,13 @@ const flowwinkAgencyPages: TemplatePage[] = [
         id: 'twocol-workflow',
         type: 'two-column',
         data: {
+          eyebrow: 'WORKFLOW',
+          title: 'The Client',
+          accentText: 'Workflow',
+          accentPosition: 'end',
           leftColumn: {
             type: 'doc',
             content: [
-              { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'The Client Workflow' }] },
               { type: 'paragraph', content: [{ type: 'text', text: 'Your team builds the site, clients get a simple admin to manage content. Clear separation of concerns.' }] },
               { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'What Your Team Does' }] },
               { type: 'bulletList', content: [
