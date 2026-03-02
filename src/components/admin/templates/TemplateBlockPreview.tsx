@@ -523,7 +523,7 @@ export function TemplateBlockPreview({ block, compact, primaryColor = '#6366f1' 
             type="notification-toast" 
             icon={Bell} 
             label="Notification Toast"
-            description="Animerade notifikationer"
+            description="Animated notifications"
             primaryColor={primaryColor}
           />
         );
