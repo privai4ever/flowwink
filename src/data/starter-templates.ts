@@ -94,6 +94,7 @@ export interface StarterTemplate {
   headerSettings?: Partial<HeaderBlockData>;
   footerSettings?: Partial<FooterBlockData>;
   seoSettings?: Partial<SeoSettings>;
+  aeoSettings?: Partial<AeoSettings>;
   cookieBannerSettings?: Partial<CookieBannerSettings>;
   
   // General settings
