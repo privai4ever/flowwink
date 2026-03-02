@@ -450,8 +450,8 @@ export function TemplateBlockPreview({ block, compact, primaryColor = '#6366f1' 
           <BlockPlaceholder 
             type="kb-hub" 
             icon={Layers} 
-            label="Kunskapsbas"
-            description="Kategoriöversikt för hjälpartiklar"
+            label="Knowledge Base"
+            description="Help article categories"
             primaryColor={primaryColor}
             variant="kb"
           />
