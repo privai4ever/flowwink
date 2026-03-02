@@ -199,8 +199,11 @@ const trustcorpPages: StarterTemplate['pages'] = [
         id: 'two-col-1',
         type: 'two-column',
         data: {
+          eyebrow: 'CONSULTING',
+          title: 'Strategic',
+          accentText: 'Consulting',
+          accentPosition: 'end',
           content: { type: 'doc', content: [
-            { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Strategic Consulting' }] },
             { type: 'paragraph', content: [{ type: 'text', text: 'Our experienced consultants work closely with your leadership team to develop strategies that drive growth, efficiency, and competitive advantage.' }] },
             { type: 'bulletList', content: [
               { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Digital transformation roadmaps' }] }] },
@@ -211,14 +214,19 @@ const trustcorpPages: StarterTemplate['pages'] = [
           imageSrc: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
           imageAlt: 'Team strategy meeting',
           imagePosition: 'right',
+          ctaText: 'Book a Consultation →',
+          ctaUrl: '/contact',
         },
       },
       {
         id: 'two-col-2',
         type: 'two-column',
         data: {
+          eyebrow: 'TECHNOLOGY',
+          title: 'Enterprise',
+          accentText: 'Technology',
+          accentPosition: 'end',
           content: { type: 'doc', content: [
-            { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Enterprise Technology' }] },
             { type: 'paragraph', content: [{ type: 'text', text: 'We design, build, and maintain the technology infrastructure that powers the world\'s leading organizations.' }] },
             { type: 'bulletList', content: [
               { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Cloud architecture & migration' }] }] },
@@ -229,6 +237,8 @@ const trustcorpPages: StarterTemplate['pages'] = [
           imageSrc: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800',
           imageAlt: 'Technology infrastructure',
           imagePosition: 'left',
+          ctaText: 'Explore Solutions →',
+          ctaUrl: '/case-studies',
         },
       },
       {
