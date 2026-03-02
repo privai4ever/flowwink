@@ -267,7 +267,7 @@ export function TemplatePreview({ template, open, onOpenChange, onSelect }: Temp
 
               <Button onClick={handleSelect} size="sm" className="gap-1.5 h-8">
                 <Sparkles className="h-3.5 w-3.5" />
-                Använd
+                Use Template
               </Button>
             </div>
           </div>
