@@ -127,6 +127,19 @@ const serviceProPages: TemplatePage[] = [
         },
       },
       {
+        id: 'parallax-quality',
+        type: 'parallax-section',
+        data: {
+          backgroundImage: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1920',
+          title: 'Quality You Can Count On',
+          subtitle: 'Every service backed by our 100% satisfaction guarantee.',
+          height: 'sm',
+          textColor: 'light',
+          overlayOpacity: 65,
+          contentAlignment: 'center',
+        },
+      },
+      {
         id: 'products-popular',
         type: 'products',
         data: {
