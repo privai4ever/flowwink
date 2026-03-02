@@ -270,7 +270,7 @@ function BlockPlaceholder({
                   <cat.icon className="h-5 w-5" />
                 </div>
                 <p className="font-medium mb-1">{cat.title}</p>
-                <p className="text-xs text-muted-foreground">12 artiklar</p>
+                <p className="text-xs text-muted-foreground">12 articles</p>
               </div>
             ))}
           </div>
