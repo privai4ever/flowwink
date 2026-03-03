@@ -1,8 +1,8 @@
 # FlowWink - Product Requirements Document (PRD)
 
-> **Version:** 2.2  
-> **Last Updated:** February 2026  
-> **Status:** Blockseditorpreviews Complete
+> **Version:** 2.3  
+> **Last Updated:** March 2026  
+> **Status:** FlowPilot Agent Architecture Complete
 
 ---
 
