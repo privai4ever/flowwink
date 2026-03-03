@@ -137,6 +137,7 @@ const router = createBrowserRouter([
   { path: "/admin/knowledge-base/new", element: <KbArticleEditorPage /> },
   { path: "/admin/knowledge-base/:id", element: <KbArticleEditorPage /> },
   { path: "/admin/copilot", element: <CopilotPage /> },
+  { path: "/admin/skills", element: <SkillHubPage /> },
   { path: "/admin/live-support", element: <LiveSupportPage /> },
   { path: "/admin/template-export", element: <TemplateExportPage /> },
   { path: "/admin/developer-tools", element: <DeveloperToolsPage /> },

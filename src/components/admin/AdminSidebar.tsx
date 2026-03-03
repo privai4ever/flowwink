@@ -120,6 +120,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { name: "FlowPilot", href: "/admin/copilot", icon: Zap },
+      { name: "Skill Hub", href: "/admin/skills", icon: Bot },
       { name: "Analytics", href: "/admin/analytics", icon: BarChart3, moduleId: "analytics" },
     ],
   },
