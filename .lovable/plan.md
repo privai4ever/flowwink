@@ -14,13 +14,17 @@
 - Scope validation works (internal skills blocked from chat agent)
 - Approval gating works (send_newsletter returns 202 pending_approval)
 
-## Phase 2: FlowPilot "Operate" Mode — NEXT
+## Phase 2: FlowPilot "Operate" Mode ✅ DONE
 
-### TODO
-- [ ] Add mode switcher to CopilotPage: Migration | Operate | Automate
-- [ ] Create OperateChat component — chat interface that uses agent-execute
+### Completed
+- Mode switcher (Operate | Migrate) in CopilotPage header using Tabs
+- OperateChat component — chat with quick actions, skill badges, and inline results
+- ActivityFeed sidebar — shows recent actions with status, duration, approve button
+- `agent-operate` edge function — AI router that picks skills via tool calling, executes via agent-execute, summarizes results
+- `useAgentOperate` hook — manages messages, skills, activity, and approval flow
+
+### TODO (refinement)
 - [ ] Refactor copilot-action to load tool definitions from agent_skills table
-- [ ] Activity feed sidebar showing recent agent actions
 - [ ] Agent memory read/write from FlowPilot conversations
 
 ## Phase 3: Public Chat Gets Skills
