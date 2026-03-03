@@ -25,7 +25,16 @@
 
 ### TODO (refinement)
 - [ ] Refactor copilot-action to load tool definitions from agent_skills table
-- [ ] Agent memory read/write from FlowPilot conversations
+
+## Phase 2.5: Active Memory ✅ DONE
+
+### Completed
+- **agent-operate** loads all `agent_memory` entries into system prompt before each AI call
+- **memory_write** built-in tool — FlowPilot saves preferences, facts, context to DB
+- **memory_read** built-in tool — FlowPilot searches memory by key/category
+- Memory tools handled locally in agent-operate (no round-trip to agent-execute)
+- Two new skills registered in `agent_skills` table (memory_write, memory_read)
+- FlowPilot proactively saves useful info when it learns something new
 
 ## Phase 3.5: Skill Hub Admin UI ✅ DONE
 
