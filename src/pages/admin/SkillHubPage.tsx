@@ -155,5 +155,6 @@ export default function SkillHubPage() {
         onDelete={(id) => remove.mutate(id)}
       />
     </div>
+    </AdminLayout>
   );
 }
