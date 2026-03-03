@@ -15,6 +15,7 @@ import { SkillCard } from '@/components/admin/skills/SkillCard';
 import { SkillEditorSheet } from '@/components/admin/skills/SkillEditorSheet';
 import { ActivityTable } from '@/components/admin/skills/ActivityTable';
 import { ObjectivesPanel } from '@/components/admin/skills/ObjectivesPanel';
+import { AutomationsPanel } from '@/components/admin/skills/AutomationsPanel';
 import { useSkills, useToggleSkill, useUpsertSkill, useDeleteSkill } from '@/hooks/useSkillHub';
 import type { AgentSkill } from '@/types/agent';
 
@@ -55,7 +56,7 @@ export default function SkillHubPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Skill Hub</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage agent skills, monitor activity, and define objectives.
+            Manage agent skills, monitor activity, define objectives, and configure automations.
           </p>
         </div>
         <Badge variant="secondary" className="text-xs">
@@ -68,9 +69,8 @@ export default function SkillHubPage() {
         <TabsList>
           <TabsTrigger value="skills">Skills</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
-          <TabsTrigger value="objectives">
-            Objectives
-          </TabsTrigger>
+          <TabsTrigger value="objectives">Objectives</TabsTrigger>
+          <TabsTrigger value="automations">Automations</TabsTrigger>
         </TabsList>
 
         {/* Skills Tab */}
@@ -136,9 +136,14 @@ export default function SkillHubPage() {
           <ActivityTable />
         </TabsContent>
 
-        {/* Objectives Tab (placeholder) */}
+        {/* Objectives Tab */}
         <TabsContent value="objectives">
           <ObjectivesPanel />
+        </TabsContent>
+
+        {/* Automations Tab */}
+        <TabsContent value="automations">
+          <AutomationsPanel />
         </TabsContent>
       </Tabs>
 
