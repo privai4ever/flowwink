@@ -10,6 +10,7 @@ export type AgentSkillCategory = 'content' | 'crm' | 'communication' | 'automati
 export type AgentActivityStatus = 'success' | 'failed' | 'pending_approval' | 'approved' | 'rejected';
 export type AgentType = 'flowpilot' | 'chat';
 export type AgentMemoryCategory = 'preference' | 'context' | 'fact';
+export type AgentObjectiveStatus = 'active' | 'completed' | 'paused' | 'failed';
 
 // =============================================================================
 // Skill
