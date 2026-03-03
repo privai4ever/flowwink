@@ -1,65 +1,110 @@
-# FlowPilot Agentic Architecture
 
-## Phase 1: Skill Registry + Unified Tool Engine ✅ DONE
 
-### Completed
-- **Database tables**: `agent_skills`, `agent_memory`, `agent_activity` with RLS policies
-- **Enums**: `agent_scope`, `agent_skill_category`, `agent_activity_status`, `agent_type`, `agent_memory_category`
-- **11 built-in skills** seeded: migrate_url, create_page_block, write_blog_post, send_newsletter, create_campaign, add_lead, search_web, book_appointment, check_order, update_settings, analyze_analytics
-- **`agent-execute` edge function**: Unified skill executor with scope validation, approval checks, handler routing (edge/module/db/webhook), and activity logging
-- **TypeScript types**: `src/types/agent.ts` with full type coverage
+# Skill Hub — Unified Agent Administration
 
-### Verified
-- Direct execution works (analyze_analytics returns real page view data)
-- Scope validation works (internal skills blocked from chat agent)
-- Approval gating works (send_newsletter returns 202 pending_approval)
+## Vision
 
-## Phase 2: FlowPilot "Operate" Mode ✅ DONE
+Inspired by how Claude Code exposes "tools" and OpenClaw defines "skills" as composable units, we evolve FlowPilot's current flat skill list into a **Skill Hub** — a single admin page where you manage, compose, and monitor everything the agents can do.
 
-### Completed
-- Mode switcher (Operate | Migrate) in CopilotPage header using Tabs
-- OperateChat component — chat with quick actions, skill badges, and inline results
-- ActivityFeed sidebar — shows recent actions with status, duration, approve button
-- `agent-operate` edge function — AI router that picks skills via tool calling, executes via agent-execute, summarizes results
-- `useAgentOperate` hook — manages messages, skills, activity, and approval flow
+The key insight: your platform already has two parallel registries — **Module Registry** (14 frontend modules with Zod contracts) and **Agent Skills** (11 DB-driven tool definitions). These need to converge into one manageable surface.
 
-### TODO (refinement)
-- [ ] Refactor copilot-action to load tool definitions from agent_skills table
-- [ ] Agent memory read/write from FlowPilot conversations
+## Concept: Three Layers
 
-## Phase 3: Public Chat Gets Skills ✅ DONE
-
-### Completed
-- **chat-completion** loads external/both skills from `agent_skills` table as OpenAI-compatible tools
-- Skills are routed through `agent-execute` edge function (scope validation, approval gating, activity logging)
-- `agentSkillNames` map tracks which tool calls are agent skills vs built-in tools
-- System prompt dynamically extended with skill usage instructions
-- Works for both OpenAI and local AI providers (when tool calling is supported)
-- Approval-gated skills return friendly "pending approval" messages to visitors
-
-## Phase 4: Automation Layer
-
-### TODO
-- [ ] Create agent_automations table (schedule/event/signal triggers)
-- [ ] Cron-based skill execution
-- [ ] Signal integration from webhook events
-- [ ] Proactive suggestions (heartbeat system)
-
-## Architecture Reference
-
-```
-skill.handler routing:
-  edge:function-name  →  supabase.functions.invoke()
-  module:name         →  Direct DB operations (blog, crm, booking, etc.)
-  db:table            →  DB read/write (settings, analytics)
-  webhook:n8n         →  External webhook POST
+```text
++--------------------------------------------------+
+|                   OBJECTIVES                      |
+|  "Grow newsletter by 20% this quarter"            |
+|  High-level goals that decompose into skill runs  |
++--------------------------------------------------+
+          |
+          v
++--------------------------------------------------+
+|                    SKILLS                          |
+|  Composable, scoped actions (what exists today)   |
+|  + new: chains, conditions, schedules             |
++--------------------------------------------------+
+          |
+          v
++--------------------------------------------------+
+|                   MODULES                         |
+|  Data layer (blog, CRM, booking, etc.)            |
+|  Already exists in module-registry                |
++--------------------------------------------------+
 ```
 
-## Key Files
+**Modules** = data and business logic (already built).
+**Skills** = agent-callable actions that use modules (already built, needs admin UI).
+**Objectives** = new concept — a goal that can trigger multiple skills over time.
+
+## What We Build (Phase 1)
+
+### 1. Skill Hub Page (`/admin/skills`)
+
+A new admin page with three tabs:
+
+**Skills Tab** — CRUD for `agent_skills` table
+- Card grid showing all skills with name, category, scope badge, handler type
+- Toggle enabled/disabled inline
+- Click to edit: name, description, scope, handler, requires_approval, tool_definition (JSON editor)
+- "New Skill" button to create custom skills
+- Filter by category and scope
+
+**Activity Tab** — Enhanced view of `agent_activity`
+- Table with filters (agent type, status, skill, date range)
+- Click to expand: full input/output JSON, duration, error details
+- Bulk approve/reject for pending items
+
+**Objectives Tab** (Phase 2 placeholder)
+- Simple list of goals with status (draft/active/completed)
+- Each objective links to related skill executions
+- Placeholder UI that shows the concept
+
+### 2. Sidebar Navigation Update
+
+Add "Skill Hub" under FlowPilot in the Main navigation group, using a `Puzzle` or `Boxes` icon.
+
+### 3. Skill Editor Dialog
+
+A sheet/dialog for creating and editing skills:
+- Name, description, category (dropdown), scope (radio: internal/external/both)
+- Handler type picker (edge function, module, DB, webhook) with dynamic fields
+- Tool definition editor — either form-based (name, params) or raw JSON toggle
+- Approval toggle
+- Test button that fires `agent-execute` and shows result inline
+
+## Technical Details
+
+### New Files
 | File | Purpose |
 |------|---------|
-| `supabase/functions/agent-execute/index.ts` | Unified skill executor |
-| `src/types/agent.ts` | TypeScript types for skill engine |
-| `src/lib/module-registry.ts` | Existing module registry (14 modules) |
-| `supabase/functions/copilot-action/index.ts` | Current FlowPilot (to be refactored) |
-| `supabase/functions/chat-completion/index.ts` | Current public chat (to integrate skills) |
+| `src/pages/admin/SkillHubPage.tsx` | Main page with tabs |
+| `src/components/admin/skills/SkillCard.tsx` | Card for skill grid |
+| `src/components/admin/skills/SkillEditorSheet.tsx` | Create/edit sheet |
+| `src/components/admin/skills/ActivityTable.tsx` | Enhanced activity view |
+| `src/hooks/useSkillHub.ts` | CRUD operations for skills |
+
+### Database
+No schema changes needed — `agent_skills`, `agent_activity`, and `agent_memory` tables already have the right structure and RLS policies.
+
+### Route
+Add `/admin/skills` to the router alongside existing admin routes.
+
+### Sidebar
+Add entry in the "Main" navigation group in `AdminSidebar.tsx`.
+
+### PRD Update
+Document Skill Hub as a new section in the PRD under FlowPilot.
+
+## What This Enables
+
+- **Self-service skill creation** — admins can wire up new edge functions or webhooks without code changes
+- **Visibility** — see exactly what the agents are doing, approve/reject actions
+- **Foundation for Objectives** — once the skill layer is manageable, we can layer goal-driven automation on top
+- **Convergence** — Module Registry provides the "what's possible," Skill Hub provides the "what's enabled for agents"
+
+## Out of Scope (Future Phases)
+- Skill chaining / composition (multi-step workflows)
+- Objective decomposition engine
+- Scheduled/cron skill execution
+- Skill marketplace or templates
+
