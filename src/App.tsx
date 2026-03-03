@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "next-themes";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { BrandingProvider } from "@/providers/BrandingProvider";
 import { CartProvider } from "@/contexts/CartContext";
@@ -24,7 +26,6 @@ import ContentApiPage from "./pages/admin/ContentApiPage";
 import ContentCampaignsPage from "./pages/admin/ContentCampaignsPage";
 import QuickStartPage from "./pages/admin/QuickStartPage";
 import NewSitePage from "./pages/admin/NewSitePage";
-import TemplateGalleryPage from "./pages/admin/TemplateGalleryPage";
 import GlobalBlocksPage from "./pages/admin/GlobalBlocksPage";
 import FormSubmissionsPage from "./pages/admin/FormSubmissionsPage";
 import NewsletterPage from "./pages/admin/NewsletterPage";
@@ -72,8 +73,22 @@ import PricingPage from "./pages/PricingPage";
 import DeveloperToolsPage from "./pages/admin/DeveloperToolsPage";
 import WebinarsPage from "./pages/admin/WebinarsPage";
 
+const TemplateGalleryPage = lazy(() => import("./pages/admin/TemplateGalleryPage"));
 
 const queryClient = new QueryClient();
+
+const withPageFallback = (element: JSX.Element) => (
+  <Suspense
+    fallback={
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }
+  >
+    {element}
+  </Suspense>
+);
+
 
 const router = createBrowserRouter([
   { path: "/", element: <PublicPage /> },
@@ -115,7 +130,7 @@ const router = createBrowserRouter([
   { path: "/admin/campaigns", element: <ContentCampaignsPage /> },
   { path: "/admin/quick-start", element: <QuickStartPage /> },
   { path: "/admin/new-site", element: <NewSitePage /> },
-  { path: "/admin/templates", element: <TemplateGalleryPage /> },
+  { path: "/admin/templates", element: withPageFallback(<TemplateGalleryPage />) },
   { path: "/admin/global-blocks", element: <GlobalBlocksPage /> },
   { path: "/admin/forms", element: <FormSubmissionsPage /> },
   { path: "/admin/newsletter", element: <NewsletterPage /> },
