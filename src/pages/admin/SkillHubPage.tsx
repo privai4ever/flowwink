@@ -138,12 +138,7 @@ export default function SkillHubPage() {
 
         {/* Objectives Tab (placeholder) */}
         <TabsContent value="objectives">
-          <div className="text-center py-16 text-muted-foreground">
-            <p className="text-lg font-medium">Coming soon</p>
-            <p className="text-sm mt-1">
-              Define high-level goals that decompose into automated skill executions.
-            </p>
-          </div>
+          <ObjectivesPanel />
         </TabsContent>
       </Tabs>
 
