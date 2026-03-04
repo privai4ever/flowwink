@@ -1,115 +1,149 @@
+# FlowPilot Agentic Architecture
 
+## Phase 1: Skill Registry + Unified Tool Engine ✅ DONE
 
-## Sales Intelligence Pipeline — Implementation Plan
+### Completed
+- **Database tables**: `agent_skills`, `agent_memory`, `agent_activity` with RLS policies
+- **Enums**: `agent_scope`, `agent_skill_category`, `agent_activity_status`, `agent_type`, `agent_memory_category`
+- **11 built-in skills** seeded: migrate_url, create_page_block, write_blog_post, send_newsletter, create_campaign, add_lead, search_web, book_appointment, check_order, update_settings, analyze_analytics
+- **`agent-execute` edge function**: Unified skill executor with scope validation, approval checks, handler routing (edge/module/db/webhook), and activity logging
+- **TypeScript types**: `src/types/agent.ts` with full type coverage
 
-### What the n8n Workflows Do (Extracted Logic)
+### Verified
+- Direct execution works (analyze_analytics returns real page view data)
+- Scope validation works (internal skills blocked from chat agent)
+- Approval gating works (send_newsletter returns 202 pending_approval)
 
-The 5 workflows form a **4-step pipeline** (ScoutOut) + **1 standalone** (ScoutIn):
+## Phase 2: FlowPilot "Operate" Mode ✅ DONE
 
-**ScoutOut (MBA 1-4):**
-1. **Homepage** — Jina Reader scrapes your own website → AI extracts: company_name, about_us, services, delivered_value, clients, testimonials
-2. **Questions** — Takes your business profile → AI generates 5 qualifying questions tied to your services
-3. **Research** — For each prospect: Jina Search + Jina Reader + Hunter → answers the qualifying questions, finds contact (name, email, phone, role)
-4. **Proposition** — Takes your profile + research answers → AI generates: fit_score (0-100), fit_advice, introduction_letter, email_subject
+### Completed
+- Mode switcher (Operate | Migrate) in CopilotPage header using Tabs
+- OperateChat component — chat with quick actions, skill badges, and inline results
+- ActivityFeed sidebar — shows recent actions with status, duration, approve button
+- `agent-operate` edge function — AI router that picks skills via tool calling, executes via agent-execute, summarizes results
+- `useAgentOperate` hook — manages messages, skills, activity, and approval flow
 
-**ScoutIn (Research Single):**
-- Standalone: takes prospect company name + your company profile → Jina Search + Jina Reader → AI generates structured research output with fit analysis
+### TODO (refinement)
+- [ ] Refactor copilot-action to load tool definitions from agent_skills table
 
-### What We'll Build
+## Phase 2.5: Active Memory ✅ DONE
 
-Two edge functions that collapse the 4-step MBA pipeline into 2 callable skills, plus Hunter as a new integration.
+### Completed
+- **agent-operate** loads all `agent_memory` entries into system prompt before each AI call
+- **memory_write** built-in tool — FlowPilot saves preferences, facts, context to DB
+- **memory_read** built-in tool — FlowPilot searches memory by key/category
+- Memory tools handled locally in agent-operate (no round-trip to agent-execute)
+- Two new skills registered in `agent_skills` table (memory_write, memory_read)
+- FlowPilot proactively saves useful info when it learns something new
 
----
+## Phase 3.5: Skill Hub Admin UI ✅ DONE
 
-### Step 1: Hunter Integration
+### Completed
+- **SkillHubPage** (`/admin/skills`) with Skills, Activity, and Objectives (placeholder) tabs
+- **SkillCard** — card grid with inline enable/disable toggle, scope/category/handler badges
+- **SkillEditorSheet** — full CRUD sheet with JSON tool definition editor (CodeMirror)
+- **ActivityTable** — filterable activity log with expand for input/output JSON, approve/reject
+- **useSkillHub** hook — CRUD for skills, activity queries, approval mutations
+- **Sidebar** — "Skill Hub" added to Main group with Bot icon
 
-- Add `HUNTER_API_KEY` secret (user needs to provide it)
-- Update `check-secrets` to include `hunter: !!Deno.env.get('HUNTER_API_KEY')`
-- Update `useIntegrationStatus.ts` interface to include `hunter`
-- Add Hunter toggle to integrations settings UI
-- Update `configure-secrets.sh` with Hunter section
+## Phase 3: Public Chat Gets Skills ✅ DONE
 
-### Step 2: `prospect-research` Edge Function
+### Completed
+- **chat-completion** loads external/both skills from `agent_skills` table as OpenAI-compatible tools
+- Skills are routed through `agent-execute` edge function (scope validation, approval gating, activity logging)
+- `agentSkillNames` map tracks which tool calls are agent skills vs built-in tools
+- System prompt dynamically extended with skill usage instructions
+- Works for both OpenAI and local AI providers (when tool calling is supported)
+- Approval-gated skills return friendly "pending approval" messages to visitors
 
-**Input:** `{ company_name: string, company_url?: string }`
+## Phase 4: Automation Layer ✅ DONE
 
-**Logic (replaces MBA workflows 1-3):**
-1. Load your company profile from `site_settings` key `company_profile` (about_us, services, delivered_value, clients)
-2. **Jina Reader** (`https://r.jina.ai/{url}`) — scrape prospect's website
-3. **Jina Search** (`https://s.jina.ai/{query}`) — search for additional context about the prospect
-4. **Hunter Domain Search** (`https://api.hunter.io/v2/domain-search`) — find contacts at the prospect company
-5. **AI** (OpenAI/Gemini, whichever is configured) — with the MBA workflow 2+3 prompts combined:
-   - Generate qualifying questions based on your services
-   - Answer them using the scraped/searched data
-   - Structure output as company profile + Q&A
-6. **Upsert** to `companies` table (name, domain, industry, size, website, notes)
-7. **Create** `leads` entries for each Hunter contact found (name, email, phone, source: `prospect_research`, company_id)
+### Completed
+- **agent_automations table** with cron/event/signal trigger types and RLS policies
+- **AutomationsPanel** — full CRUD UI with trigger-type badges, skill linking, JSON config editor
+- **ObjectivesPanel** — full CRUD UI with status management, progress tracking, constraint/criteria JSON
+- **FlowPilot skills**: `create_objective` and `create_automation` registered in agent_skills
+- **agent-execute** updated with `module:objectives` and `module:automations` handlers
+- **5 seed automations** and **4 seed objectives** for onboarding
 
-**Output:** `{ company: {...}, contacts: [...], questions_and_answers: [...] }`
+### Runtime
+- **`automation-dispatcher` edge function** — reads due cron automations, executes via agent-execute, updates run metadata
+- **pg_cron** runs dispatcher every minute via pg_net HTTP POST
+- Simple cron parser calculates `next_run_at` for common patterns (*/N, daily, weekly)
 
-### Step 3: `prospect-fit-analysis` Edge Function
+- **Event-trigger dispatch** — `send-webhook` now also checks `agent_automations` with matching `event_name` and executes their skills via `agent-execute`, merging event data into arguments
+- **Signal-trigger dispatch** — `signal-dispatcher` edge function evaluates dynamic conditions (score thresholds, status changes, field matches, compound logic) against incoming data
 
-**Input:** `{ company_id: string }` or `{ company_name: string, research_data?: object }`
+### Signal Integration Points
+- `qualify-lead` → emits `lead_score_updated` and `lead_status_changed` signals
+- `send-webhook` → emits every webhook event as a signal (e.g. `form.submitted`, `booking.submitted`)
+- Signal conditions supported: `score_threshold`, `count_threshold`, `status_change`, `field_match`, `compound` (all/any)
 
-**Logic (replaces MBA workflow 4 + ScoutIn):**
-1. Load your company profile from `site_settings` key `company_profile`
-2. Load prospect data from `companies` table (or use provided research_data)
-3. Load any previous research Q&A from `agent_memory`
-4. **AI** — with the MBA proposition prompt:
-   - Evaluate fit (score 0-100)
-   - Map prospect problems to your services
-   - Generate introduction letter + email subject
-5. **Hunter Email Finder** — find decision-maker email if not already known
-6. **Update** `leads.score` with fit_score
-7. **Save** introduction letter to `agent_memory` (key: `intro_letter_{lead_id}`)
+## Phase 5: Autonomy Unlocks ✅ DONE
 
-**Output:** `{ fit_score, fit_advice, introduction_letter, email_subject, decision_maker }`
+### Completed
+- **Multi-tool loop** — up to 6 iterations, all tool_calls processed in parallel per round
+- **Approval re-execution** — approved pending actions auto-re-execute with original args
+- **Conversation persistence** — sessions saved to chat_conversations/chat_messages
+- **Markdown rendering** — assistant messages rendered with react-markdown
+- **Multi-skill result tracking** — Response format supports `skill_results[]` array
 
-### Step 4: Company Profile Settings
+## Phase 6: Agent Self-Improvement ✅ DONE
 
-New `site_settings` key `company_profile` with fields extracted from ScoutIn's company profile form:
-- `company_name`, `about_us`, `services` (object: name→description), `delivered_value`, `clients`, `client_testimonials`, `target_industries`, `differentiators`
+### Completed
+- **skill_create/update/list/disable** — FlowPilot can manage its own skill registry
+- **automation_create/list** — Create and view automations
+- **reflect** — Introspection: 7-day activity analysis, error rates, improvement suggestions
 
-Add a "Company Profile" section to the existing Settings or Integrations page — a simple form that saves to `site_settings`.
+## Phase 7: Weekly Business Digest ✅ DONE
 
-### Step 5: Skill Registration
+### Completed
+- **`business-digest` edge function** — queries 7-day data across all modules (page views, leads, bookings, orders, blog posts, newsletters, chat conversations, form submissions, subscribers)
+- **Structured + markdown output** — metrics table, top pages, hot leads, device/referrer breakdown, actionable callouts
+- **`weekly_business_digest` skill** — registered in agent_skills with `edge:business-digest` handler
+- **Cron automation** — "Weekly Business Digest" scheduled Monday 9:00 AM (disabled by default for safety)
+- **Actionable callouts** — hot leads needing follow-up, pending bookings, unpublished drafts, low sentiment alerts
 
-Two new skills in `agent_skills`:
+## Phase 8: Sales Intelligence Pipeline ✅ DONE
 
-| Skill | Handler | Scope | Category | Approval |
-|-------|---------|-------|----------|----------|
-| `prospect_research` | `edge:prospect-research` | internal | crm | no |
-| `prospect_fit_analysis` | `edge:prospect-fit-analysis` | internal | crm | no |
+### Completed
+- **`prospect-research` edge function** — Replaces n8n ScoutOut workflows (MBA 1-3). Uses Jina Reader (website scraping), Jina Search (market context), Hunter Domain Search (contact discovery), and AI (OpenAI/Gemini) to generate qualifying Q&A. Upserts to `companies` table and creates `leads` entries.
+- **`prospect-fit-analysis` edge function** — Replaces n8n ScoutOut workflow 4 + ScoutIn. Loads company profile from `site_settings`, evaluates fit score (0-100), maps prospect problems to services, generates personalized introduction letter + email subject. Uses Hunter Email Finder for decision-maker lookup.
+- **Hunter.io integration** — New `HUNTER_API_KEY` secret, added to `check-secrets`, `useIntegrationStatus`, `useIntegrations` (category: Sales Intelligence), and `configure-secrets.sh`.
+- **2 new agent skills** — `prospect_research` (edge:prospect-research) and `prospect_fit_analysis` (edge:prospect-fit-analysis) registered in `agent_skills` table, category: crm, scope: internal.
+- **Company Profile** — Uses `site_settings` key `company_profile` to store business context (about_us, services, delivered_value, clients, etc.) for AI prompts.
+- **Data flow**: Research → `companies` + `leads` tables; Fit score → `leads.score`; Intro letters → `agent_memory`; Research Q&A → `agent_memory`.
 
-### Step 6: Documentation
+### External APIs (No n8n dependency)
+- **Jina Reader**: `https://r.jina.ai/{url}` — free, no key
+- **Jina Search**: `https://s.jina.ai/{query}` — free, no key
+- **Hunter Domain Search**: `https://api.hunter.io/v2/domain-search`
+- **Hunter Email Finder**: `https://api.hunter.io/v2/email-finder`
 
-Update `.lovable/plan.md` with Phase 8: Sales Intelligence Pipeline.
+### FlowPilot Usage
+```
+"Research Acme Corp" → prospect_research skill
+"Analyze fit for Acme Corp and draft an intro" → prospect_fit_analysis skill
+"Research Acme Corp and prepare an introduction if fit score > 70" → chained execution
+```
 
----
+## Architecture Reference
 
-### Files to Create
-- `supabase/functions/prospect-research/index.ts`
-- `supabase/functions/prospect-fit-analysis/index.ts`
+```
+skill.handler routing:
+  edge:function-name  →  supabase.functions.invoke()
+  module:name         →  Direct DB operations (blog, crm, booking, etc.)
+  db:table            →  DB read/write (settings, analytics)
+  webhook:n8n         →  External webhook POST
+```
 
-### Files to Edit
-- `supabase/functions/check-secrets/index.ts` — add `hunter` check
-- `supabase/config.toml` — add 2 new functions
-- `src/hooks/useIntegrationStatus.ts` — add `hunter` to interface
-- `scripts/configure-secrets.sh` — add Hunter section
-- Integrations settings UI — add Hunter card + Company Profile form
-- `.lovable/plan.md` — add Phase 8
-
-### DB Migration
-- Seed 2 skills into `agent_skills`
-- No new tables needed
-
-### Secret Required
-- `HUNTER_API_KEY` — user provides via secret configuration
-
-### Key Design Decisions
-- **Jina Reader/Search are free APIs** (no key needed, just HTTP calls with `Accept: application/json` header)
-- **No n8n dependency** — all logic runs natively in edge functions
-- **Reuses existing AI provider selection** pattern from `enrich-company` (OpenAI or Gemini, whichever is configured)
-- **Reuses existing `companies` and `leads` tables** — no schema changes needed
-- **FlowPilot can chain both skills**: "Research Acme Corp and prepare an introduction if fit score > 70"
-
+## Key Files
+| File | Purpose |
+|------|---------|
+| `supabase/functions/agent-execute/index.ts` | Unified skill executor |
+| `supabase/functions/prospect-research/index.ts` | Sales research pipeline |
+| `supabase/functions/prospect-fit-analysis/index.ts` | Fit scoring + intro drafting |
+| `src/types/agent.ts` | TypeScript types for skill engine |
+| `src/lib/module-registry.ts` | Existing module registry (14 modules) |
+| `supabase/functions/copilot-action/index.ts` | Current FlowPilot (to be refactored) |
+| `supabase/functions/chat-completion/index.ts` | Current public chat (to integrate skills) |

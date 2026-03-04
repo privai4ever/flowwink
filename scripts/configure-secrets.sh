@@ -209,6 +209,26 @@ if [[ "$configure_n8n" =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
+
+# Hunter.io
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}  Sales Intelligence (Hunter.io)${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo "Required for: Prospect research, domain search, email finder"
+echo "Get your key from: https://hunter.io/api"
+echo ""
+read -p "Configure Hunter.io? [y/N]: " configure_hunter
+
+if [[ "$configure_hunter" =~ ^[Yy]$ ]]; then
+    read -p "Hunter API Key: " HUNTER_API_KEY
+    if [ -n "$HUNTER_API_KEY" ]; then
+        supabase secrets set HUNTER_API_KEY="$HUNTER_API_KEY"
+        echo -e "${GREEN}✓ Hunter.io configured${NC}"
+    fi
+fi
+
+echo ""
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║   Configuration Complete!                                  ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"

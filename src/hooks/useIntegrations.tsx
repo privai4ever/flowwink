@@ -50,7 +50,7 @@ export interface IntegrationConfig {
   name: string;
   description: string;
   icon: string;
-  category: 'payments' | 'communication' | 'ai' | 'media' | 'automation' | 'analytics' | 'notifications';
+  category: 'payments' | 'communication' | 'ai' | 'media' | 'automation' | 'analytics' | 'notifications' | 'sales';
   features: string[];
   secretName: string;
   docsUrl: string;
@@ -74,6 +74,7 @@ export interface IntegrationsSettings {
   google_analytics: IntegrationConfig;
   meta_pixel: IntegrationConfig;
   slack: IntegrationConfig;
+  hunter: IntegrationConfig;
 }
 
 // Default settings - all disabled by default, requiring explicit activation
@@ -249,6 +250,17 @@ export const defaultIntegrationsSettings: IntegrationsSettings = {
     docsUrl: 'https://firecrawl.dev/docs',
     docsLabel: 'Get API key',
   },
+  hunter: {
+    enabled: false,
+    name: 'Hunter.io',
+    description: 'Email finder & domain search',
+    icon: 'Target',
+    category: 'sales',
+    features: ['Domain Search', 'Email Finder', 'Prospect Research'],
+    secretName: 'HUNTER_API_KEY',
+    docsUrl: 'https://hunter.io/api',
+    docsLabel: 'Get API key',
+  },
 };
 
 // Category definitions
@@ -256,10 +268,11 @@ export const INTEGRATION_CATEGORIES = {
   payments: { label: 'Payments', order: 1 },
   communication: { label: 'Communication', order: 2 },
   ai: { label: 'AI Providers', order: 3 },
-  automation: { label: 'Automation', order: 4 },
-  media: { label: 'Media & Tools', order: 5 },
-  analytics: { label: 'Analytics & Attribution', order: 6 },
-  notifications: { label: 'Notifications', order: 7 },
+  sales: { label: 'Sales Intelligence', order: 4 },
+  automation: { label: 'Automation', order: 5 },
+  media: { label: 'Media & Tools', order: 6 },
+  analytics: { label: 'Analytics & Attribution', order: 7 },
+  notifications: { label: 'Notifications', order: 8 },
 } as const;
 
 // Fetch integrations settings
