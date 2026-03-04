@@ -76,6 +76,23 @@
 ## Phase 5: Autonomy Unlocks ✅ DONE
 
 ### Completed
+- **Multi-tool loop** — up to 6 iterations, all tool_calls processed in parallel per round
+- **Approval re-execution** — approved pending actions auto-re-execute with original args
+- **Conversation persistence** — sessions saved to chat_conversations/chat_messages
+- **Markdown rendering** — assistant messages rendered with react-markdown
+
+## Phase 6: Agent Self-Improvement ✅ DONE
+
+### Completed
+- **skill_create** — FlowPilot can register new skills with handler routing and tool definitions
+- **skill_update** — Modify existing skill metadata (description, handler, scope, approval)
+- **skill_list** — Enumerate all registered skills with filtering
+- **skill_disable** — Turn off problematic or unused skills
+- **automation_create** — Create automations (cron/event/signal) linked to skills, disabled by default
+- **automation_list** — View all automations with run counts and status
+- **reflect** — Introspection tool that analyzes 7-day activity patterns, calculates error rates, identifies unused skills, and generates actionable improvement suggestions
+
+### Completed
 - **Multi-tool loop** — `agent-operate` now iterates up to 6 rounds, processing ALL tool_calls in parallel per round, allowing the agent to chain steps autonomously (e.g., search → analyze → write)
 - **Approval re-execution** — When admin approves a `pending_approval` activity, the original skill is automatically re-executed with its original arguments
 - **Conversation persistence** — FlowPilot sessions are saved to `chat_conversations` + `chat_messages`, surviving page refreshes and browser restarts
