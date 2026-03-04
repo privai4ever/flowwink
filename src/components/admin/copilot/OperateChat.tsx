@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
 import type { OperateMessage } from '@/hooks/useAgentOperate';
 import type { AgentSkill } from '@/types/agent';
 
@@ -15,8 +16,6 @@ interface OperateChatProps {
   onSendMessage: (message: string) => void;
   onReset: () => void;
 }
-
-const OPERATE_WELCOME = `🤖 I'm FlowPilot in **Operate** mode.\n\nTell me what you need — I can write blog posts, add leads, analyze traffic, send newsletters, and more.\n\nI have access to **${'{skillCount}'}** skills across your CMS.`;
 
 const QUICK_ACTIONS = [
   { label: 'Analyze this week', action: 'Analyze my site traffic for this week' },
@@ -42,6 +41,13 @@ export function OperateChat({ messages, skills, isLoading, onSendMessage, onRese
 
   const isEmpty = messages.length === 0;
 
+  // Get all skill results (support both old and new format)
+  const getSkillResults = (msg: OperateMessage) => {
+    if (msg.skillResults?.length) return msg.skillResults;
+    if (msg.skillResult) return [msg.skillResult];
+    return [];
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Messages */}
@@ -59,7 +65,6 @@ export function OperateChat({ messages, skills, isLoading, onSendMessage, onRese
               </p>
             </div>
 
-            {/* Quick actions */}
             <div className="flex flex-wrap gap-2 justify-center">
               {QUICK_ACTIONS.map((qa) => (
                 <Button
@@ -74,7 +79,6 @@ export function OperateChat({ messages, skills, isLoading, onSendMessage, onRese
               ))}
             </div>
 
-            {/* Skill badges */}
             <div className="flex flex-wrap gap-1.5 justify-center max-w-sm">
               {skills.slice(0, 8).map(s => (
                 <Badge key={s.id} variant="secondary" className="text-xs font-normal">
@@ -90,36 +94,50 @@ export function OperateChat({ messages, skills, isLoading, onSendMessage, onRese
           </div>
         ) : (
           <div className="py-4 px-4 space-y-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className={cn(
-                'flex gap-3',
-                msg.role === 'user' ? 'justify-end' : 'justify-start'
-              )}>
-                <div className={cn(
-                  'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
-                  msg.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+            {messages.map((msg) => {
+              const results = getSkillResults(msg);
+              return (
+                <div key={msg.id} className={cn(
+                  'flex gap-3',
+                  msg.role === 'user' ? 'justify-end' : 'justify-start'
                 )}>
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
-                  {msg.skillResult && (
-                    <div className="mt-2 pt-2 border-t border-border/30">
-                      <Badge variant={
-                        msg.skillResult.status === 'success' ? 'default' :
-                        msg.skillResult.status === 'pending_approval' ? 'secondary' : 'destructive'
-                      } className="text-xs">
-                        {msg.skillResult.skill} — {msg.skillResult.status}
-                      </Badge>
-                      {msg.skillResult.result && (
-                        <pre className="mt-1 text-xs opacity-70 overflow-auto max-h-32">
-                          {JSON.stringify(msg.skillResult.result, null, 2)}
-                        </pre>
-                      )}
-                    </div>
-                  )}
+                  <div className={cn(
+                    'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
+                    msg.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
+                  )}>
+                    {msg.role === 'assistant' ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    )}
+
+                    {results.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-border/30 space-y-1.5">
+                        {results.map((sr, i) => (
+                          <div key={i}>
+                            <Badge variant={
+                              sr.status === 'success' ? 'default' :
+                              sr.status === 'pending_approval' ? 'secondary' : 'destructive'
+                            } className="text-xs">
+                              {sr.skill.replace(/_/g, ' ')} — {sr.status}
+                            </Badge>
+                            {sr.result && (
+                              <pre className="mt-1 text-xs opacity-70 overflow-auto max-h-24">
+                                {JSON.stringify(sr.result, null, 2)}
+                              </pre>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {isLoading && (
               <div className="flex gap-3 justify-start">
                 <div className="bg-muted rounded-2xl px-4 py-3">

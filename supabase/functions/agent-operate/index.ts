@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const MAX_TOOL_ITERATIONS = 6;
+
 // ─── Memory helpers ───────────────────────────────────────────────────────────
 
 async function loadMemories(supabase: any): Promise<string> {
@@ -16,7 +18,6 @@ async function loadMemories(supabase: any): Promise<string> {
     .limit(30);
 
   if (!data || data.length === 0) return '';
-
   const lines = data.map((m: any) => `- [${m.category}] ${m.key}: ${JSON.stringify(m.value)}`);
   return `\n\nYour memory (things you've learned about this site and its owner):\n${lines.join('\n')}`;
 }
@@ -24,19 +25,14 @@ async function loadMemories(supabase: any): Promise<string> {
 async function handleMemoryWrite(supabase: any, args: { key: string; value: any; category?: string }) {
   const { key, value, category = 'context' } = args;
   const { data: existing } = await supabase
-    .from('agent_memory')
-    .select('id')
-    .eq('key', key)
-    .maybeSingle();
+    .from('agent_memory').select('id').eq('key', key).maybeSingle();
 
   if (existing) {
-    await supabase
-      .from('agent_memory')
+    await supabase.from('agent_memory')
       .update({ value: typeof value === 'object' ? value : { text: value }, category, updated_at: new Date().toISOString() })
       .eq('id', existing.id);
   } else {
-    await supabase
-      .from('agent_memory')
+    await supabase.from('agent_memory')
       .insert({ key, value: typeof value === 'object' ? value : { text: value }, category, created_by: 'flowpilot' });
   }
   return { status: 'saved', key };
@@ -61,7 +57,6 @@ async function loadObjectives(supabase: any): Promise<string> {
     .limit(10);
 
   if (!data || data.length === 0) return '';
-
   const lines = data.map((o: any) =>
     `- [${o.id.slice(0, 8)}] "${o.goal}" | progress: ${JSON.stringify(o.progress)} | criteria: ${JSON.stringify(o.success_criteria)} | constraints: ${JSON.stringify(o.constraints)}`
   );
@@ -70,9 +65,7 @@ async function loadObjectives(supabase: any): Promise<string> {
 
 async function handleObjectiveUpdateProgress(supabase: any, args: { objective_id: string; progress: any }) {
   const { error } = await supabase
-    .from('agent_objectives')
-    .update({ progress: args.progress })
-    .eq('id', args.objective_id);
+    .from('agent_objectives').update({ progress: args.progress }).eq('id', args.objective_id);
   if (error) return { status: 'error', error: error.message };
   return { status: 'updated', objective_id: args.objective_id };
 }
@@ -86,13 +79,6 @@ async function handleObjectiveComplete(supabase: any, args: { objective_id: stri
   return { status: 'completed', objective_id: args.objective_id };
 }
 
-async function linkActivityToObjective(supabase: any, objectiveId: string, activityId: string) {
-  await supabase.from('agent_objective_activities').insert({
-    objective_id: objectiveId,
-    activity_id: activityId,
-  });
-}
-
 // ─── Built-in tool definitions ────────────────────────────────────────────────
 
 const memoryTools = [
@@ -100,13 +86,13 @@ const memoryTools = [
     type: 'function',
     function: {
       name: 'memory_write',
-      description: 'Save something to your persistent memory. Use this to remember user preferences, facts about the site, important decisions, or context for future conversations.',
+      description: 'Save something to your persistent memory.',
       parameters: {
         type: 'object',
         properties: {
-          key: { type: 'string', description: 'Short identifier for this memory, e.g. "preferred_blog_tone" or "owner_name"' },
-          value: { description: 'The information to remember — can be a string or object' },
-          category: { type: 'string', enum: ['preference', 'context', 'fact'], description: 'Category: preference (user likes/dislikes), context (situational info), fact (objective data)' },
+          key: { type: 'string', description: 'Short identifier e.g. "preferred_blog_tone"' },
+          value: { description: 'The information to remember' },
+          category: { type: 'string', enum: ['preference', 'context', 'fact'] },
         },
         required: ['key', 'value'],
       },
@@ -116,12 +102,12 @@ const memoryTools = [
     type: 'function',
     function: {
       name: 'memory_read',
-      description: 'Search your persistent memory for previously saved information. Use when you need to recall preferences, context, or facts.',
+      description: 'Search your persistent memory.',
       parameters: {
         type: 'object',
         properties: {
-          key: { type: 'string', description: 'Search term to find in memory keys' },
-          category: { type: 'string', enum: ['preference', 'context', 'fact'], description: 'Filter by category' },
+          key: { type: 'string', description: 'Search term' },
+          category: { type: 'string', enum: ['preference', 'context', 'fact'] },
         },
       },
     },
@@ -133,12 +119,12 @@ const objectiveTools = [
     type: 'function',
     function: {
       name: 'objective_update_progress',
-      description: 'Update progress on an active objective. Call this after completing a skill execution that contributes to an objective.',
+      description: 'Update progress on an active objective.',
       parameters: {
         type: 'object',
         properties: {
-          objective_id: { type: 'string', description: 'The objective ID (first 8 chars shown in your context)' },
-          progress: { type: 'object', description: 'Updated progress object, e.g. {"posts_published": 2, "target": 3}' },
+          objective_id: { type: 'string' },
+          progress: { type: 'object', description: 'Updated progress object' },
         },
         required: ['objective_id', 'progress'],
       },
@@ -148,17 +134,40 @@ const objectiveTools = [
     type: 'function',
     function: {
       name: 'objective_complete',
-      description: 'Mark an objective as completed when all success criteria have been met.',
+      description: 'Mark an objective as completed.',
       parameters: {
         type: 'object',
         properties: {
-          objective_id: { type: 'string', description: 'The objective ID to mark as completed' },
+          objective_id: { type: 'string' },
         },
         required: ['objective_id'],
       },
     },
   },
 ];
+
+// ─── Tool execution helper ────────────────────────────────────────────────────
+
+async function executeToolCall(
+  supabase: any,
+  supabaseUrl: string,
+  serviceKey: string,
+  fnName: string,
+  fnArgs: any,
+): Promise<any> {
+  if (fnName === 'memory_write') return handleMemoryWrite(supabase, fnArgs);
+  if (fnName === 'memory_read') return handleMemoryRead(supabase, fnArgs);
+  if (fnName === 'objective_update_progress') return handleObjectiveUpdateProgress(supabase, fnArgs);
+  if (fnName === 'objective_complete') return handleObjectiveComplete(supabase, fnArgs);
+
+  // External skill via agent-execute
+  const response = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${serviceKey}` },
+    body: JSON.stringify({ skill_name: fnName, arguments: fnArgs, agent_type: 'flowpilot' }),
+  });
+  return response.json();
+}
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
@@ -174,7 +183,7 @@ serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Get AI config from settings
+    // Get AI config
     let apiKey = Deno.env.get('OPENAI_API_KEY') || '';
     let apiUrl = 'https://api.openai.com/v1/chat/completions';
     let model = 'gpt-4o';
@@ -194,7 +203,6 @@ serve(async (req) => {
       }
     }
 
-    // Fallback to Lovable AI if no keys
     if (!apiKey) {
       const lovableKey = Deno.env.get('LOVABLE_API_KEY');
       if (lovableKey) {
@@ -210,157 +218,147 @@ serve(async (req) => {
       });
     }
 
-    // Load context in parallel
+    // Load context
     const [memoryContext, objectiveContext] = await Promise.all([
       loadMemories(supabase),
       loadObjectives(supabase),
     ]);
 
-    const systemPrompt = `You are FlowPilot in Operate mode — an AI assistant that controls a CMS platform.
+    const systemPrompt = `You are FlowPilot in Operate mode — an autonomous AI assistant that controls a CMS platform.
 
-You have access to tools/skills that let you take real actions: write blog posts, add leads, analyze traffic, book appointments, send newsletters, and more.
+You can use MULTIPLE tools in a single turn and CHAIN tool calls across iterations.
+When a task requires multiple steps, execute them sequentially — don't just describe a plan.
 
-You also have PERSISTENT MEMORY. You can remember things between conversations using memory_write and memory_read.
+TOOLS & SKILLS:
+- You have access to CMS skills: blog posts, leads, analytics, bookings, newsletters, etc.
+- You have PERSISTENT MEMORY (memory_write / memory_read).
+- You can track OBJECTIVES (objective_update_progress / objective_complete).
 
 MEMORY GUIDELINES:
-- When the user tells you a preference, fact, or important context → save it with memory_write
-- Examples: their preferred tone, brand name, target audience, common tasks, language preferences
-- Before answering questions about the site, check if you already know from memory
-- Use category "preference" for likes/dislikes, "fact" for objective info, "context" for situational data
+- Save user preferences, facts, and context with memory_write
+- Check memory before answering questions about the site
 ${memoryContext}
 
 OBJECTIVES:
-You have active objectives — high-level goals to work toward across conversations.
-- After executing a skill that contributes to an objective, use objective_update_progress to track progress.
-- When all success_criteria are met, use objective_complete to mark it done.
-- Respect the constraints defined on each objective (budgets, rate limits, excluded skills).
-- Proactively mention relevant objectives when they relate to the user's request.
+- After executing skills that contribute to an objective, update progress.
+- When all success_criteria are met, mark as complete.
 ${objectiveContext}
 
 RULES:
-- When the user asks you to do something, USE the appropriate tool immediately.
-- After using a tool, summarize what you did in a friendly, concise way.
-- If no tool matches, answer conversationally with your knowledge.
-- Be concise: 1-2 sentences max before or after tool calls.
-- Use emoji sparingly but naturally.
-- If a task requires multiple steps, explain your plan first.
-- Proactively save useful information to memory when you learn it.`;
+- When the user asks you to do something, USE the appropriate tools immediately.
+- You can call MULTIPLE tools in parallel when they're independent.
+- After tool results come back, you may call MORE tools if the task isn't done.
+- After all actions complete, summarize what you did concisely.
+- Use markdown formatting for clear, readable responses.
+- Be concise but thorough. Use emoji sparingly.`;
 
-    // Merge all tools
     const allTools = [...memoryTools, ...objectiveTools, ...(available_skills || [])];
 
-    // Call AI with tool calling
-    const aiResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages,
-        ],
-        tools: allTools.length > 0 ? allTools : undefined,
-        tool_choice: allTools.length > 0 ? 'auto' : undefined,
-      }),
-    });
+    // ─── Iterative tool-call loop ───────────────────────────────────────
+    let conversationMessages: any[] = [
+      { role: 'system', content: systemPrompt },
+      ...messages,
+    ];
 
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error('AI error:', aiResponse.status, errText);
-      return new Response(JSON.stringify({ error: 'AI provider error', message: 'Could not process your request. Please try again.' }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    const allSkillResults: any[] = [];
 
-    const aiData = await aiResponse.json();
-    const choice = aiData.choices?.[0];
-
-    if (!choice) {
-      return new Response(JSON.stringify({ message: 'No response from AI' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Check if AI wants to call a tool
-    if (choice.message?.tool_calls?.length) {
-      const toolCall = choice.message.tool_calls[0];
-      const fnName = toolCall.function.name;
-      const fnArgs = JSON.parse(toolCall.function.arguments || '{}');
-
-      let executeResult: any;
-
-      // Handle built-in tools locally
-      if (fnName === 'memory_write') {
-        executeResult = await handleMemoryWrite(supabase, fnArgs);
-      } else if (fnName === 'memory_read') {
-        executeResult = await handleMemoryRead(supabase, fnArgs);
-      } else if (fnName === 'objective_update_progress') {
-        executeResult = await handleObjectiveUpdateProgress(supabase, fnArgs);
-      } else if (fnName === 'objective_complete') {
-        executeResult = await handleObjectiveComplete(supabase, fnArgs);
-      } else {
-        // Execute skill through agent-execute
-        const executeResponse = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${serviceKey}`,
-          },
-          body: JSON.stringify({
-            skill_name: fnName,
-            arguments: fnArgs,
-            agent_type: 'flowpilot',
-          }),
-        });
-        executeResult = await executeResponse.json();
-
-        // If skill execution produced an activity_id and there's an objective context,
-        // the AI should use objective_update_progress explicitly — no auto-linking here
-      }
-
-      // Get AI to summarize the result
-      const summaryResponse = await fetch(apiUrl, {
+    for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
+      const aiResponse = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            ...messages,
-            choice.message,
-            {
-              role: 'tool',
-              tool_call_id: toolCall.id,
-              content: JSON.stringify(executeResult),
-            },
-          ],
+          messages: conversationMessages,
+          tools: allTools.length > 0 ? allTools : undefined,
+          tool_choice: allTools.length > 0 ? 'auto' : undefined,
         }),
       });
 
-      const summaryData = await summaryResponse.json();
-      const summaryText = summaryData.choices?.[0]?.message?.content || 'Action completed.';
+      if (!aiResponse.ok) {
+        const errText = await aiResponse.text();
+        console.error('AI error:', aiResponse.status, errText);
+        return new Response(JSON.stringify({ error: 'AI provider error', message: 'Could not process your request.' }), {
+          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
-      return new Response(JSON.stringify({
-        message: summaryText,
-        skill_result: {
-          skill: fnName,
-          status: executeResult.status || 'success',
-          result: executeResult.result || executeResult,
-        },
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      const aiData = await aiResponse.json();
+      const choice = aiData.choices?.[0];
+
+      if (!choice) {
+        return new Response(JSON.stringify({ message: 'No response from AI' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const assistantMessage = choice.message;
+
+      // No tool calls — final text response, loop ends
+      if (!assistantMessage.tool_calls?.length) {
+        return new Response(JSON.stringify({
+          message: assistantMessage.content || "Done.",
+          skill_results: allSkillResults.length > 0 ? allSkillResults : undefined,
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Process ALL tool calls in parallel
+      conversationMessages.push(assistantMessage);
+
+      const toolResults = await Promise.all(
+        assistantMessage.tool_calls.map(async (tc: any) => {
+          const fnName = tc.function.name;
+          let fnArgs: any;
+          try {
+            fnArgs = JSON.parse(tc.function.arguments || '{}');
+          } catch {
+            fnArgs = {};
+          }
+
+          let result: any;
+          try {
+            result = await executeToolCall(supabase, supabaseUrl, serviceKey, fnName, fnArgs);
+          } catch (err: any) {
+            result = { error: err.message };
+          }
+
+          // Track skill results for the response
+          const isBuiltIn = ['memory_write', 'memory_read', 'objective_update_progress', 'objective_complete'].includes(fnName);
+          if (!isBuiltIn) {
+            allSkillResults.push({
+              skill: fnName,
+              status: result?.status || 'success',
+              result: result?.result || result,
+            });
+          }
+
+          return {
+            role: 'tool' as const,
+            tool_call_id: tc.id,
+            content: JSON.stringify(result),
+          };
+        })
+      );
+
+      // Add all tool results to conversation
+      conversationMessages.push(...toolResults);
+
+      // Continue loop — AI will see tool results and decide if more calls needed
     }
 
-    // No tool call — just a text response
+    // If we hit max iterations, do one final call without tools to get summary
+    const finalResponse = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, messages: conversationMessages }),
+    });
+    const finalData = await finalResponse.json();
+    const finalText = finalData.choices?.[0]?.message?.content || 'Completed all actions.';
+
     return new Response(JSON.stringify({
-      message: choice.message?.content || "I'm not sure how to help with that.",
+      message: finalText,
+      skill_results: allSkillResults.length > 0 ? allSkillResults : undefined,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
