@@ -18,6 +18,8 @@ interface IntegrationStatus {
     openai: boolean;
     gemini: boolean;
     local_llm: boolean;
+    google_client_id: boolean;
+    google_client_secret: boolean;
     n8n: boolean;
     google_analytics: boolean;
     meta_pixel: boolean;
