@@ -38,6 +38,7 @@ import {
   Code2,
   ChevronRight,
   Video,
+  Target,
 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
