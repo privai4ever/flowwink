@@ -674,14 +674,14 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
             <CardContent className="pt-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium">Egna navigeringslänkar</h3>
+                  <h3 className="font-medium">Custom navigation links</h3>
                   <p className="text-sm text-muted-foreground">
-                    Lägg till externa länkar utöver CMS-sidor
+                    Add external links beyond CMS pages
                   </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={addNavItem}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Lägg till
+                  Add
                 </Button>
               </div>
 
