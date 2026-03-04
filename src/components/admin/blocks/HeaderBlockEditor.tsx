@@ -577,8 +577,8 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
 
             <div className="flex items-center justify-between">
               <div>
-                <Label>Visa kant</Label>
-                <p className="text-sm text-muted-foreground">Visa en nedre kant på headern</p>
+                <Label>Show Border</Label>
+                <p className="text-sm text-muted-foreground">Show a bottom border on the header</p>
               </div>
               <Switch
                 checked={data.showBorder !== false}
