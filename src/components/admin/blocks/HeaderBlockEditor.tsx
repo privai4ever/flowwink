@@ -633,7 +633,7 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Mobilmeny-stil</Label>
+              <Label>Mobile menu style</Label>
               <Select
                 value={data.mobileMenuStyle || 'default'}
                 onValueChange={(value: 'default' | 'fullscreen' | 'slide') => onChange({ ...data, mobileMenuStyle: value })}
@@ -643,8 +643,8 @@ export function HeaderBlockEditor({ data, onChange }: HeaderBlockEditorProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="default">Dropdown</SelectItem>
-                  <SelectItem value="fullscreen">Helskärm</SelectItem>
-                  <SelectItem value="slide">Slide från höger</SelectItem>
+                  <SelectItem value="fullscreen">Fullscreen</SelectItem>
+                  <SelectItem value="slide">Slide from right</SelectItem>
                 </SelectContent>
               </Select>
             </div>
