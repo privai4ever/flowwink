@@ -268,10 +268,11 @@ export const INTEGRATION_CATEGORIES = {
   payments: { label: 'Payments', order: 1 },
   communication: { label: 'Communication', order: 2 },
   ai: { label: 'AI Providers', order: 3 },
-  automation: { label: 'Automation', order: 4 },
-  media: { label: 'Media & Tools', order: 5 },
-  analytics: { label: 'Analytics & Attribution', order: 6 },
-  notifications: { label: 'Notifications', order: 7 },
+  sales: { label: 'Sales Intelligence', order: 4 },
+  automation: { label: 'Automation', order: 5 },
+  media: { label: 'Media & Tools', order: 6 },
+  analytics: { label: 'Analytics & Attribution', order: 7 },
+  notifications: { label: 'Notifications', order: 8 },
 } as const;
 
 // Fetch integrations settings
