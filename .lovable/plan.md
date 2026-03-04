@@ -1,90 +1,115 @@
+# FlowPilot Agentic Architecture
 
+## Phase 1: Skill Registry + Unified Tool Engine ✅ DONE
 
-## Gmail Signal Integration — Inbound Email as Automation Trigger
+### Completed
+- **Database tables**: `agent_skills`, `agent_memory`, `agent_activity` with RLS policies
+- **Enums**: `agent_scope`, `agent_skill_category`, `agent_activity_status`, `agent_type`, `agent_memory_category`
+- **11 built-in skills** seeded: migrate_url, create_page_block, write_blog_post, send_newsletter, create_campaign, add_lead, search_web, book_appointment, check_order, update_settings, analyze_analytics
+- **`agent-execute` edge function**: Unified skill executor with scope validation, approval checks, handler routing (edge/module/db/webhook), and activity logging
+- **TypeScript types**: `src/types/agent.ts` with full type coverage
 
-### Context
+### Verified
+- Direct execution works (analyze_analytics returns real page view data)
+- Scope validation works (internal skills blocked from chat agent)
+- Approval gating works (send_newsletter returns 202 pending_approval)
 
-In **mycms.chat**, Gmail integration works as a **signal source**: OAuth connects a Google account (readonly), a scan function (`agent-inbox-scan`) fetches recent emails via the Gmail API, AI analyzes them for actionable signals (topics, opportunities, contacts), and results feed into the agent task pipeline. A separate `gmail-oauth-callback` function handles the OAuth flow (authorize → token exchange → refresh → disconnect).
+## Phase 2: FlowPilot "Operate" Mode ✅ DONE
 
-This project already has:
-- Signal dispatcher infrastructure (signal-type automations)
-- Webhook event system
-- Integration settings framework (`useIntegrations`, `useIntegrationStatus`, `check-secrets`)
-- Agent skill engine with activity logging
+### Completed
+- Mode switcher (Operate | Migrate) in CopilotPage header using Tabs
+- OperateChat component — chat with quick actions, skill badges, and inline results
+- ActivityFeed sidebar — shows recent actions with status, duration, approve button
+- `agent-operate` edge function — AI router that picks skills via tool calling, executes via agent-execute, summarizes results
+- `useAgentOperate` hook — manages messages, skills, activity, and approval flow
 
-Gmail/email integration is **not yet present** in this project.
+### TODO (refinement)
+- [ ] Refactor copilot-action to load tool definitions from agent_skills table
 
-### What to Build
+## Phase 2.5: Active Memory ✅ DONE
 
-Port the Gmail signal integration pattern from mycms.chat, adapted to this project's architecture (agent_skills, agent_automations, signal-dispatcher).
+### Completed
+- **agent-operate** loads all `agent_memory` entries into system prompt before each AI call
+- **memory_write** built-in tool — FlowPilot saves preferences, facts, context to DB
+- **memory_read** built-in tool — FlowPilot searches memory by key/category
+- Memory tools handled locally in agent-operate (no round-trip to agent-execute)
+- Two new skills registered in `agent_skills` table (memory_write, memory_read)
+- FlowPilot proactively saves useful info when it learns something new
 
-### Plan
+## Phase 3.5: Skill Hub Admin UI ✅ DONE
 
-#### 1. Edge Function: `gmail-oauth-callback`
-- OAuth flow: authorize → token exchange → store tokens
-- Actions: `authorize`, `status`, `disconnect`, `update_settings`
-- Store config in `site_settings` under key `gmail_integration` (reuse existing settings pattern instead of mycms.chat's `modules` table)
-- Requires secrets: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+### Completed
+- **SkillHubPage** (`/admin/skills`) with Skills, Activity, and Objectives (placeholder) tabs
+- **SkillCard** — card grid with inline enable/disable toggle, scope/category/handler badges
+- **SkillEditorSheet** — full CRUD sheet with JSON tool definition editor (CodeMirror)
+- **ActivityTable** — filterable activity log with expand for input/output JSON, approve/reject
+- **useSkillHub** hook — CRUD for skills, activity queries, approval mutations
+- **Sidebar** — "Skill Hub" added to Main group with Bot icon
 
-#### 2. Edge Function: `gmail-inbox-scan`
-- Reads Gmail API (readonly scope) using stored OAuth tokens
-- Auto-refreshes expired tokens
-- Configurable: filter senders, max messages, scan window (days)
-- AI analysis via OpenAI/Gemini (using existing provider resolution)
-- Emits signal to `signal-dispatcher` so automations can fire (e.g., "lead score from email sender", "create blog draft from topic")
-- Logs activity to `agent_activity`
+## Phase 3: Public Chat Gets Skills ✅ DONE
 
-#### 3. Admin UI: Gmail Integration Card
-- Add to existing Integrations page (`/admin/integrations`)
-- Connect/disconnect button (opens OAuth popup)
-- Status display: connected email, last scan time, signal count
-- Settings: filter senders, scan frequency, max messages
-- Manual "Scan Now" button
-- Follows existing integration card pattern
+### Completed
+- **chat-completion** loads external/both skills from `agent_skills` table as OpenAI-compatible tools
+- Skills are routed through `agent-execute` edge function (scope validation, approval gating, activity logging)
+- `agentSkillNames` map tracks which tool calls are agent skills vs built-in tools
+- System prompt dynamically extended with skill usage instructions
+- Works for both OpenAI and local AI providers (when tool calling is supported)
+- Approval-gated skills return friendly "pending approval" messages to visitors
 
-#### 4. Integration Status Updates
-- Add `gmail` to `check-secrets` edge function
-- Add `gmail` to `useIntegrationStatus` and `useIntegrations` types
-- Add `IntegrationWarning` support for gmail
+## Phase 4: Automation Layer ✅ DONE
 
-#### 5. Automation Wiring
-- Register a `gmail_inbox_scan` agent skill (category: `research`, scope: `internal`)
-- Optionally create a default cron automation (e.g., daily scan)
-- Signal output feeds existing `signal-dispatcher` for cross-module triggers
+### Completed
+- **agent_automations table** with cron/event/signal trigger types and RLS policies
+- **AutomationsPanel** — full CRUD UI with trigger-type badges, skill linking, JSON config editor
+- **ObjectivesPanel** — full CRUD UI with status management, progress tracking, constraint/criteria JSON
+- **FlowPilot skills**: `create_objective` and `create_automation` registered in agent_skills
+- **agent-execute** updated with `module:objectives` and `module:automations` handlers
+- **5 seed automations** and **4 seed objectives** for onboarding
 
-### Technical Details
+### Runtime
+- **`automation-dispatcher` edge function** — reads due cron automations, executes via agent-execute, updates run metadata
+- **pg_cron** runs dispatcher every minute via pg_net HTTP POST
+- Simple cron parser calculates `next_run_at` for common patterns (*/N, daily, weekly)
 
-```text
-┌─────────────┐     OAuth      ┌──────────────────────┐
-│  Admin UI   │ ──────────────▶│ gmail-oauth-callback  │
-│  /admin/    │                │  (authorize/status/   │
-│ integrations│◀───────────────│   disconnect)         │
-└─────────────┘   redirect     └──────────────────────┘
-                                        │
-                                        ▼ tokens in site_settings
-┌─────────────┐    invoke      ┌──────────────────────┐
-│ Cron / UI   │ ──────────────▶│  gmail-inbox-scan    │
-│ "Scan Now"  │                │  fetch → AI analyze  │
-└─────────────┘                └──────────┬───────────┘
-                                          │ signal
-                                          ▼
-                               ┌──────────────────────┐
-                               │  signal-dispatcher   │
-                               │  → matching automations
-                               └──────────────────────┘
+- **Event-trigger dispatch** — `send-webhook` now also checks `agent_automations` with matching `event_name` and executes their skills via `agent-execute`, merging event data into arguments
+- **Signal-trigger dispatch** — `signal-dispatcher` edge function evaluates dynamic conditions (score thresholds, status changes, field matches, compound logic) against incoming data
+
+### Signal Integration Points
+- `qualify-lead` → emits `lead_score_updated` and `lead_status_changed` signals
+- `send-webhook` → emits every webhook event as a signal (e.g. `form.submitted`, `booking.submitted`)
+- Signal conditions supported: `score_threshold`, `count_threshold`, `status_change`, `field_match`, `compound` (all/any)
+
+## Phase 5: Autonomy Unlocks ✅ DONE
+
+### Completed
+- **Multi-tool loop** — up to 6 iterations, all tool_calls processed in parallel per round
+- **Approval re-execution** — approved pending actions auto-re-execute with original args
+- **Conversation persistence** — sessions saved to chat_conversations/chat_messages
+- **Markdown rendering** — assistant messages rendered with react-markdown
+- **Multi-skill result tracking** — Response format supports `skill_results[]` array
+
+## Phase 6: Agent Self-Improvement ✅ DONE
+
+### Completed
+- **skill_create/update/list/disable** — FlowPilot can manage its own skill registry
+- **automation_create/list** — Create and view automations
+- **reflect** — Introspection: 7-day activity analysis, error rates, improvement suggestions
+
+## Architecture Reference
+
+```
+skill.handler routing:
+  edge:function-name  →  supabase.functions.invoke()
+  module:name         →  Direct DB operations (blog, crm, booking, etc.)
+  db:table            →  DB read/write (settings, analytics)
+  webhook:n8n         →  External webhook POST
 ```
 
-### Files to Create/Edit
-- `supabase/functions/gmail-oauth-callback/index.ts` — new
-- `supabase/functions/gmail-inbox-scan/index.ts` — new
-- `src/components/admin/integrations/GmailIntegrationCard.tsx` — new
-- `src/pages/admin/IntegrationsPage.tsx` — add Gmail card
-- `supabase/functions/check-secrets/index.ts` — add GOOGLE_CLIENT_ID check
-- `src/hooks/useIntegrationStatus.ts` — add `gmail` key
-- `src/hooks/useIntegrations.tsx` — add `gmail` settings type
-- `supabase/config.toml` — add function config (verify_jwt = false for OAuth callback)
-
-### Prerequisites
-- User must provide `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (from Google Cloud Console)
-- Google Cloud project with Gmail API enabled and OAuth consent screen configured
-
+## Key Files
+| File | Purpose |
+|------|---------|
+| `supabase/functions/agent-execute/index.ts` | Unified skill executor |
+| `src/types/agent.ts` | TypeScript types for skill engine |
+| `src/lib/module-registry.ts` | Existing module registry (14 modules) |
+| `supabase/functions/copilot-action/index.ts` | Current FlowPilot (to be refactored) |
+| `supabase/functions/chat-completion/index.ts` | Current public chat (to integrate skills) |

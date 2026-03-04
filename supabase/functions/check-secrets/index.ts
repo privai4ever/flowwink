@@ -20,6 +20,8 @@ interface SecretsStatus {
     firecrawl: boolean;
     openai: boolean;
     gemini: boolean;
+    google_client_id: boolean;
+    google_client_secret: boolean;
   };
 }
 
@@ -89,6 +91,8 @@ serve(async (req) => {
         firecrawl: !!Deno.env.get('FIRECRAWL_API_KEY'),
         openai: !!Deno.env.get('OPENAI_API_KEY'),
         gemini: !!Deno.env.get('GEMINI_API_KEY'),
+        google_client_id: !!Deno.env.get('GOOGLE_CLIENT_ID'),
+        google_client_secret: !!Deno.env.get('GOOGLE_CLIENT_SECRET'),
       }
     };
 

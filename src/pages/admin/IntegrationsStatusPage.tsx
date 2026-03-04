@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { GmailIntegrationCard } from "@/components/admin/integrations/GmailIntegrationCard";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminPageContainer } from "@/components/admin/AdminPageContainer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -786,6 +787,16 @@ export default function IntegrationsStatusPage() {
               {activeCount} of {integrationKeys.length} active
               {configuredCount > activeCount && ` (${configuredCount} configured)`}
             </p>
+          </div>
+        </div>
+
+        {/* Gmail Signal Integration (standalone card) */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+            Email Signals
+          </h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            <GmailIntegrationCard />
           </div>
         </div>
 
