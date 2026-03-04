@@ -154,6 +154,7 @@ export default function AdminDashboard() {
     'chat-analytics': chatEnabled,
     'chat-feedback': chatEnabled,
     'aeo': true,
+    'automation-health': true,
     'recent-pages': true,
     'quick-actions': true,
   };
