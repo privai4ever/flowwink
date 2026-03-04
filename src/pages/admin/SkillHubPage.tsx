@@ -70,6 +70,7 @@ export default function SkillHubPage() {
         <TabsList>
           <TabsTrigger value="skills">Skills</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="health">Health</TabsTrigger>
           <TabsTrigger value="objectives">Objectives</TabsTrigger>
           <TabsTrigger value="automations">Automations</TabsTrigger>
         </TabsList>
