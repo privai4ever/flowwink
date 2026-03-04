@@ -193,6 +193,7 @@ export const SIDEBAR_TO_MODULE: Record<string, keyof ModulesSettings> = {
   '/admin/global-blocks': 'globalElements',
   '/admin/media': 'mediaLibrary',
   '/admin/webinars': 'webinars',
+  '/admin/sales-intelligence': 'salesIntelligence',
 };
 
 export function useModules() {
