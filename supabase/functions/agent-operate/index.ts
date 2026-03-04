@@ -8,6 +8,14 @@ const corsHeaders = {
 
 const MAX_TOOL_ITERATIONS = 6;
 
+const BUILT_IN_TOOL_NAMES = [
+  'memory_write', 'memory_read',
+  'objective_update_progress', 'objective_complete',
+  'skill_create', 'skill_update', 'skill_list', 'skill_disable',
+  'automation_create', 'automation_list',
+  'reflect',
+];
+
 // ─── Memory helpers ───────────────────────────────────────────────────────────
 
 async function loadMemories(supabase: any): Promise<string> {
@@ -79,6 +87,216 @@ async function handleObjectiveComplete(supabase: any, args: { objective_id: stri
   return { status: 'completed', objective_id: args.objective_id };
 }
 
+// ─── Self-modification: Skill CRUD ────────────────────────────────────────────
+
+async function handleSkillCreate(supabase: any, args: {
+  name: string;
+  description: string;
+  handler: string;
+  category?: string;
+  scope?: string;
+  requires_approval?: boolean;
+  tool_definition: any;
+}) {
+  // Prevent duplicate names
+  const { data: existing } = await supabase
+    .from('agent_skills').select('id').eq('name', args.name).maybeSingle();
+  if (existing) return { status: 'error', error: `Skill "${args.name}" already exists (id: ${existing.id})` };
+
+  const { data, error } = await supabase.from('agent_skills').insert({
+    name: args.name,
+    description: args.description,
+    handler: args.handler,
+    category: args.category || 'automation',
+    scope: args.scope || 'internal',
+    requires_approval: args.requires_approval ?? true, // Default: require approval for agent-created skills
+    enabled: true,
+    tool_definition: args.tool_definition,
+  }).select('id, name, handler, enabled').single();
+
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'created', skill: data };
+}
+
+async function handleSkillUpdate(supabase: any, args: {
+  skill_name: string;
+  updates: Record<string, any>;
+}) {
+  // Only allow safe fields to be updated
+  const safeFields = ['description', 'handler', 'category', 'scope', 'requires_approval', 'enabled', 'tool_definition'];
+  const filtered: Record<string, any> = {};
+  for (const [k, v] of Object.entries(args.updates)) {
+    if (safeFields.includes(k)) filtered[k] = v;
+  }
+
+  if (Object.keys(filtered).length === 0) return { status: 'error', error: 'No valid fields to update' };
+
+  filtered.updated_at = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('agent_skills')
+    .update(filtered)
+    .eq('name', args.skill_name)
+    .select('id, name, enabled')
+    .single();
+
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'updated', skill: data };
+}
+
+async function handleSkillList(supabase: any, args: { category?: string; scope?: string; include_disabled?: boolean }) {
+  let q = supabase.from('agent_skills').select('id, name, description, category, scope, handler, enabled, requires_approval');
+  if (!args.include_disabled) q = q.eq('enabled', true);
+  if (args.category) q = q.eq('category', args.category);
+  if (args.scope) q = q.eq('scope', args.scope);
+  const { data } = await q.order('category').order('name');
+  return { skills: data || [], count: data?.length || 0 };
+}
+
+async function handleSkillDisable(supabase: any, args: { skill_name: string }) {
+  const { data, error } = await supabase
+    .from('agent_skills')
+    .update({ enabled: false, updated_at: new Date().toISOString() })
+    .eq('name', args.skill_name)
+    .select('id, name')
+    .single();
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'disabled', skill: data };
+}
+
+// ─── Self-modification: Automation CRUD ───────────────────────────────────────
+
+async function handleAutomationCreate(supabase: any, args: {
+  name: string;
+  description?: string;
+  trigger_type: string;
+  trigger_config: any;
+  skill_name: string;
+  skill_arguments?: any;
+  enabled?: boolean;
+}) {
+  // Resolve skill_id
+  const { data: skill } = await supabase
+    .from('agent_skills').select('id').eq('name', args.skill_name).eq('enabled', true).maybeSingle();
+
+  const { data, error } = await supabase.from('agent_automations').insert({
+    name: args.name,
+    description: args.description || null,
+    trigger_type: args.trigger_type || 'cron',
+    trigger_config: args.trigger_config || {},
+    skill_id: skill?.id || null,
+    skill_name: args.skill_name,
+    skill_arguments: args.skill_arguments || {},
+    enabled: args.enabled ?? false, // Default disabled — user can enable
+  }).select('id, name, trigger_type, enabled').single();
+
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'created', automation: data };
+}
+
+async function handleAutomationList(supabase: any, args: { enabled_only?: boolean }) {
+  let q = supabase.from('agent_automations').select('id, name, description, trigger_type, trigger_config, skill_name, enabled, run_count, last_triggered_at');
+  if (args.enabled_only) q = q.eq('enabled', true);
+  const { data } = await q.order('created_at', { ascending: false });
+  return { automations: data || [], count: data?.length || 0 };
+}
+
+// ─── Reflection: Analyze patterns ─────────────────────────────────────────────
+
+async function handleReflect(supabase: any, args: { focus?: string }) {
+  // Gather recent activity stats
+  const since = new Date();
+  since.setDate(since.getDate() - 7);
+
+  const { data: recentActivity } = await supabase
+    .from('agent_activity')
+    .select('skill_name, status, duration_ms, error_message, created_at')
+    .gte('created_at', since.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  const activities = recentActivity || [];
+
+  // Aggregate by skill
+  const skillStats: Record<string, { count: number; errors: number; avg_ms: number; last_error?: string }> = {};
+  for (const a of activities) {
+    const name = a.skill_name || 'unknown';
+    if (!skillStats[name]) skillStats[name] = { count: 0, errors: 0, avg_ms: 0 };
+    skillStats[name].count++;
+    if (a.status === 'failed') {
+      skillStats[name].errors++;
+      skillStats[name].last_error = a.error_message;
+    }
+    if (a.duration_ms) {
+      skillStats[name].avg_ms = Math.round(
+        (skillStats[name].avg_ms * (skillStats[name].count - 1) + a.duration_ms) / skillStats[name].count
+      );
+    }
+  }
+
+  // Get current skill count
+  const { data: allSkills } = await supabase
+    .from('agent_skills').select('name, category, handler, enabled').order('category');
+
+  // Get current automations
+  const { data: automations } = await supabase
+    .from('agent_automations').select('name, trigger_type, skill_name, enabled, run_count');
+
+  // Get objectives status
+  const { data: objectives } = await supabase
+    .from('agent_objectives').select('goal, status, progress');
+
+  return {
+    period: '7 days',
+    total_actions: activities.length,
+    skill_usage: skillStats,
+    registered_skills: allSkills?.length || 0,
+    active_automations: automations?.filter((a: any) => a.enabled).length || 0,
+    total_automations: automations?.length || 0,
+    active_objectives: objectives?.filter((o: any) => o.status === 'active').length || 0,
+    skills: allSkills || [],
+    automations: automations || [],
+    objectives: objectives || [],
+    suggestions: generateSuggestions(skillStats, allSkills || [], automations || []),
+  };
+}
+
+function generateSuggestions(
+  stats: Record<string, any>,
+  skills: any[],
+  automations: any[],
+): string[] {
+  const suggestions: string[] = [];
+
+  // High-error skills
+  for (const [name, s] of Object.entries(stats)) {
+    if (s.errors > 2) {
+      suggestions.push(`Skill "${name}" has ${s.errors} failures — consider debugging or updating its handler.`);
+    }
+  }
+
+  // Frequently used skills without automation
+  const automatedSkills = new Set(automations.map((a: any) => a.skill_name));
+  for (const [name, s] of Object.entries(stats)) {
+    if (s.count >= 5 && !automatedSkills.has(name)) {
+      suggestions.push(`"${name}" was used ${s.count} times manually — consider creating an automation for it.`);
+    }
+  }
+
+  // Skills that are registered but never used
+  const usedSkills = new Set(Object.keys(stats));
+  const unusedSkills = skills.filter(s => s.enabled && !usedSkills.has(s.name));
+  if (unusedSkills.length > 3) {
+    suggestions.push(`${unusedSkills.length} skills have never been used. Consider disabling unused ones or promoting them in your workflow.`);
+  }
+
+  if (suggestions.length === 0) {
+    suggestions.push('System is running well. No immediate improvements suggested.');
+  }
+
+  return suggestions;
+}
+
 // ─── Built-in tool definitions ────────────────────────────────────────────────
 
 const memoryTools = [
@@ -146,6 +364,119 @@ const objectiveTools = [
   },
 ];
 
+const selfModTools = [
+  {
+    type: 'function',
+    function: {
+      name: 'skill_create',
+      description: 'Create a new skill in your registry. Use this to extend your own capabilities. Handler types: "module:name" for DB operations, "edge:function-name" for edge functions, "db:table" for direct queries, "webhook:url" for external calls.',
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'snake_case skill name, e.g. "weekly_digest_report"' },
+          description: { type: 'string', description: 'What this skill does' },
+          handler: { type: 'string', description: 'Handler route, e.g. "module:blog", "edge:my-function", "db:page_views"' },
+          category: { type: 'string', enum: ['content', 'crm', 'communication', 'automation', 'search', 'analytics'] },
+          scope: { type: 'string', enum: ['internal', 'external', 'both'], description: 'Who can use this skill' },
+          requires_approval: { type: 'boolean', description: 'Whether admin must approve before execution. Default true for safety.' },
+          tool_definition: { type: 'object', description: 'OpenAI function calling definition with type:"function" and function:{name, description, parameters}' },
+        },
+        required: ['name', 'description', 'handler', 'tool_definition'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'skill_update',
+      description: 'Update an existing skill. Can change description, handler, scope, approval setting, or tool_definition.',
+      parameters: {
+        type: 'object',
+        properties: {
+          skill_name: { type: 'string', description: 'Name of the skill to update' },
+          updates: { type: 'object', description: 'Fields to update: description, handler, category, scope, requires_approval, enabled, tool_definition' },
+        },
+        required: ['skill_name', 'updates'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'skill_list',
+      description: 'List all registered skills with their details.',
+      parameters: {
+        type: 'object',
+        properties: {
+          category: { type: 'string', description: 'Filter by category' },
+          scope: { type: 'string', description: 'Filter by scope' },
+          include_disabled: { type: 'boolean', description: 'Include disabled skills' },
+        },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'skill_disable',
+      description: 'Disable a skill that is no longer needed or is causing problems.',
+      parameters: {
+        type: 'object',
+        properties: {
+          skill_name: { type: 'string', description: 'Name of the skill to disable' },
+        },
+        required: ['skill_name'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'automation_create',
+      description: 'Create a new automation that triggers a skill on a schedule or event. Created automations are disabled by default for safety.',
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Human-readable automation name' },
+          description: { type: 'string' },
+          trigger_type: { type: 'string', enum: ['cron', 'event', 'signal'] },
+          trigger_config: { type: 'object', description: 'For cron: {cron: "0 9 * * 1"}, for event: {event_name: "lead.created"}, for signal: {signal: "score_threshold", condition: {min_score: 50}}' },
+          skill_name: { type: 'string', description: 'Name of the skill to execute' },
+          skill_arguments: { type: 'object', description: 'Default arguments to pass to the skill' },
+          enabled: { type: 'boolean', description: 'Whether to enable immediately (default: false)' },
+        },
+        required: ['name', 'trigger_type', 'trigger_config', 'skill_name'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'automation_list',
+      description: 'List all automations with their status and run counts.',
+      parameters: {
+        type: 'object',
+        properties: {
+          enabled_only: { type: 'boolean', description: 'Only show enabled automations' },
+        },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'reflect',
+      description: 'Analyze your own performance over the past week. Returns skill usage stats, error rates, unused skills, automation coverage, and improvement suggestions. Use this to identify areas for self-improvement.',
+      parameters: {
+        type: 'object',
+        properties: {
+          focus: { type: 'string', description: 'Optional focus area: "errors", "usage", "automations", "objectives"' },
+        },
+      },
+    },
+  },
+];
+
 // ─── Tool execution helper ────────────────────────────────────────────────────
 
 async function executeToolCall(
@@ -155,10 +486,20 @@ async function executeToolCall(
   fnName: string,
   fnArgs: any,
 ): Promise<any> {
-  if (fnName === 'memory_write') return handleMemoryWrite(supabase, fnArgs);
-  if (fnName === 'memory_read') return handleMemoryRead(supabase, fnArgs);
-  if (fnName === 'objective_update_progress') return handleObjectiveUpdateProgress(supabase, fnArgs);
-  if (fnName === 'objective_complete') return handleObjectiveComplete(supabase, fnArgs);
+  // Built-in tools
+  switch (fnName) {
+    case 'memory_write': return handleMemoryWrite(supabase, fnArgs);
+    case 'memory_read': return handleMemoryRead(supabase, fnArgs);
+    case 'objective_update_progress': return handleObjectiveUpdateProgress(supabase, fnArgs);
+    case 'objective_complete': return handleObjectiveComplete(supabase, fnArgs);
+    case 'skill_create': return handleSkillCreate(supabase, fnArgs);
+    case 'skill_update': return handleSkillUpdate(supabase, fnArgs);
+    case 'skill_list': return handleSkillList(supabase, fnArgs);
+    case 'skill_disable': return handleSkillDisable(supabase, fnArgs);
+    case 'automation_create': return handleAutomationCreate(supabase, fnArgs);
+    case 'automation_list': return handleAutomationList(supabase, fnArgs);
+    case 'reflect': return handleReflect(supabase, fnArgs);
+  }
 
   // External skill via agent-execute
   const response = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
@@ -224,15 +565,25 @@ serve(async (req) => {
       loadObjectives(supabase),
     ]);
 
-    const systemPrompt = `You are FlowPilot in Operate mode — an autonomous AI assistant that controls a CMS platform.
+    const systemPrompt = `You are FlowPilot in Operate mode — an autonomous, self-improving AI assistant that controls a CMS platform.
 
 You can use MULTIPLE tools in a single turn and CHAIN tool calls across iterations.
 When a task requires multiple steps, execute them sequentially — don't just describe a plan.
 
 TOOLS & SKILLS:
-- You have access to CMS skills: blog posts, leads, analytics, bookings, newsletters, etc.
-- You have PERSISTENT MEMORY (memory_write / memory_read).
-- You can track OBJECTIVES (objective_update_progress / objective_complete).
+- CMS skills: blog posts, leads, analytics, bookings, newsletters, etc.
+- PERSISTENT MEMORY (memory_write / memory_read)
+- OBJECTIVES (objective_update_progress / objective_complete)
+- SELF-MODIFICATION: You can create, update, disable, and list your own skills and automations.
+- REFLECTION: Use 'reflect' to analyze your performance and identify improvements.
+
+SELF-IMPROVEMENT GUIDELINES:
+- If a user asks you to do something you can't, consider creating a new skill for it.
+- When you notice repetitive manual tasks, suggest creating an automation.
+- Use 'reflect' periodically (or when asked) to review your own performance.
+- When creating skills, set requires_approval=true for anything destructive.
+- New automations are disabled by default — tell the user to enable them when ready.
+- Handler types: module:name (DB ops), edge:function (edge functions), db:table (queries), webhook:url (external)
 
 MEMORY GUIDELINES:
 - Save user preferences, facts, and context with memory_write
@@ -252,7 +603,7 @@ RULES:
 - Use markdown formatting for clear, readable responses.
 - Be concise but thorough. Use emoji sparingly.`;
 
-    const allTools = [...memoryTools, ...objectiveTools, ...(available_skills || [])];
+    const allTools = [...memoryTools, ...objectiveTools, ...selfModTools, ...(available_skills || [])];
 
     // ─── Iterative tool-call loop ───────────────────────────────────────
     let conversationMessages: any[] = [
@@ -293,7 +644,7 @@ RULES:
 
       const assistantMessage = choice.message;
 
-      // No tool calls — final text response, loop ends
+      // No tool calls — final text response
       if (!assistantMessage.tool_calls?.length) {
         return new Response(JSON.stringify({
           message: assistantMessage.content || "Done.",
@@ -323,9 +674,8 @@ RULES:
             result = { error: err.message };
           }
 
-          // Track skill results for the response
-          const isBuiltIn = ['memory_write', 'memory_read', 'objective_update_progress', 'objective_complete'].includes(fnName);
-          if (!isBuiltIn) {
+          // Track non-built-in skill results
+          if (!BUILT_IN_TOOL_NAMES.includes(fnName)) {
             allSkillResults.push({
               skill: fnName,
               status: result?.status || 'success',
@@ -341,13 +691,10 @@ RULES:
         })
       );
 
-      // Add all tool results to conversation
       conversationMessages.push(...toolResults);
-
-      // Continue loop — AI will see tool results and decide if more calls needed
     }
 
-    // If we hit max iterations, do one final call without tools to get summary
+    // Max iterations reached — final summary
     const finalResponse = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
