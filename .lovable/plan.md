@@ -71,8 +71,7 @@
 - **pg_cron** runs dispatcher every minute via pg_net HTTP POST
 - Simple cron parser calculates `next_run_at` for common patterns (*/N, daily, weekly)
 
-### TODO
-- [ ] Signal integration from webhook events (match incoming events to signal-type automations)
+- **Event-trigger dispatch** — `send-webhook` now also checks `agent_automations` with matching `event_name` and executes their skills via `agent-execute`, merging event data into arguments
 
 ## Architecture Reference
 
