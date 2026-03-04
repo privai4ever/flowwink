@@ -264,19 +264,29 @@ ${hunterContacts.length > 0 ? JSON.stringify(hunterContacts.slice(0, 5), null, 2
     if (companyId && hunterContacts.length > 0) {
       for (const contact of hunterContacts.slice(0, 10)) {
         const leadName = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || null;
+        
+        // Check if lead with this email already exists
+        const { data: existing } = await supabase
+          .from('leads')
+          .select('id, email, name')
+          .eq('email', contact.email)
+          .maybeSingle();
+
+        if (existing) {
+          createdLeads.push(existing);
+          continue;
+        }
+
         const { data: lead, error: leadError } = await supabase
           .from('leads')
-          .upsert(
-            {
-              email: contact.email,
-              name: leadName,
-              phone: contact.phone_number || null,
-              source: 'prospect_research',
-              company_id: companyId,
-              ai_summary: contact.position ? `${contact.position}${contact.department ? ` (${contact.department})` : ''}` : null,
-            },
-            { onConflict: 'email', ignoreDuplicates: true }
-          )
+          .insert({
+            email: contact.email,
+            name: leadName,
+            phone: contact.phone_number || null,
+            source: 'prospect_research',
+            company_id: companyId,
+            ai_summary: contact.position ? `${contact.position}${contact.department ? ` (${contact.department})` : ''}` : null,
+          })
           .select('id, email, name')
           .maybeSingle();
 
