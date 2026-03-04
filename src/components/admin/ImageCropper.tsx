@@ -414,10 +414,10 @@ export function ImageCropper({
               <Button variant="outline" size="sm" className="w-full justify-between">
                 <span className="flex items-center gap-2">
                   <SlidersHorizontal className="h-4 w-4" />
-                  Finjusteringar
+                  Adjustments
                   {hasAdjustments && activePreset !== 'original' && (
                     <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-                      Aktiv
+                      Active
                     </span>
                   )}
                 </span>
