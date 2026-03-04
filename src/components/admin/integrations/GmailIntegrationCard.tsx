@@ -153,8 +153,8 @@ export function GmailIntegrationCard() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
-              <Mail className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+              <Mail className="h-5 w-5 text-destructive" />
             </div>
             <div>
               <CardTitle className="text-base">Gmail Signals</CardTitle>
