@@ -217,6 +217,42 @@ async function executeModuleAction(
       return { orders: data || [] };
     }
 
+    case 'objectives': {
+      const { goal, constraints = {}, success_criteria = {} } = args as any;
+      if (!goal) throw new Error('goal is required');
+      const { data, error } = await supabase.from('agent_objectives').insert({
+        goal,
+        constraints,
+        success_criteria,
+        status: 'active',
+        progress: {},
+      }).select('id, goal, status').single();
+      if (error) throw new Error(`Objective insert failed: ${error.message}`);
+      return { objective_id: data.id, goal: data.goal, status: data.status };
+    }
+
+    case 'automations': {
+      const { name, description, trigger_type = 'cron', trigger_config = {}, skill_name: targetSkill, skill_arguments = {}, enabled = false } = args as any;
+      if (!name || !targetSkill) throw new Error('name and skill_name are required');
+
+      // Look up skill_id from skill_name
+      const { data: skillRef } = await supabase.from('agent_skills')
+        .select('id').eq('name', targetSkill).eq('enabled', true).limit(1).single();
+
+      const { data, error } = await supabase.from('agent_automations').insert({
+        name,
+        description: description || null,
+        trigger_type,
+        trigger_config,
+        skill_id: skillRef?.id || null,
+        skill_name: targetSkill,
+        skill_arguments,
+        enabled,
+      }).select('id, name, trigger_type, enabled').single();
+      if (error) throw new Error(`Automation insert failed: ${error.message}`);
+      return { automation_id: data.id, name: data.name, trigger_type: data.trigger_type, enabled: data.enabled };
+    }
+
     default:
       return { error: `Unknown module: ${moduleName}` };
   }
