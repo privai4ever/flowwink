@@ -620,7 +620,7 @@ export default function NewSitePage() {
             template_name: selectedTemplate.name,
           },
         });
-        logger.info('[NewSite] FlowPilot bootstrapped for template:', selectedTemplate.id);
+        logger.log('[NewSite] FlowPilot bootstrapped for template:', selectedTemplate.id);
       } catch (fpError) {
         // Non-fatal: FlowPilot bootstrap failure shouldn't block site creation
         logger.warn('[NewSite] FlowPilot bootstrap failed (non-fatal):', fpError);
