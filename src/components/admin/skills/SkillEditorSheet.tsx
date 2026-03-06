@@ -69,6 +69,7 @@ export function SkillEditorSheet({ skill, open, onClose, onSave, onDelete }: Ski
       form.reset({
         name: skill.name,
         description: skill.description ?? '',
+        instructions: skill.instructions ?? '',
         category: skill.category,
         scope: skill.scope,
         handler: skill.handler,
