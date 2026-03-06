@@ -255,6 +255,9 @@ export default function AdminDashboard() {
       case 'automation-health':
         return <AutomationHealthDashboardWidget key={widgetId} />;
 
+      case 'flowpilot':
+        return <FlowPilotDashboardWidget key={widgetId} />;
+
       case 'recent-pages':
         return (
           <Card key={widgetId}>
