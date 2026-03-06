@@ -18,12 +18,40 @@ const BUILT_IN_TOOL_NAMES = [
   'reflect',
 ];
 
+// ─── SOUL/IDENTITY loader ─────────────────────────────────────────────────────
+
+async function loadSoulIdentity(supabase: any): Promise<{ soul: any; identity: any }> {
+  const { data } = await supabase
+    .from('agent_memory')
+    .select('key, value')
+    .in('key', ['soul', 'identity']);
+
+  const soul = data?.find((m: any) => m.key === 'soul')?.value || {};
+  const identity = data?.find((m: any) => m.key === 'identity')?.value || {};
+  return { soul, identity };
+}
+
+function buildSoulPrompt(soul: any, identity: any): string {
+  let prompt = '';
+  if (identity.name || identity.role) {
+    prompt += `\n\nIDENTITY:\nName: ${identity.name || 'FlowPilot'}\nRole: ${identity.role || 'CMS operator'}`;
+    if (identity.capabilities?.length) prompt += `\nCapabilities: ${identity.capabilities.join(', ')}`;
+    if (identity.boundaries?.length) prompt += `\nBoundaries: ${identity.boundaries.join('; ')}`;
+  }
+  if (soul.purpose) prompt += `\n\nSOUL:\nPurpose: ${soul.purpose}`;
+  if (soul.values?.length) prompt += `\nValues: ${soul.values.join('; ')}`;
+  if (soul.tone) prompt += `\nTone: ${soul.tone}`;
+  if (soul.philosophy) prompt += `\nPhilosophy: ${soul.philosophy}`;
+  return prompt;
+}
+
 // ─── Memory helpers ───────────────────────────────────────────────────────────
 
 async function loadMemories(supabase: any): Promise<string> {
   const { data } = await supabase
     .from('agent_memory')
     .select('key, value, category')
+    .not('key', 'in', '("soul","identity")')
     .order('updated_at', { ascending: false })
     .limit(30);
 
