@@ -41,6 +41,7 @@ const WIDGET_META: Record<string, { title: string; description: string; moduleId
   'chat-feedback': { title: 'Chat Feedback', description: 'User feedback on AI chat', moduleId: 'chat' },
   'aeo': { title: 'AEO Insights', description: 'Answer Engine Optimization' },
   'automation-health': { title: 'Automation Health', description: 'Automation run counts and error rates' },
+  'flowpilot': { title: 'FlowPilot', description: 'AI agent activity and goals' },
   'recent-pages': { title: 'Recent Pages', description: 'Recently updated pages' },
   'quick-actions': { title: 'Quick Actions', description: 'Common shortcuts' },
 };
