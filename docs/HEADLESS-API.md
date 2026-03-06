@@ -1,6 +1,6 @@
-# Headless API Documentation
+# Content API Documentation
 
-FlowWink provides a powerful headless API for multi-channel content delivery. Access your content via REST or GraphQL endpoints.
+FlowWink provides a powerful Content API for multi-channel delivery. Access your content via REST or GraphQL endpoints — the same content FlowPilot creates and manages autonomously.
 
 ## Base URL
 

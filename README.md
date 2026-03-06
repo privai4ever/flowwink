@@ -1,72 +1,74 @@
 # FlowWink
 
-**Flow into Content Creation** — The modern CMS that makes content creation effortless.
+**Your Website Runs Itself** — The first autonomous agentic CMS powered by FlowPilot.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Docker Image](https://img.shields.io/badge/Docker-ghcr.io-blue)](https://github.com/magnusfroste/flowwink/pkgs/container/flowwink)
 
 ## What is FlowWink?
 
-FlowWink is a modern, open-source Content Management System built for organizations that need:
+FlowWink is the first autonomous agentic CMS — an open-source platform where an AI agent called **FlowPilot** operates your entire online presence. You set objectives. FlowPilot executes.
 
-- ✅ A complete website without developers
-- ✅ Headless API for multi-channel delivery
-- ✅ **AI chat with your content as context** — Instant value, no training needed
-- ✅ GDPR and WCAG compliance built-in
-- ✅ Full control with self-hosting
+- ✅ **Autonomous Operations** — FlowPilot writes content, qualifies leads, sends campaigns, and books meetings
+- ✅ **Self-Hosted & Private** — Your agent, your data, your AI — on your infrastructure
+- ✅ **Replaces 4 Products** — CMS + Chatbot + CRM + Marketing Automation in one
+- ✅ **GDPR by Architecture** — Private LLM support, no third-party data transfers
+- ✅ **Self-Evolving** — FlowPilot learns from every interaction and creates new skills
 
-### Killer Feature: AI Chat with Multi-Module Context
+### The Autonomous Loop
 
-**First system to use all your content as AI context:**
-
-- Pages, blog posts, knowledge base articles
-- Instant answers from your own content
-- No training required — works immediately
-- Saves hours of customer support time
-
-### Use Case: Outreach-Focused Teams
-
-For teams building their digital presence and lead generation:
+FlowPilot operates in a continuous cycle — no manual intervention required:
 
 ```
-AI → Blog (content) → Pages (landings) → Forms (capture)
-→ Leads (nurture) → Newsletter (email) → Analytics (measure)
+┌───────────────────────────────────────────────────────┐
+│                  THE AUTONOMOUS LOOP                   │
+│                                                       │
+│  Heartbeat → Reflect → Plan → Execute → Log → Learn  │
+│       ↑                                        │      │
+│       └────────────────────────────────────────┘      │
+└───────────────────────────────────────────────────────┘
 ```
 
-**5 modules = complete outreach loop:**
-- **Pages** — Landings pages for campaigns
-- **Blog** — Content marketing, SEO, thought leadership
-- **Leads** — Capture leads from forms
-- **Newsletter** — Nurture leads via email
-- **AI** — Generate content 10x faster
+**Every 12 hours**, FlowPilot reviews what happened, evaluates performance against your objectives, plans next actions, and executes — logging everything for your review.
 
-### Head + Headless
+### Six Core Capabilities
 
-Unlike traditional CMS (website only) or pure headless solutions (API only, requires separate frontend), FlowWink delivers **both**:
+| Capability | Description |
+|-----------|-------------|
+| **Skill Engine** | 20+ registered tools, self-creating new ones |
+| **Persistent Memory** | Learns preferences, remembers context, stores brand guidelines |
+| **Objectives** | Goal-driven operations with progress tracking |
+| **Autonomous Heartbeat** | 12-hour reflection cycles |
+| **Signal Automations** | Event-driven reactions (form → qualify lead → send email) |
+| **Self-Evolution** | Modifies own instructions, proposes new skills |
+
+### Six Channels, One Agent
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     FLOWWINK CONTENT                        │
-│                    (Single Source of Truth)                 │
-└─────────────────────────────────────────────────────────────┘
-                              │
-          ┌───────────────────┼───────────────────┐
-          │                   │                   │
-          ▼                   ▼                   ▼
-    ┌──────────┐       ┌──────────┐       ┌──────────┐
-    │   HEAD   │       │ HEADLESS │       │  FUTURE  │
-    │ Website  │       │   API    │       │ Channels │
-    │(Built-in)│       │(REST/GQL)│       │          │
-    └──────────┘       └──────────┘       └──────────┘
+FlowPilot operates across all channels natively:
+
+Content & Blog ──── writes, schedules, publishes, optimizes
+Visitor Chat ────── answers questions, qualifies leads, escalates
+CRM ─────────────── captures, scores, enriches, manages leads
+Email ───────────── newsletters, drip sequences, confirmations
+Bookings ────────── schedules, confirms, follows up
+E-Commerce ──────── products, orders, recommendations
 ```
 
 ## Features
 
 ### Content Management
-- **46 block types** — Text, images, galleries, accordions, CTAs, booking, and more
+- **46+ block types** — Text, images, galleries, accordions, CTAs, booking, and more
 - **Drag & drop** — Reorder blocks visually
-- **Rich text editor** — Powered by Tiptap
+- **Rich text editor** — Powered by Tiptap with AI Text Assistant (Cmd+J)
 - **Media library** — With automatic WebP optimization
+
+### FlowPilot Agent
+- **Skill Engine** — 20+ skills with approval gating and scope control
+- **Persistent Memory** — Brand guidelines, preferences, learned patterns
+- **Objectives** — Goal-driven autonomous operations
+- **Signal Automations** — Event-driven skill execution
+- **Activity Feed** — Complete audit trail of all autonomous actions
 
 ### Blog Module
 - **Full blog engine** — Posts, categories, tags, and author profiles
@@ -74,27 +76,34 @@ Unlike traditional CMS (website only) or pure headless solutions (API only, requ
 - **Editorial workflow** — Draft → Review → Published with scheduling
 - **RSS feed** — Auto-generated feed for subscribers
 
+### CRM & Lead Management
+- **Lead scoring** — Automatic scoring based on behavior
+- **AI qualification** — FlowPilot qualifies leads 24/7
+- **Deal pipeline** — Kanban board with stage tracking
+- **Company enrichment** — AI-powered data enrichment from domain
+
 ### Newsletter
 - **Subscriber management** — Double opt-in, GDPR-compliant
 - **Email campaigns** — Create and send newsletters
 - **Analytics** — Open rates, click tracking, engagement metrics
-- **GDPR tools** — Export and delete subscriber data
+- **Signal automations** — Welcome sequences triggered automatically
 
-### Integration Module (N8N Webhooks)
+### Integration Module
 - **Webhook system** — Trigger on page, blog, form, and newsletter events
 - **N8N templates** — Pre-built workflows for common automations
-- **Event types** — `page.published`, `blog_post.published`, `newsletter.subscribed`, `form.submitted`, and more
+- **Content API** — REST and GraphQL for multi-channel delivery
 - **Delivery logs** — Track webhook success/failure with retry support
 
 ### Editorial Workflow
 - **Roles** — Writer, Approver, Admin
-- **Approval flow** — Draft → Review → Published
-- **Version history** — Track and restore changes
+- **Approval flow** — Draft → Review → Published (FlowPilot respects this)
+- **Version history** — Track and restore changes (manual and autonomous)
 - **Scheduled publishing** — Set it and forget it
 
 ### AI Features
-- **AI Chat** — Multi-provider support (OpenAI, Local LLM, N8N)
-- **AI Migration** — Import existing websites automatically
+- **FlowPilot** — Autonomous agent with skills, memory, and objectives
+- **AI Chat** — Multi-provider support (OpenAI, Gemini, Local LLM, N8N)
+- **AI Text Assistant** — Generate, improve, translate content inline
 - **AI Brand Analysis** — Extract colors and fonts from any URL
 - **Knowledge Base** — Your content becomes AI context
 
@@ -102,9 +111,10 @@ Unlike traditional CMS (website only) or pure headless solutions (API only, requ
 - **GDPR** — Audit logging, cookie consent, privacy by design
 - **WCAG 2.1 AA** — Accessibility built into every component
 - **Row Level Security** — Powered by Supabase RLS
-- **Security Hardening** — Regular dependency audits, production-safe logging
+- **Approval Gating** — Human oversight for sensitive autonomous actions
+- **Private AI** — Self-hosted LLM support for complete data sovereignty
 
-### Headless API
+### Content API
 - **REST API** — `/content-api/pages`, `/content-api/page/:slug`
 - **GraphQL** — Full schema for flexible queries
 - **Edge caching** — Fast responses worldwide
@@ -118,10 +128,11 @@ Unlike traditional CMS (website only) or pure headless solutions (API only, requ
 | Backend | Supabase (PostgreSQL, Auth, Storage, Edge Functions) |
 | Editor | Tiptap |
 | State | TanStack Query |
+| AI | OpenAI, Gemini, Local LLM (Ollama/LM Studio/vLLM), N8N |
 
 ## Self-Hosting
 
-FlowWink is **free to self-host**. Deploy on your own Supabase instance with full control over your data.
+FlowWink is **free to self-host**. Deploy on your own Supabase instance with full control over your data and AI.
 
 ### Quick Start
 
@@ -206,7 +217,7 @@ docker-compose up -d
 - ✅ Easy upgrades (`docker pull` for new versions)
 - ✅ Works with Supabase Cloud OR Self-Hosted Supabase
 - ✅ Deploy on Easypanel, Railway, Fly.io, or any VPS
-- ✅ Your data, your infrastructure
+- ✅ Your data, your AI, your infrastructure
 
 **Platforms:**
 - **Easypanel** — One-click Docker deployment with auto-HTTPS ([Guide](docs/DEPLOYMENT.md))
@@ -231,10 +242,11 @@ npx supabase db push
 
 See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for complete deployment guides.
 
-**AI Features:** When self-hosting, configure a Private LLM endpoint (OpenAI, Gemini, Ollama, LM Studio, or N8N) in the CMS admin panel.
+**AI Features:** When self-hosting, configure your AI provider (OpenAI, Gemini, Ollama, LM Studio, or N8N) in the admin panel. FlowPilot operates with the same autonomous capabilities regardless of provider.
 
 ## Documentation
 
+- **[docs/flowpilot.md](docs/flowpilot.md)** — FlowPilot autonomous agent documentation
 - **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — Docker deployment guide (Easypanel, Railway, Fly.io)
 - **[docs/SETUP.md](docs/SETUP.md)** — Supabase setup guide
 - **[docs/PRD.md](docs/PRD.md)** — Full product documentation

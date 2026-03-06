@@ -56,7 +56,7 @@ This document describes each FlowWink module from a user perspective: what it do
 
 | Module | Description | Default |
 |--------|-------------|---------|
-| Content Hub | REST and GraphQL API for headless CMS | Disabled |
+| Content Hub | REST and GraphQL Content API for multi-channel delivery | Disabled |
 | Global Elements | Header, footer and other reusable components | Enabled |
 
 ---
@@ -217,7 +217,7 @@ This document describes each FlowWink module from a user perspective: what it do
 
 ### Content Hub
 
-**Purpose**: REST and GraphQL API for headless CMS
+**Purpose**: REST and GraphQL Content API for multi-channel delivery
 
 **Key features**: `/content-api` endpoints, GraphQL support
 

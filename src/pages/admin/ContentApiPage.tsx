@@ -396,7 +396,7 @@ export default async function Home() {
       <div className="space-y-8">
         <AdminPageHeader
           title="Content API"
-          description="Developer tools for headless content delivery. REST & GraphQL."
+          description="Developer tools for multi-channel content delivery. REST & GraphQL."
         />
 
         {/* Hero Section */}
@@ -424,14 +424,14 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Headless Side */}
+            {/* Content API Side */}
             <div className="p-8 bg-gradient-to-br from-secondary/5 to-secondary/10">
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-12 w-12 rounded-xl bg-secondary/20 flex items-center justify-center">
                   <Code2 className="h-6 w-6 text-secondary-foreground" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Headless</h3>
+                  <h3 className="font-semibold text-lg">Content API</h3>
                   <p className="text-sm text-muted-foreground">REST & GraphQL API</p>
                 </div>
               </div>
