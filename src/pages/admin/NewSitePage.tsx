@@ -49,6 +49,7 @@ export default function NewSitePage() {
   const [step, setStep] = useState<CreationStep>('select');
   const [progress, setProgress] = useState<CreationProgress>({ currentPage: 0, totalPages: 0, currentStep: '' });
   const [createdPageIds, setCreatedPageIds] = useState<string[]>([]);
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [clearExistingPages, setClearExistingPages] = useState(false);
   const [clearBlogPosts, setClearBlogPosts] = useState(true);
   const [clearKbContent, setClearKbContent] = useState(true);
