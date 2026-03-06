@@ -227,7 +227,7 @@ async function handleAutomationList(supabase: any, args: { enabled_only?: boolea
   return { automations: data || [], count: data?.length || 0 };
 }
 
-// ─── Reflection: Analyze patterns ─────────────────────────────────────────────
+// ─── Reflection: Analyze patterns & auto-persist ──────────────────────────────
 
 async function handleReflect(supabase: any, args: { focus?: string }) {
   const since = new Date();
@@ -265,6 +265,24 @@ async function handleReflect(supabase: any, args: { focus?: string }) {
   const { data: objectives } = await supabase
     .from('agent_objectives').select('goal, status, progress');
 
+  const suggestions = generateSuggestions(skillStats, allSkills || [], automations || []);
+
+  // ── Auto-persist learnings from reflection ──
+  const learnings: string[] = [];
+  for (const [name, s] of Object.entries(skillStats)) {
+    if (s.errors > 2 && s.last_error) {
+      learnings.push(`Skill "${name}" fails frequently: ${s.last_error}`);
+    }
+  }
+  if (learnings.length > 0) {
+    await supabase.from('agent_memory').upsert({
+      key: `lesson:reflect_${new Date().toISOString().slice(0, 10)}`,
+      value: { learnings, suggestions, generated_at: new Date().toISOString() },
+      category: 'fact',
+      created_by: 'flowpilot',
+    }, { onConflict: 'key' });
+  }
+
   return {
     period: '7 days',
     total_actions: activities.length,
@@ -276,7 +294,8 @@ async function handleReflect(supabase: any, args: { focus?: string }) {
     skills: allSkills || [],
     automations: automations || [],
     objectives: objectives || [],
-    suggestions: generateSuggestions(skillStats, allSkills || [], automations || []),
+    suggestions,
+    auto_persisted_learnings: learnings.length,
   };
 }
 
@@ -306,6 +325,40 @@ function generateSuggestions(
     suggestions.push('System is running well. No immediate improvements suggested.');
   }
   return suggestions;
+}
+
+// ─── SOUL update ──────────────────────────────────────────────────────────────
+
+async function handleSoulUpdate(supabase: any, args: { field: string; value: any }) {
+  const { data: existing } = await supabase
+    .from('agent_memory').select('id, value').eq('key', 'soul').maybeSingle();
+
+  const currentSoul = existing?.value || {};
+  const updatedSoul = { ...currentSoul, [args.field]: args.value };
+
+  if (existing) {
+    await supabase.from('agent_memory')
+      .update({ value: updatedSoul, updated_at: new Date().toISOString() })
+      .eq('id', existing.id);
+  } else {
+    await supabase.from('agent_memory')
+      .insert({ key: 'soul', value: updatedSoul, category: 'preference', created_by: 'flowpilot' });
+  }
+  return { status: 'updated', field: args.field, soul: updatedSoul };
+}
+
+// ─── Skill instruct (add knowledge to a skill) ───────────────────────────────
+
+async function handleSkillInstruct(supabase: any, args: { skill_name: string; instructions: string }) {
+  const { data, error } = await supabase
+    .from('agent_skills')
+    .update({ instructions: args.instructions, updated_at: new Date().toISOString() })
+    .eq('name', args.skill_name)
+    .select('id, name, instructions')
+    .single();
+
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'updated', skill: data };
 }
 
 // ─── Built-in tool definitions ────────────────────────────────────────────────
