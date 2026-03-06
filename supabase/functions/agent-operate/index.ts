@@ -12,6 +12,8 @@ const BUILT_IN_TOOL_NAMES = [
   'memory_write', 'memory_read',
   'objective_update_progress', 'objective_complete',
   'skill_create', 'skill_update', 'skill_list', 'skill_disable',
+  'skill_instruct',
+  'soul_update',
   'automation_create', 'automation_list',
   'reflect',
 ];
