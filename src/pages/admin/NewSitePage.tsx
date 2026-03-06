@@ -28,6 +28,7 @@ import { useMediaLibraryCount, useClearMediaLibrary } from '@/hooks/useMediaLibr
 import { useToast } from '@/hooks/use-toast';
 import { extractImagesFromTemplate, updateBlockAtPath } from '@/lib/image-extraction';
 import { supabase } from '@/integrations/supabase/client';
+import { FlowPilotOnboardingWizard } from '@/components/admin/FlowPilotOnboardingWizard';
 import type { ContentBlock } from '@/types/cms';
 
 type CreationStep = 'select' | 'creating' | 'done';
