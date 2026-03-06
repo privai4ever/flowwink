@@ -89,7 +89,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
             { id: 'ab1', title: 'White Label', description: 'Your brand, your domain. Clients never see FlowWink.', icon: 'Palette', span: 'wide', accentColor: '#8B5CF6' },
             { id: 'ab2', title: 'Unlimited Sites', description: 'One VPS hosts 20-50 client sites. Scale without limits.', icon: 'Layers', accentColor: '#3B82F6' },
             { id: 'ab3', title: 'Zero Fees', description: 'No per-site, per-user, or per-page charges. Ever.', icon: 'Ban', accentColor: '#10B981' },
-            { id: 'ab4', title: 'Full API', description: 'Headless delivery for custom React, Vue, or mobile apps.', icon: 'Code', span: 'wide', accentColor: '#F59E0B' },
+            { id: 'ab4', title: 'Full API', description: 'Content API for custom React, Vue, or mobile apps.', icon: 'Code', span: 'wide', accentColor: '#F59E0B' },
           ],
         },
       },
