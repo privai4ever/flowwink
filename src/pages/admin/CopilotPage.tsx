@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Zap, Plus, Trash2, MessageSquare } from 'lucide-react';
+import { Zap, Plus, Trash2, MessageSquare, Search } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminContentHeader } from '@/components/admin/AdminContentHeader';
+import { AdminSearchCommand, useAdminSearch, SearchButton } from '@/components/admin/AdminSearchCommand';
 import { Button } from '@/components/ui/button';
 import { UnifiedChat } from '@/components/chat/UnifiedChat';
 import { ContextPanel } from '@/components/admin/copilot/ContextPanel';
@@ -20,7 +21,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
 
 export default function CopilotPage() {
