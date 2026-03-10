@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Save, Cloud, Server, Webhook, Shield, Database, BookOpen, FileText, HelpCircle, ExternalLink, ThumbsUp, ThumbsDown, Download, CheckCircle2, XCircle, AlertTriangle, Wrench, Globe, Headphones, Brain, Gauge, BarChart3, TrendingUp, Bot, Users, MessageSquare } from 'lucide-react';
+import { Loader2, Save, Cloud, Server, Webhook, Shield, Database, BookOpen, FileText, HelpCircle, ExternalLink, ThumbsUp, ThumbsDown, Download, CheckCircle2, XCircle, AlertTriangle, Wrench, Globe, Headphones, Brain, Gauge, BarChart3, TrendingUp, Bot, Users, MessageSquare, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useUnsavedChanges, UnsavedChangesDialog } from '@/hooks/useUnsavedChanges';
