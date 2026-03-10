@@ -52,7 +52,7 @@ export default function CopilotPage() {
 
       {/* Chat history sidebar */}
       {sidebarOpen ? (
-        <div className="w-[--sidebar-width] shrink-0 flex flex-col border-r border-sidebar-border bg-sidebar">
+        <div className="w-64 shrink-0 flex flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
           {/* Header */}
           <div className="flex items-center justify-between h-10 px-3 shrink-0 border-b border-sidebar-border">
             <span className="font-serif font-bold text-base truncate">{adminName}</span>
