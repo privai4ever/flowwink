@@ -18,8 +18,27 @@ export default function CopilotPage() {
   const [chatKey, setChatKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { data: branding } = useBrandingSettings();
+  const { data: chatSettings } = useChatSettings();
   const { searchOpen, setSearchOpen } = useAdminSearch();
   const adminName = branding?.adminName || 'FlowWink';
+  const showEscalations = chatSettings?.showEscalationsInCopilot ?? false;
+
+  // Fetch unresolved escalations
+  const { data: escalations = [] } = useQuery({
+    queryKey: ['copilot-escalations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('support_escalations')
+        .select('id, reason, priority, created_at, ai_summary, conversation_id')
+        .is('resolved_at', null)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: showEscalations,
+    refetchInterval: 30_000,
+  });
 
   useEffect(() => {
     operate.loadSkills();
