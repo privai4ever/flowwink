@@ -54,6 +54,7 @@ import {
   BentoGridBlock,
   SectionDividerBlock,
   FeaturedCarouselBlock,
+  ResumeMatcherBlock,
 } from './blocks';
 import type { ChatLauncherBlockData } from './blocks/ChatLauncherBlock';
 import type { KbHubBlockData } from './blocks/KbHubBlock';
