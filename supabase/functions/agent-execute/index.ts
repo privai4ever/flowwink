@@ -156,6 +156,7 @@ const MODULE_HANDLER_TO_SETTING: Record<string, string> = {
   objectives: 'analytics',
   products: 'products',
   media: 'media',
+  resume: 'resume',
 };
 
 async function autoActivateModule(
@@ -372,8 +373,76 @@ async function executeModuleAction(
       return { error: `Unknown media action: ${action}` };
     }
 
+    case 'resume': {
+      return await executeResumeAction(supabase, skillName, args);
+    }
+
     default:
       return { error: `Unknown module: ${moduleName}` };
+  }
+}
+
+// =============================================================================
+// Resume module handlers
+// =============================================================================
+
+async function executeResumeAction(
+  supabase: ReturnType<typeof createClient>,
+  skillName: string,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  switch (skillName) {
+    case 'manage_consultant_profile': {
+      const { action = 'create', profile_id, ...profileData } = args as any;
+
+      if (action === 'list') {
+        const { data, error } = await supabase.from('consultant_profiles')
+          .select('id, name, title, skills, experience_years, is_active, availability')
+          .order('created_at', { ascending: false }).limit(50);
+        if (error) throw new Error(`List failed: ${error.message}`);
+        return { profiles: data || [] };
+      }
+
+      if (action === 'create') {
+        const { name, title, skills = [], bio, experience_years, experience_json, education, certifications, languages, email, phone, hourly_rate_cents, currency, summary } = profileData;
+        if (!name) throw new Error('name is required');
+        const { data, error } = await supabase.from('consultant_profiles').insert({
+          name, title, skills, bio, experience_years, experience_json, education, certifications, languages, email, phone, hourly_rate_cents, currency, summary, is_active: true,
+        }).select('id, name, title').single();
+        if (error) throw new Error(`Create failed: ${error.message}`);
+        return { profile_id: data.id, name: data.name, status: 'created' };
+      }
+
+      if (action === 'update' && profile_id) {
+        const { data, error } = await supabase.from('consultant_profiles')
+          .update(profileData).eq('id', profile_id).select('id, name').single();
+        if (error) throw new Error(`Update failed: ${error.message}`);
+        return { profile_id: data.id, status: 'updated' };
+      }
+
+      return { error: `Unknown resume action: ${action}` };
+    }
+
+    case 'match_consultant': {
+      const { job_description, max_results = 3 } = args as any;
+      if (!job_description) throw new Error('job_description is required');
+      
+      // Delegate to the resume-match edge function
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const response = await fetch(`${supabaseUrl}/functions/v1/resume-match`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${serviceKey}`,
+        },
+        body: JSON.stringify({ job_description, max_results }),
+      });
+      return await response.json();
+    }
+
+    default:
+      return { error: `Unknown resume skill: ${skillName}` };
   }
 }
 
@@ -775,6 +844,8 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   learn_from_data: ['learn', 'insight', 'analytics', 'performance'],
   seo_audit_page: ['seo', 'content', 'page', 'traffic', 'search', 'performance'],
   kb_gap_analysis: ['knowledge', 'support', 'chat', 'content', 'article', 'kb'],
+  manage_consultant_profile: ['resume', 'consultant', 'profile', 'talent'],
+  match_consultant: ['resume', 'consultant', 'match', 'talent', 'recruitment'],
 };
 
 async function trackObjectiveProgress(
