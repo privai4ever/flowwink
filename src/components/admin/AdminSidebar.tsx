@@ -220,13 +220,11 @@ export function AdminSidebar() {
 
       <Sidebar collapsible="icon" className="border-r border-sidebar-border">
         {/* Logo */}
-        <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
-          <div className="flex items-center justify-between gap-2">
-            {!isCollapsed && (
-              <span className="font-serif font-bold text-base truncate">{adminName}</span>
-            )}
-            <SidebarTrigger className="h-7 w-7 shrink-0" />
-          </div>
+        <SidebarHeader className="border-b border-sidebar-border px-3 h-10 flex items-center justify-between shrink-0">
+          {!isCollapsed && (
+            <span className="font-serif font-bold text-base truncate">{adminName}</span>
+          )}
+          <SidebarTrigger className="h-7 w-7 shrink-0" />
         </SidebarHeader>
 
         {/* Search Button */}

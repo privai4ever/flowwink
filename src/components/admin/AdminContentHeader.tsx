@@ -45,8 +45,6 @@ export function AdminContentHeader() {
 
   return (
     <div className="h-10 flex items-center gap-1 px-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
-      {/* Sidebar trigger — only in dashboard mode */}
-      {!isCopilotMode && <SidebarTrigger className="h-7 w-7 shrink-0" />}
 
       {/* Mode toggle pills */}
       <div className="flex items-center bg-muted/50 rounded-lg p-0.5 gap-0.5 ml-1 shrink-0">

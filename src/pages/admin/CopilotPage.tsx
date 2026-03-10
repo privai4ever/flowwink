@@ -65,10 +65,9 @@ export default function CopilotPage() {
       {/* Chat history sidebar — mirrors AdminSidebar structure */}
       <Sidebar collapsible="none" className="border-r border-sidebar-border">
         {/* Header — matches AdminSidebar header */}
-        <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-serif font-bold text-base truncate">{adminName}</span>
-          </div>
+        <SidebarHeader className="border-b border-sidebar-border px-3 h-10 flex items-center justify-between shrink-0">
+          <span className="font-serif font-bold text-base truncate">{adminName}</span>
+          <SidebarTrigger className="h-7 w-7 shrink-0" />
         </SidebarHeader>
 
         {/* Search Button */}
