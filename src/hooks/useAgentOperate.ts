@@ -156,12 +156,14 @@ export function useAgentOperate() {
       }
     }
 
+    const { data: { user } } = await supabase.auth.getUser();
     const { data, error } = await supabase
       .from('chat_conversations')
       .insert({
         title: 'FlowPilot Session',
         conversation_status: 'active',
         priority: 'normal',
+        user_id: user?.id,
       })
       .select('id')
       .single();
