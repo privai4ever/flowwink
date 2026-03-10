@@ -422,7 +422,264 @@ async function executeDbAction(
       })).sort((a, b) => b.views - a.views).slice(0, 10);
 
       return { period, total_views: totalViews, unique_pages: uniqueSlugs.length, top_pages: topPages };
+}
+
+// =============================================================================
+// Analytics skill handlers (SEO audit, KB gap analysis)
+// =============================================================================
+
+async function executeAnalyticsAction(
+  supabase: ReturnType<typeof createClient>,
+  skillName: string,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  switch (skillName) {
+    case 'seo_audit_page': {
+      const { slug } = args as any;
+      if (!slug) throw new Error('slug is required');
+
+      // Fetch page or blog post
+      let page: any = null;
+      const { data: pageData } = await supabase.from('pages')
+        .select('id, title, slug, meta_json, content_json, status')
+        .eq('slug', slug).maybeSingle();
+      
+      if (pageData) {
+        page = { ...pageData, type: 'page' };
+      } else {
+        const { data: postData } = await supabase.from('blog_posts')
+          .select('id, title, slug, meta_json, content_json, excerpt, featured_image, featured_image_alt, status')
+          .eq('slug', slug).maybeSingle();
+        if (postData) page = { ...postData, type: 'blog_post' };
+      }
+
+      if (!page) return { error: `No page or blog post found with slug '${slug}'` };
+
+      const meta = (page.meta_json || {}) as Record<string, any>;
+      const blocks = (page.content_json || []) as any[];
+      const issues: string[] = [];
+      const suggestions: string[] = [];
+      let score = 100;
+
+      // Title check
+      if (!page.title || page.title.length < 10) {
+        issues.push('Title is too short (< 10 chars)');
+        score -= 15;
+      } else if (page.title.length > 60) {
+        issues.push(`Title is too long (${page.title.length} chars, recommended < 60)`);
+        score -= 5;
+      }
+
+      // Meta description
+      const metaDesc = meta.description || meta.metaDescription || '';
+      if (!metaDesc) {
+        issues.push('Missing meta description');
+        score -= 20;
+      } else if (metaDesc.length < 50) {
+        issues.push(`Meta description too short (${metaDesc.length} chars, recommended 120-160)`);
+        score -= 10;
+      } else if (metaDesc.length > 160) {
+        issues.push(`Meta description too long (${metaDesc.length} chars, recommended < 160)`);
+        score -= 5;
+      }
+
+      // OG Image
+      if (!meta.ogImage && !page.featured_image) {
+        issues.push('Missing Open Graph / featured image');
+        score -= 10;
+      }
+
+      // Alt text check
+      if (page.type === 'blog_post' && page.featured_image && !page.featured_image_alt) {
+        issues.push('Featured image missing alt text');
+        score -= 5;
+      }
+
+      // Content depth — count text blocks
+      let wordCount = 0;
+      let headingCount = 0;
+      let imageCount = 0;
+      let linkCount = 0;
+
+      const walkBlocks = (items: any[]) => {
+        for (const block of items) {
+          const data = block.data || block;
+          const blockType = block.type || '';
+          if (blockType === 'heading' || data.level) headingCount++;
+          if (blockType === 'image' || data.src) imageCount++;
+          
+          // Count text
+          const text = data.text || data.content || '';
+          if (typeof text === 'string') {
+            wordCount += text.split(/\s+/).filter(Boolean).length;
+          }
+
+          // Tiptap JSON
+          if (block.content && Array.isArray(block.content)) {
+            for (const node of block.content) {
+              if (node.type === 'text' && node.text) {
+                wordCount += node.text.split(/\s+/).filter(Boolean).length;
+              }
+              if (node.marks) {
+                for (const mark of node.marks) {
+                  if (mark.type === 'link') linkCount++;
+                }
+              }
+            }
+          }
+
+          if (block.children) walkBlocks(block.children);
+        }
+      };
+
+      if (Array.isArray(blocks)) walkBlocks(blocks);
+
+      if (wordCount < 300 && page.type === 'blog_post') {
+        issues.push(`Content too thin (${wordCount} words, recommended 800+)`);
+        score -= 15;
+      } else if (wordCount < 100) {
+        issues.push(`Very little content (${wordCount} words)`);
+        score -= 10;
+      }
+
+      if (headingCount === 0 && wordCount > 200) {
+        issues.push('No headings found — add H2/H3 structure');
+        score -= 10;
+      }
+
+      if (imageCount === 0 && wordCount > 300) {
+        suggestions.push('Consider adding images to improve engagement');
+      }
+
+      if (linkCount === 0 && page.type === 'blog_post') {
+        suggestions.push('Add internal or external links for better SEO');
+      }
+
+      // Excerpt check (blog)
+      if (page.type === 'blog_post' && !page.excerpt) {
+        issues.push('Missing excerpt — important for search snippets');
+        score -= 5;
+      }
+
+      // Status
+      if (page.status !== 'published') {
+        suggestions.push(`Page is currently '${page.status}' — publish to make it indexable`);
+      }
+
+      score = Math.max(0, Math.min(100, score));
+
+      return {
+        slug,
+        type: page.type,
+        title: page.title,
+        seo_score: score,
+        word_count: wordCount,
+        heading_count: headingCount,
+        image_count: imageCount,
+        link_count: linkCount,
+        issues,
+        suggestions,
+        meta_present: {
+          title: !!page.title,
+          description: !!metaDesc,
+          og_image: !!(meta.ogImage || page.featured_image),
+          alt_text: page.type === 'blog_post' ? !!page.featured_image_alt : null,
+        },
+      };
     }
+
+    case 'kb_gap_analysis': {
+      const { limit = 20 } = args as any;
+
+      // 1. Get all chat messages from users (recent)
+      const since = new Date();
+      since.setDate(since.getDate() - 30);
+
+      const { data: messages } = await supabase.from('chat_messages')
+        .select('content, conversation_id, created_at')
+        .eq('role', 'user')
+        .gte('created_at', since.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      // 2. Get existing KB articles
+      const { data: articles } = await supabase.from('kb_articles')
+        .select('id, title, question, slug, views_count, helpful_count, not_helpful_count, needs_improvement')
+        .eq('is_published', true);
+
+      // 3. Get negative feedback
+      const { data: negativeFeedback } = await supabase.from('chat_feedback')
+        .select('user_question, ai_response, context_kb_articles')
+        .eq('rating', 'negative')
+        .gte('created_at', since.toISOString())
+        .limit(100);
+
+      const articleTitles = (articles || []).map(a => a.title.toLowerCase());
+      const articleQuestions = (articles || []).map(a => a.question.toLowerCase());
+
+      // 4. Extract unique user questions / topics
+      const userQuestions = (messages || [])
+        .map(m => m.content.trim())
+        .filter(q => q.length > 10 && q.length < 500 && q.endsWith('?'));
+
+      // 5. Find questions NOT covered by existing KB
+      const uncoveredQuestions: string[] = [];
+      for (const q of userQuestions) {
+        const qLower = q.toLowerCase();
+        const covered = articleTitles.some(t => {
+          const words = t.split(/\s+/).filter(w => w.length > 3);
+          const matching = words.filter(w => qLower.includes(w));
+          return matching.length >= Math.ceil(words.length * 0.5);
+        }) || articleQuestions.some(aq => {
+          const words = aq.split(/\s+/).filter(w => w.length > 3);
+          const matching = words.filter(w => qLower.includes(w));
+          return matching.length >= Math.ceil(words.length * 0.5);
+        });
+
+        if (!covered && !uncoveredQuestions.some(uq => uq.toLowerCase() === qLower)) {
+          uncoveredQuestions.push(q);
+        }
+      }
+
+      // 6. Identify underperforming articles
+      const underperforming = (articles || [])
+        .filter(a => (a.not_helpful_count || 0) > (a.helpful_count || 0) || a.needs_improvement)
+        .map(a => ({
+          id: a.id,
+          title: a.title,
+          slug: a.slug,
+          helpful: a.helpful_count || 0,
+          not_helpful: a.not_helpful_count || 0,
+          needs_improvement: a.needs_improvement,
+        }));
+
+      // 7. Negative feedback themes
+      const negativeThemes = (negativeFeedback || []).map(f => ({
+        question: f.user_question,
+        had_kb_context: (f.context_kb_articles || []).length > 0,
+      }));
+
+      return {
+        period_days: 30,
+        total_user_questions: userQuestions.length,
+        total_kb_articles: (articles || []).length,
+        uncovered_questions: uncoveredQuestions.slice(0, limit),
+        uncovered_count: uncoveredQuestions.length,
+        underperforming_articles: underperforming,
+        negative_feedback_count: negativeThemes.length,
+        negative_without_kb: negativeThemes.filter(n => !n.had_kb_context).length,
+        suggestions: [
+          uncoveredQuestions.length > 5 ? `${uncoveredQuestions.length} user questions have no matching KB article — consider creating articles for the most common ones.` : null,
+          underperforming.length > 0 ? `${underperforming.length} articles have more negative than positive feedback — review and improve them.` : null,
+          negativeThemes.filter(n => !n.had_kb_context).length > 0 ? `${negativeThemes.filter(n => !n.had_kb_context).length} negative feedbacks had no KB context — the chat couldn't find relevant articles.` : null,
+        ].filter(Boolean),
+      };
+    }
+
+    default:
+      return { error: `Unknown analytics skill: ${skillName}` };
+  }
+}
 
     default:
       return { error: `Unknown table handler: ${table}` };
