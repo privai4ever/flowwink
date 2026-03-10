@@ -24,6 +24,10 @@ import { useSkills, useToggleSkill, useUpsertSkill, useDeleteSkill } from '@/hoo
 import type { AgentSkill } from '@/types/agent';
 
 export default function SkillHubPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'skills';
+
   const { data: skills = [], isLoading } = useSkills();
   const toggle = useToggleSkill();
   const upsert = useUpsertSkill();
