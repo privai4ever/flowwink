@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
-import { useChatSettings, useUpdateChatSettings, ChatSettings, ChatAiProvider } from '@/hooks/useSiteSettings';
+import { useChatSettings, useUpdateChatSettings, ChatSettings, ChatAiProvider, defaultChatSettings } from '@/hooks/useSiteSettings';
 import { usePages } from '@/hooks/usePages';
 import { useKbArticles, useKbStats } from '@/hooks/useKnowledgeBase';
 import { useChatFeedbackStats, useChatFeedbackList, useKbArticlesNeedingImprovement, exportFeedbackForFineTuning } from '@/hooks/useChatFeedback';
