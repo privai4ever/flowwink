@@ -68,6 +68,7 @@ import {
   Search,
   Clipboard,
   AlertTriangle,
+  FileUser,
 } from 'lucide-react';
 import { ContentBlockType } from '@/types/cms';
 import { useAllBlockModuleStatus } from '@/hooks/useBlockModuleStatus';
