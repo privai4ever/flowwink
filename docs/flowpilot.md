@@ -331,16 +331,55 @@ FlowAgent can modify its own behavior:
 
 ---
 
-## 5. What FlowAgent Manages — Six Channels
+## 5. Complete Skill Inventory (19 Default Skills)
 
-| Channel | Skills | What FlowAgent Does |
-|---------|--------|---------------------|
-| **Content & Blog** | `blog_write`, `blog_list` | Writes posts in brand voice, optimizes SEO/AEO, schedules publishing |
-| **Lead CRM** | `lead_qualify`, `lead_enrich`, `company_enrich` | Captures from any touchpoint, scores, enriches, routes to sales |
-| **Email Campaigns** | `newsletter_create` | Segments audiences, writes copy, sends at optimal times, GDPR-compliant |
-| **Bookings** | `book_appointment`, `availability_check` | Schedules meetings, sends confirmations, syncs with CRM |
-| **E-commerce** | `order_lookup`, `product_search` | Manages products, processes orders, tracks revenue |
-| **Analytics** | `analytics_query`, `reflect` | Monitors traffic, identifies trends, suggests improvements |
+### Content & Research
+
+| Skill | Handler | Scope | Approval | Description |
+|-------|---------|-------|----------|-------------|
+| `write_blog_post` | `module:blog` | internal | ❌ | Create draft blog post with title, topic, tone |
+| `research_content` | `edge:research-content` | internal | ❌ | Deep AI topic research — angles, hooks, competitive landscape |
+| `generate_content_proposal` | `edge:generate-content-proposal` | internal | ✅ | Multi-channel content generation (blog, newsletter, LinkedIn, X) |
+| `publish_scheduled_content` | `edge:publish-scheduled-pages` | internal | ❌ | Auto-publish pages/posts past their scheduled date |
+| `search_web` | `edge:firecrawl-search` | internal | ❌ | Web search for research and content ideas |
+
+### CRM & Sales Intelligence
+
+| Skill | Handler | Scope | Approval | Description |
+|-------|---------|-------|----------|-------------|
+| `add_lead` | `module:crm` | both | ❌ | Add lead to CRM from any source |
+| `qualify_lead` | `edge:qualify-lead` | internal | ❌ | AI lead scoring — analyzes activities, company data, engagement |
+| `enrich_company` | `edge:enrich-company` | internal | ❌ | Domain-based company enrichment via Firecrawl + AI |
+| `prospect_research` | `edge:prospect-research` | internal | ❌ | Company research + Hunter.io contact discovery |
+| `prospect_fit_analysis` | `edge:prospect-fit-analysis` | internal | ❌ | AI prospect-company fit scoring against ICP |
+
+### Communication
+
+| Skill | Handler | Scope | Approval | Description |
+|-------|---------|-------|----------|-------------|
+| `send_newsletter` | `module:newsletter` | internal | ✅ | Create newsletter draft or schedule |
+| `execute_newsletter_send` | `edge:newsletter-send` | internal | ✅ | Actually send newsletter to subscribers via Resend |
+| `scan_gmail_inbox` | `edge:gmail-inbox-scan` | internal | ❌ | Scan Gmail for business signals (leads, inquiries) |
+
+### Operations
+
+| Skill | Handler | Scope | Approval | Description |
+|-------|---------|-------|----------|-------------|
+| `book_appointment` | `module:booking` | both | ❌ | Create booking for customer |
+| `lookup_order` | `module:orders` | both | ❌ | Look up order by ID or email |
+| `create_objective` | `module:objectives` | internal | ❌ | Create high-level goal for autonomous operation |
+
+### Analytics & Learning
+
+| Skill | Handler | Scope | Approval | Description |
+|-------|---------|-------|----------|-------------|
+| `analyze_analytics` | `db:page_views` | internal | ❌ | Page view analytics by period |
+| `weekly_business_digest` | `edge:business-digest` | internal | ❌ | Cross-module business summary (views, leads, bookings, orders) |
+| `learn_from_data` | `edge:flowpilot-learn` | internal | ❌ | Distill platform data into persistent memory insights |
+
+### Objective Progress Auto-Tracking
+
+Every skill execution is automatically matched against active objectives via `SKILL_OBJECTIVE_MAP`. When a skill like `write_blog_post` succeeds, objectives containing keywords like "blog" or "content" automatically get their progress incremented — creating a closed-loop system where actions visibly advance business goals.
 
 ---
 
