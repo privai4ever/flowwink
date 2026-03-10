@@ -61,12 +61,7 @@ function AdminMessage({ msg }: { msg: OperateMessage }) {
   const showCursor = isStreaming && msg.toolStatus?.phase === 'streaming';
 
   return (
-    <div className={cn('flex gap-3', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-      {msg.role === 'assistant' && (
-        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center mt-1">
-          <Bot className="w-3.5 h-3.5 text-primary" />
-        </div>
-      )}
+    <div className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
       <div className={cn(
         'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
         msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
@@ -106,11 +101,6 @@ function AdminMessage({ msg }: { msg: OperateMessage }) {
           </div>
         )}
       </div>
-      {msg.role === 'user' && (
-        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary flex items-center justify-center mt-1">
-          <User className="w-3.5 h-3.5 text-primary-foreground" />
-        </div>
-      )}
     </div>
   );
 }
