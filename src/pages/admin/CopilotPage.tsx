@@ -27,6 +27,7 @@ export default function CopilotPage() {
   const operate = useAgentOperate();
   const [chatKey, setChatKey] = useState(0);
   const { data: branding } = useBrandingSettings();
+  const { searchOpen, setSearchOpen } = useAdminSearch();
   const adminName = branding?.adminName || 'FlowWink';
 
   useEffect(() => {
