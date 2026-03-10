@@ -210,17 +210,6 @@ export function UnifiedChatInput({
         <div className="flex items-end gap-2">
           {/* Left buttons */}
           <div className="flex items-center gap-1 shrink-0">
-            {onReset && scope === 'admin' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onReset}
-                className="h-9 w-9 rounded-full"
-                title="Clear conversation"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            )}
 
             {scope === 'admin' && (
               <>
