@@ -516,6 +516,8 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   publish_scheduled_content: ['publish', 'schedule', 'content', 'page'],
   scan_gmail_inbox: ['email', 'inbox', 'signal', 'lead'],
   learn_from_data: ['learn', 'insight', 'analytics', 'performance'],
+  seo_audit_page: ['seo', 'content', 'page', 'traffic', 'search', 'performance'],
+  kb_gap_analysis: ['knowledge', 'support', 'chat', 'content', 'article', 'kb'],
 };
 
 async function trackObjectiveProgress(
