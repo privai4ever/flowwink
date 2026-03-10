@@ -223,7 +223,7 @@ export default function CopilotPage() {
                   <MessageSquare className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary/60" />
                   <div className="flex-1 min-w-0">
                     <span className="block truncate text-sm">
-                      {chat.customer_name || chat.customer_email || 'Visitor'}
+                      {chat.title && chat.title !== 'New conversation' ? chat.title : (chat.customer_name || chat.customer_email || 'Visitor')}
                     </span>
                     <span className="block text-[10px] text-sidebar-foreground/50">
                       {chat.conversation_status || 'active'} · {formatDistanceToNow(new Date(chat.updated_at), { addSuffix: true })}
