@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Zap, Plus, Trash2, MessageSquare, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Zap, Plus, Trash2, MessageSquare, PanelLeftClose, PanelLeft, AlertTriangle } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminContentHeader } from '@/components/admin/AdminContentHeader';
 import { AdminSearchCommand, useAdminSearch, SearchButton } from '@/components/admin/AdminSearchCommand';
@@ -7,17 +7,38 @@ import { Button } from '@/components/ui/button';
 import { UnifiedChat } from '@/components/chat/UnifiedChat';
 import { ContextPanel } from '@/components/admin/copilot/ContextPanel';
 import { useAgentOperate } from '@/hooks/useAgentOperate';
-import { useBrandingSettings } from '@/hooks/useSiteSettings';
+import { useBrandingSettings, useChatSettings } from '@/hooks/useSiteSettings';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function CopilotPage() {
   const operate = useAgentOperate();
   const [chatKey, setChatKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { data: branding } = useBrandingSettings();
+  const { data: chatSettings } = useChatSettings();
   const { searchOpen, setSearchOpen } = useAdminSearch();
   const adminName = branding?.adminName || 'FlowWink';
+  const showEscalations = chatSettings?.showEscalationsInCopilot ?? false;
+
+  // Fetch unresolved escalations
+  const { data: escalations = [] } = useQuery({
+    queryKey: ['copilot-escalations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('support_escalations')
+        .select('id, reason, priority, created_at, ai_summary, conversation_id')
+        .is('resolved_at', null)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: showEscalations,
+    refetchInterval: 30_000,
+  });
 
   useEffect(() => {
     operate.loadSkills();
@@ -113,6 +134,35 @@ export default function CopilotPage() {
               </div>
             )}
           </div>
+
+          {/* Escalations section */}
+          {showEscalations && escalations.length > 0 && (
+            <div className="px-2 pb-2 border-t border-sidebar-border pt-2">
+              <div className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-normal mb-1 px-2 flex items-center gap-1.5">
+                <AlertTriangle className="h-3 w-3 text-warning" />
+                Escalations ({escalations.length})
+              </div>
+              {escalations.map((esc) => (
+                <button
+                  key={esc.id}
+                  onClick={() => {
+                    if (esc.conversation_id) {
+                      handleSwitchConversation(esc.conversation_id);
+                    }
+                  }}
+                  className="w-full flex items-start gap-2 px-2 py-1.5 rounded-md text-left transition-colors hover:bg-sidebar-accent/50"
+                >
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-warning" />
+                  <div className="flex-1 min-w-0">
+                    <span className="block truncate text-sm">{esc.reason}</span>
+                    <span className="block text-[10px] text-sidebar-foreground/50">
+                      {esc.priority} · {formatDistanceToNow(new Date(esc.created_at), { addSuffix: true })}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Footer */}
           <div className="border-t border-sidebar-border p-3">

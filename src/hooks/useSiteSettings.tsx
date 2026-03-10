@@ -254,11 +254,14 @@ export interface ChatSettings {
   suggestedPrompts: string[];
   
   // Live agent indicator settings
-  showLiveAgentBanner: boolean; // Show "You are now chatting with a live agent" banner
-  liveAgentIconStyle: 'avatar' | 'person' | 'headphones'; // What to show instead of robot icon
+  showLiveAgentBanner: boolean;
+  liveAgentIconStyle: 'avatar' | 'person' | 'headphones';
   
   // Chat appearance
-  showChatIcons: boolean; // Show avatars/icons in chat messages
+  showChatIcons: boolean;
+  
+  // FlowPilot integration
+  showEscalationsInCopilot: boolean;
 }
 
 const defaultChatSettings: ChatSettings = {
@@ -311,6 +314,7 @@ const defaultChatSettings: ChatSettings = {
   showLiveAgentBanner: true,
   liveAgentIconStyle: 'avatar',
   showChatIcons: true,
+  showEscalationsInCopilot: false,
 };
 
 // Generic hook for fetching settings
