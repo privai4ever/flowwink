@@ -122,12 +122,20 @@ async function parseOperateStream(response: Response, callbacks: StreamCallbacks
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
+export interface FlowPilotConversation {
+  id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export function useAgentOperate() {
   const [messages, setMessages] = useState<OperateMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [skills, setSkills] = useState<AgentSkill[]>([]);
   const [activities, setActivities] = useState<AgentActivity[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<FlowPilotConversation[]>([]);
   const abortRef = useRef<AbortController | null>(null);
 
   // ─── Conversation persistence ───────────────────────────────────────
