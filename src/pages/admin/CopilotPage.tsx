@@ -182,7 +182,38 @@ export default function CopilotPage() {
             </div>
           )}
 
-          {/* Footer */}
+          {/* Public chats section */}
+          {showPublicChats && publicChats.length > 0 && (
+            <div className="px-2 pb-2 border-t border-sidebar-border pt-2">
+              <div className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-normal mb-1 px-2 flex items-center gap-1.5">
+                <Users className="h-3 w-3 text-primary" />
+                Public chats ({publicChats.length})
+              </div>
+              {publicChats.map((chat) => (
+                <button
+                  key={chat.id}
+                  onClick={() => handleSwitchConversation(chat.id)}
+                  className={cn(
+                    'w-full flex items-start gap-2 px-2 py-1.5 rounded-md text-left transition-colors',
+                    operate.conversationId === chat.id
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'hover:bg-sidebar-accent/50'
+                  )}
+                >
+                  <MessageSquare className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary/60" />
+                  <div className="flex-1 min-w-0">
+                    <span className="block truncate text-sm">
+                      {chat.customer_name || chat.customer_email || 'Visitor'}
+                    </span>
+                    <span className="block text-[10px] text-sidebar-foreground/50">
+                      {chat.conversation_status || 'active'} · {formatDistanceToNow(new Date(chat.updated_at), { addSuffix: true })}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="border-t border-sidebar-border p-3">
             <div className="flex items-center gap-2 text-sidebar-foreground/50">
               <Zap className="h-3.5 w-3.5" />
