@@ -72,23 +72,20 @@ const STATUS_DOT: Record<string, string> = {
 
 function ActivityItem({ activity }: { activity: AgentActivity }) {
   return (
-    <div className="flex items-start gap-2.5 py-2 px-1 group">
+    <div className="flex items-start gap-2 py-2 px-1 group overflow-hidden">
       <span className={cn(
         'h-2 w-2 rounded-full mt-1.5 shrink-0',
         STATUS_DOT[activity.status] ?? 'bg-muted-foreground'
       )} />
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 overflow-hidden">
         <p className="text-xs font-medium truncate">
           {(activity.skill_name || 'Unknown').replace(/_/g, ' ')}
         </p>
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground truncate">
           {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
           {activity.duration_ms ? ` · ${activity.duration_ms}ms` : ''}
         </p>
       </div>
-      <Badge variant="outline" className="text-[9px] shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        {activity.agent}
-      </Badge>
     </div>
   );
 }
