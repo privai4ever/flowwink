@@ -143,7 +143,7 @@ export default function ChatSettingsPage() {
 
   useEffect(() => {
     if (settings) {
-      setFormData(settings);
+      setFormData({ ...defaultChatSettings, ...settings });
     }
   }, [settings]);
 
