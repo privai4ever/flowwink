@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Zap, Plus, Trash2, MessageSquare, Search } from 'lucide-react';
+import { Zap, Plus, Trash2, MessageSquare } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminContentHeader } from '@/components/admin/AdminContentHeader';
 import { AdminSearchCommand, useAdminSearch, SearchButton } from '@/components/admin/AdminSearchCommand';
@@ -9,6 +9,7 @@ import { ContextPanel } from '@/components/admin/copilot/ContextPanel';
 import { useAgentOperate } from '@/hooks/useAgentOperate';
 import { useBrandingSettings } from '@/hooks/useSiteSettings';
 import { cn } from '@/lib/utils';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { formatDistanceToNow } from 'date-fns';
 import {
   Sidebar,
@@ -64,10 +65,9 @@ export default function CopilotPage() {
       {/* Chat history sidebar — mirrors AdminSidebar structure */}
       <Sidebar collapsible="none" className="border-r border-sidebar-border">
         {/* Header — matches AdminSidebar header */}
-        <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-serif font-bold text-base truncate">{adminName}</span>
-          </div>
+        <SidebarHeader className="border-b border-sidebar-border px-3 h-10 flex items-center justify-between shrink-0">
+          <span className="font-serif font-bold text-base truncate">{adminName}</span>
+          <SidebarTrigger className="h-7 w-7 shrink-0" />
         </SidebarHeader>
 
         {/* Search Button */}
