@@ -10,18 +10,6 @@ import { useAgentOperate } from '@/hooks/useAgentOperate';
 import { useBrandingSettings } from '@/hooks/useSiteSettings';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
-import {
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from '@/components/ui/sidebar';
 
 export default function CopilotPage() {
   const operate = useAgentOperate();
