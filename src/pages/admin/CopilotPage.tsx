@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Zap, Plus, Trash2, MessageSquare } from 'lucide-react';
+import { Zap, Plus, Trash2, MessageSquare, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminContentHeader } from '@/components/admin/AdminContentHeader';
 import { AdminSearchCommand, useAdminSearch, SearchButton } from '@/components/admin/AdminSearchCommand';
@@ -9,7 +9,6 @@ import { ContextPanel } from '@/components/admin/copilot/ContextPanel';
 import { useAgentOperate } from '@/hooks/useAgentOperate';
 import { useBrandingSettings } from '@/hooks/useSiteSettings';
 import { cn } from '@/lib/utils';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { formatDistanceToNow } from 'date-fns';
 import {
   Sidebar,
