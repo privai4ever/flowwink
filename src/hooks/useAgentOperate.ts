@@ -281,6 +281,12 @@ export function useAgentOperate() {
       const convId = await getOrCreateConversation();
       await persistMessage(convId, 'user', content);
 
+      // Update conversation title from first user message
+      if (messages.length === 0) {
+        const shortTitle = content.replace(/^@\w+\s*/, '').slice(0, 80) || 'FlowPilot Session';
+        supabase.from('chat_conversations').update({ title: shortTitle }).eq('id', convId).then();
+      }
+
       const history = [...messages, userMsg].map(m => ({
         role: m.role,
         content: m.content,
