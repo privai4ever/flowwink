@@ -1,38 +1,38 @@
-# FlowPilot — The First Autonomous Agentic CMS
+# FlowAgent — Autonomous Agentic Intelligence Engine
 
-> **Your website runs itself.** FlowPilot is not a chatbot. It is an autonomous AI agent that writes your content, qualifies your leads, runs your campaigns, and learns from every interaction. You set the objectives. It does the rest.
+> **Your website runs itself.** FlowAgent is not a chatbot. It is an autonomous AI operator that writes your content, qualifies your leads, runs your campaigns, and learns from every interaction. You set the objectives. It does the rest.
 
 ---
 
-## 1. What FlowPilot Is
+## 1. What FlowAgent Is
 
-FlowPilot is an **autonomous digital operator** — an OpenClaw-inspired agent with persistent memory, self-evolving skills, goal-driven objectives, and a reactive automation layer. It sits above the entire platform — content, CRM, bookings, newsletters, analytics, knowledge base, e-commerce — and orchestrates them continuously, with or without a human present.
+FlowAgent is the **heart and brain** of FlowWink — an autonomous digital operator inspired by the OpenClaw agentic framework. It features persistent memory, self-evolving skills, goal-driven objectives with plan decomposition, self-healing, and a reactive automation layer. It sits above the entire platform — content, CRM, bookings, newsletters, analytics, knowledge base, e-commerce — and orchestrates them continuously, with or without a human present.
 
 ### The Paradigm Shift
 
-| Traditional CMS | FlowPilot |
+| Traditional CMS | FlowAgent |
 |-----------------|-----------|
-| You manage pages | FlowPilot manages your digital presence |
-| You write content | FlowPilot writes, you approve |
-| You qualify leads | FlowPilot scores, enriches, and routes them |
-| You send newsletters | FlowPilot segments, writes, and sends |
-| You check analytics | FlowPilot reflects, learns, and adapts |
-| Nothing happens while you sleep | FlowPilot keeps working |
+| You manage pages | FlowAgent manages your digital presence |
+| You write content | FlowAgent writes, you approve |
+| You qualify leads | FlowAgent scores, enriches, and routes them |
+| You send newsletters | FlowAgent segments, writes, and sends |
+| You check analytics | FlowAgent reflects, learns, and adapts |
+| Nothing happens while you sleep | FlowAgent keeps working |
 
 ### Two Agents, One Engine
 
 | Agent | Audience | Purpose |
 |-------|----------|---------|
 | **Public Chat** | Website visitors | Intelligent concierge grounded in all site content, KB articles, and blog posts. Books appointments, captures leads, searches the web, checks orders. |
-| **FlowPilot Operate** | Admins & employees | Autonomous operator with memory, objectives, self-improvement, multi-tool chaining, and human-in-the-loop approval gating. |
+| **FlowAgent Operate** | Admins & employees | Autonomous operator with memory, objectives, self-improvement, multi-tool chaining, plan decomposition, self-healing, and human-in-the-loop approval gating. |
 
-Both agents invoke skills through the same `agent-execute` edge function, share the same activity log, and respect the same scope and approval rules.
+Both agents invoke skills through `agent-execute`, share the activity log, and respect the same scope and approval rules.
 
 ---
 
 ## 2. The Autonomous Loop
 
-FlowPilot operates on a continuous cycle that never stops. This is the core value proposition — the machine that runs your business:
+FlowAgent operates on a continuous cycle. This is the core value proposition — the machine that runs your business:
 
 ```
 ┌─────────────┐
@@ -40,23 +40,31 @@ FlowPilot operates on a continuous cycle that never stops. This is the core valu
 └──────┬──────┘
        ▼
 ┌─────────────┐
-│   REFLECT   │ ← What happened since last cycle? What succeeded, what failed?
+│ SELF-HEAL   │ ← Auto-disable skills with 3+ consecutive failures
 └──────┬──────┘
        ▼
 ┌─────────────┐
-│    PLAN     │ ← Match objectives to available skills. Prioritize by impact.
+│  PROPOSE    │ ← Proactively create objectives from patterns/stats
 └──────┬──────┘
        ▼
 ┌─────────────┐
-│   EXECUTE   │ ← Write content, qualify leads, send campaigns, update CRM.
+│   PLAN      │ ← AI decomposes objectives into 3-7 ordered steps
 └──────┬──────┘
        ▼
 ┌─────────────┐
-│     LOG     │ ← Every action recorded with full I/O audit trail.
+│  ADVANCE    │ ← Chain-execute plan steps (up to 4 per call)
 └──────┬──────┘
        ▼
 ┌─────────────┐
-│ LEARN/EVOLVE│ ← Update memory. Rewrite skill instructions. Evolve soul.
+│ AUTOMATE    │ ← Execute DUE cron/event/signal automations
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│  REFLECT    │ ← Analyze 7-day performance, auto-persist learnings
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│  REMEMBER   │ ← Save insights to persistent memory
 └──────┬──────┘
        │
        └──────────────▶ (repeat)
@@ -67,16 +75,96 @@ FlowPilot operates on a continuous cycle that never stops. This is the core valu
 | Layer | Trigger | Example |
 |-------|---------|---------|
 | **🟢 Visitor Layer** | User message in public chat | "Book me a demo" → books appointment via skill |
-| **🔵 Admin Operate Layer** | Admin command in FlowPilot | "Write a blog post about our new feature" → drafts post |
+| **🔵 Admin Operate Layer** | Admin command in FlowAgent | "Write a blog post about our new feature" → drafts post |
 | **🟣 Automation Layer** | System event or scheduled tick | New form submission → create lead → qualify → notify |
 
 ---
 
-## 3. The Agent Brain — Six Core Capabilities
+## 3. Architecture — The Reasoning Core
 
-### 3.1 Skill Engine (20+ Skills)
+The central innovation is `agent-reason` — a **shared importable module** (not a standalone Edge Function) that eliminates logic duplication across all FlowAgent surfaces.
 
-Every capability is a **skill** — a database-driven, hot-reloadable tool definition in OpenAI function-calling format. FlowPilot can even create new skills for itself at runtime.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    AGENT-REASON (Core Module)                    │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │ AI Config    │  │ Soul/Identity│  │ Memory + Objectives  │  │
+│  │ Resolution   │  │ Loader       │  │ Context Loader       │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              26 Built-in Tools (7 groups)                 │   │
+│  │                                                          │   │
+│  │  memory: memory_write, memory_read                       │   │
+│  │  objectives: objective_update_progress, objective_complete│   │
+│  │  self-mod: skill_create/update/list/disable/instruct     │   │
+│  │  reflect: reflect (7-day analysis + auto-persist)        │   │
+│  │  soul: soul_update (purpose/values/tone/philosophy)      │   │
+│  │  planning: decompose_objective, advance_plan,            │   │
+│  │            propose_objective                              │   │
+│  │  automations-exec: execute_automation                    │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │ Self-Healing │  │ Plan Decomp  │  │ Priority Scoring     │  │
+│  │ Engine       │  │ (AI-powered) │  │ (deadline/momentum)  │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │  reason() — Non-streaming loop (heartbeat, learn)        │   │
+│  │  Tool Execution Router → built-in OR agent-execute       │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└──────────────────────────────┬──────────────────────────────────┘
+                               │
+          ┌────────────────────┼────────────────────┐
+          ▼                    ▼                     ▼
+┌──────────────────┐ ┌──────────────────┐ ┌─────────────────────┐
+│  agent-operate   │ │ flowpilot-       │ │  flowpilot-learn    │
+│  (SSE streaming) │ │ heartbeat        │ │  (daily 03:00 UTC)  │
+│  Interactive     │ │ (12h autonomous) │ │  Feedback analysis  │
+└──────────────────┘ └──────────────────┘ └─────────────────────┘
+                               │
+┌──────────────────────────────┼──────────────────────────────────┐
+│                       SKILL ENGINE                               │
+│                                                                  │
+│  ┌──────────────┐    ┌──────────────────┐    ┌───────────────┐  │
+│  │ agent_skills  │───▸│  agent-execute   │───▸│ agent_activity│  │
+│  │  (registry)   │    │  (router)        │    │ (audit log)   │  │
+│  └──────────────┘    └────────┬─────────┘    └───────────────┘  │
+│                               │                                  │
+│            ┌──────────┬───────┼────────┬──────────┐             │
+│            ▼          ▼       ▼        ▼          ▼             │
+│        edge:fn    module:x   db:tbl  webhook:url  local         │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+          ┌────────────────────┼────────────────────┐
+          ▼                                         ▼
+┌──────────────────┐                     ┌──────────────────────┐
+│  PUBLIC CHAT     │                     │  AUTOMATION LAYER    │
+│  (chat-completion)│                     │                      │
+│  • Visitor-facing │                     │  cron-dispatcher     │
+│  • Content-       │                     │  signal-dispatcher   │
+│    grounded       │                     │  signal-ingest       │
+│  • External skills│                     │  send-webhook        │
+└──────────────────┘                     └──────────────────────┘
+```
+
+### Consumers of `agent-reason`
+
+| Consumer | Mode | Tool Groups | Purpose |
+|----------|------|-------------|---------|
+| `agent-operate` | SSE streaming | memory, objectives, self-mod, reflect, soul | Interactive admin assistant |
+| `flowpilot-heartbeat` | Non-streaming | memory, objectives, reflect, planning, automations-exec | Autonomous 12h loop |
+| `flowpilot-learn` | Non-streaming | memory, reflect | Daily feedback distillation |
+
+---
+
+## 4. The Seven Core Capabilities
+
+### 4.1 Skill Engine (20+ Skills)
+
+Every capability is a **skill** — a database-driven, hot-reloadable tool definition in OpenAI function-calling format. FlowAgent can create new skills at runtime.
 
 ```json
 {
@@ -91,26 +179,26 @@ Every capability is a **skill** — a database-driven, hot-reloadable tool defin
 }
 ```
 
-**Handler routing** — the `handler` string decouples skill definition from implementation:
+**Handler routing** — the `handler` string decouples skill from implementation:
 
 | Prefix | Route | Example |
 |--------|-------|---------|
 | `edge:` | Edge Function | `edge:qualify-lead` |
-| `module:` | Module handler | `module:blog` |
+| `module:` | Module handler in `agent-execute` | `module:blog` |
 | `db:` | Direct DB query | `db:page_views` |
 | `webhook:` | External | `webhook:n8n` |
 
-**Scope model** — controls who can invoke what:
+**Scope model** — controls access:
 
 | Scope | Access |
 |-------|--------|
-| `internal` | Only FlowPilot (admin) |
+| `internal` | Only FlowAgent (admin) |
 | `external` | Only Public Chat (visitors) |
 | `both` | Either agent |
 
-### 3.2 Persistent Memory
+### 4.2 Persistent Memory
 
-FlowPilot maintains a key-value memory store (`agent_memory`) that survives across sessions:
+Key-value store (`agent_memory`) that survives across sessions:
 
 | Category | Purpose | Example |
 |----------|---------|---------|
@@ -120,174 +208,149 @@ FlowPilot maintains a key-value memory store (`agent_memory`) that survives acro
 | `soul` | Agent personality & values | `purpose, values, tone, philosophy` |
 | `identity` | Agent identity & boundaries | `name, role, boundaries` |
 
-Memory is loaded into the system prompt at every conversation start. Built-in `memory_write` and `memory_read` tools let FlowPilot proactively save useful information.
+Memory is loaded into the system prompt at every conversation start. Built-in `memory_write` and `memory_read` tools let FlowAgent proactively save useful information. Limited to 30 most recent entries per context window.
 
-### 3.3 Objectives & Goals
+### 4.3 Objectives & Plan Decomposition
 
-Objectives are high-level goals with structured tracking and success criteria:
+Objectives are high-level goals with **AI-powered plan decomposition** and **priority scoring**:
 
 ```json
 {
   "goal": "Increase blog output to 4 posts per month",
   "status": "active",
-  "constraints": { "max_posts_per_week": 2, "tone": "professional" },
+  "constraints": { "max_posts_per_week": 2, "priority": "high", "deadline": "2026-04-01" },
   "success_criteria": { "posts_per_month": 4 },
-  "progress": { "posts_this_month": 2, "last_post_date": "2025-01-20" }
+  "progress": {
+    "plan": {
+      "steps": [
+        { "id": "s1", "description": "Research trending topics", "skill_name": "search_web", "status": "done" },
+        { "id": "s2", "description": "Draft first blog post", "skill_name": "write_blog_post", "status": "pending" }
+      ],
+      "total_steps": 5,
+      "current_step": 2
+    }
+  }
 }
 ```
 
-Active objectives are injected into every FlowPilot prompt. During heartbeat cycles, FlowPilot autonomously reviews progress and takes action to advance them.
+**Priority Scoring** (automatic, computed per heartbeat):
 
-### 3.4 Autonomous Heartbeat
+| Factor | Score |
+|--------|-------|
+| Overdue deadline | +50 |
+| Deadline < 1 day | +40 |
+| Deadline < 3 days | +25 |
+| Priority: critical | +35 |
+| Priority: high | +20 |
+| In-progress plan (>0%, <100%) | +15 |
+| Near completion (>70%) | +10 |
+| No update in 3+ days | +8 |
+| No update in 7+ days | +12 |
+| Plan has failures | +10 |
 
-The `flowpilot-heartbeat` edge function is the engine that drives autonomous operation. Every 12 hours (configurable), FlowPilot wakes up without any human prompt and:
+Objectives are sorted by score and advanced in order during heartbeat.
 
-1. **Calls `reflect`** to analyze the past 7 days of activity
-2. **Reviews active objectives** — updates progress based on current data
-3. **Takes autonomous actions** — writes blog posts, qualifies leads, sends campaigns
-4. **Saves learnings** — persists new facts and patterns to memory
-5. **Logs a summary** — full heartbeat report in the activity feed
+**Plan Decomposition Flow:**
+1. `decompose_objective` → AI analyzes goal + available skills → produces 3-7 ordered steps
+2. `advance_plan` → Chains up to 4 steps per call via `agent-execute`
+3. Steps persist between heartbeats — FlowAgent picks up where it left off
+4. Failed steps are noted; agent continues to next objective
+
+### 4.4 Self-Healing
+
+Automatic fault detection and skill quarantine (ported from ClawCMS):
+
+1. `runSelfHealing()` scans last 3 days of `agent_activity`
+2. Skills with **3+ consecutive failures** are auto-disabled
+3. Linked automations are also disabled with error annotation
+4. Frontend `SelfHealingAlert` component notifies admin with one-click re-enable
+5. Healing report injected into heartbeat system prompt
+
+### 4.5 Autonomous Heartbeat
+
+The `flowpilot-heartbeat` Edge Function drives autonomous operation. Every 12 hours:
 
 ```
-HEARTBEAT PROTOCOL:
-1. REFLECT — analyze performance and patterns
-2. OBJECTIVES — review each goal, update progress, mark complete if criteria met
-3. ACT — execute skills to advance objectives
-4. REMEMBER — save new learnings to memory
-5. SUMMARIZE — report what happened
+HEARTBEAT PROTOCOL (7 steps):
+1. PROACTIVE REASONING — Analyze stats + patterns → propose_objective if gap found
+2. PLAN — decompose_objective for objectives without plans
+3. ADVANCE — advance_plan on highest-priority objectives (chain=true)
+4. AUTOMATE — execute_automation for DUE (⏰) automations
+5. REFLECT — 7-day performance analysis with auto-persisted learnings
+6. REMEMBER — Save new insights to memory
+7. SUMMARIZE — Brief heartbeat report logged to agent_activity
 ```
 
-### 3.5 Signal Automations
+Context loaded in parallel before reasoning:
+- Soul & Identity
+- Memories (30 most recent)
+- Objectives (priority-sorted)
+- Recent activity (24h)
+- Site stats (7 days: views, leads, posts, subscribers)
+- Enabled automations (with DUE markers)
+- Self-healing report
 
-Event-driven reactions that execute through the same skill engine:
+Max 8 tool iterations per heartbeat. Top 2-3 objectives prioritized.
+
+### 4.6 Signal Automations
+
+Event-driven reactions through the same skill engine:
 
 | Trigger Type | Mechanism | Example |
 |-------------|-----------|---------|
-| **Cron** | `pg_cron` → `automation-dispatcher` | Daily analytics digest |
-| **Event** | `send-webhook` → event match | Form submitted → create lead → qualify |
-| **Signal** | `signal-dispatcher` → condition eval | Lead score ≥ 50 → send notification |
+| **Cron** | `automation-dispatcher` | Daily analytics digest |
+| **Event** | `send-webhook` → event match | Form submitted → create lead |
+| **Signal** | `signal-dispatcher` → condition eval | Lead score ≥ 50 → notify |
+| **External** | `signal-ingest` endpoint | Chrome extension → save research |
 
-Signal conditions support: `score_threshold`, `count_threshold`, `status_change`, `field_match`, and `compound` (AND/OR combinations).
+Signal conditions support: `score_threshold`, `count_threshold`, `status_change`, `field_match`, and `compound` (AND/OR).
 
-### 3.6 Self-Evolution
+**Signal Ingest** — token-authenticated endpoint for external triggers:
+```bash
+curl -X POST https://<project>.supabase.co/functions/v1/signal-ingest \
+  -H "Authorization: Bearer <signal_ingest_token>" \
+  -d '{"url":"https://...", "title":"Research", "content":"...", "source_type":"web"}'
+```
+Signals stored in both `agent_activity` and `agent_memory` for heartbeat processing.
 
-The most radical capability. FlowPilot can modify its own behavior:
+### 4.7 Self-Evolution
+
+FlowAgent can modify its own behavior:
 
 | Tool | What It Does |
 |------|-------------|
-| `soul_update` | Evolves personality, values, tone, and philosophy based on accumulated experience |
-| `skill_instruct` | Rewrites skill instructions (the SKILL.md equivalent) — context, examples, edge cases that make execution smarter |
-| `skill_create` | Registers entirely new skills at runtime (defaults to `requires_approval = true`) |
+| `soul_update` | Evolves personality, values, tone, and philosophy |
+| `skill_instruct` | Rewrites skill instructions (rich knowledge, examples, edge cases) |
+| `skill_create` | Registers new skills at runtime (defaults to `requires_approval = true`) |
 | `skill_update` | Modifies existing skill definitions, handlers, or scope |
 | `skill_disable` | Disables problematic or unused skills |
-| `reflect` | Analyzes performance, identifies patterns, auto-persists learnings to memory |
+| `reflect` | Analyzes 7-day performance → suggestions + auto-persisted learnings |
+| `propose_objective` | Proactively creates objectives from detected patterns |
 
-**Safety**: Newly created skills default to `requires_approval = true`. New automations default to `enabled = false`. Every modification is logged in the activity feed.
-
----
-
-## 4. Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        DATA LAYER                               │
-│  pages · blogs · KB articles · leads · bookings · orders · ...  │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │
-┌──────────────────────────┼──────────────────────────────────────┐
-│                    SKILL ENGINE                                  │
-│                                                                  │
-│  ┌──────────────┐    ┌──────────────────┐    ┌───────────────┐  │
-│  │ agent_skills  │───▸│  agent-execute   │───▸│ agent_activity│  │
-│  │  (registry)   │    │  (router)        │    │ (audit log)   │  │
-│  └──────────────┘    └────────┬─────────┘    └───────────────┘  │
-│                               │                                  │
-│            ┌──────────┬───────┼────────┬──────────┐             │
-│            ▼          ▼       ▼        ▼          ▼             │
-│        edge:fn    module:x   db:tbl  webhook:url  local         │
-│     (edge func)  (DB ops)  (queries) (external)  (memory/       │
-│                                                   soul/         │
-│                                                   objectives)   │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-          ┌────────────────┼────────────────┐
-          ▼                                 ▼
-┌──────────────────┐             ┌──────────────────────┐
-│   PUBLIC CHAT    │             │   FLOWPILOT OPERATE   │
-│  (chat-completion)│             │   (agent-operate)     │
-│                  │             │                        │
-│ • Visitor-facing │             │ • Admin-facing         │
-│ • Content-grounded│            │ • Multi-tool loop (6x) │
-│ • External skills │            │ • Memory + Objectives  │
-│ • Web search     │             │ • Self-modification    │
-│ • Human handoff  │             │ • Soul + Identity      │
-│ • Sentiment      │             │ • Reflection           │
-└──────────────────┘             │ • Approval gating      │
-                                 └──────────────────────┘
-                           │
-┌──────────────────────────┼──────────────────────────────────────┐
-│                   AUTOMATION LAYER                                │
-│                                                                  │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │  CRON            │  │  EVENT           │  │  SIGNAL          │ │
-│  │  automation-     │  │  send-webhook    │  │  signal-         │ │
-│  │  dispatcher      │  │  → event match   │  │  dispatcher      │ │
-│  │  (pg_cron/1min)  │  │  → agent-execute │  │  → condition     │ │
-│  │  → agent-execute │  │                  │  │    evaluation    │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
-│                                                                  │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │  HEARTBEAT (flowpilot-heartbeat)                             │ │
-│  │  Scheduled autonomous loop — reflect, plan, execute, learn   │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### OpenClaw Architecture Mapping
-
-| OpenClaw Concept | FlowPilot Implementation | Storage |
-|------------------|--------------------------|---------|
-| **Skill Registry** | `agent_skills` table — DB-driven, hot-reloadable | PostgreSQL |
-| **Tool Definition** | OpenAI function-calling JSON format | JSONB |
-| **Tool Router** | `agent-execute` edge function — unified dispatcher | Edge Function |
-| **Handler Routing** | `edge:`, `module:`, `db:`, `webhook:` prefixes | String convention |
-| **Scope Model** | `internal`, `external`, `both` enum on each skill | DB enum |
-| **Approval Gate** | `requires_approval` boolean → pending_approval status | DB flag |
-| **Memory** | `agent_memory` table — persistent K-V with categories | PostgreSQL |
-| **Soul / Identity** | `agent_memory` entries with keys `soul` and `identity` | JSONB |
-| **Skill Knowledge** | `instructions` column on `agent_skills` — the SKILL.md | Text |
-| **Objectives** | `agent_objectives` table — goals with progress + criteria | PostgreSQL |
-| **Activity Log** | `agent_activity` table — full I/O audit trail | PostgreSQL |
-| **Automations** | `agent_automations` table — cron/event/signal triggers | PostgreSQL |
-| **Self-Modification** | `soul_update`, `skill_instruct`, `skill_create/update/disable`, `reflect` | In-process |
-| **Heartbeat** | `flowpilot-heartbeat` edge function — scheduled autonomous loop | Edge Function |
-| **Multi-Tool Loop** | Up to 6 iterations per turn, parallel tool_calls per round | Runtime |
+**Safety**: New skills default `requires_approval = true`. New automations default `enabled = false`. Every modification logged in activity feed.
 
 ---
 
-## 5. What FlowPilot Manages — Six Channels
+## 5. What FlowAgent Manages — Six Channels
 
-| Channel | Skills | What FlowPilot Does |
+| Channel | Skills | What FlowAgent Does |
 |---------|--------|---------------------|
 | **Content & Blog** | `blog_write`, `blog_list` | Writes posts in brand voice, optimizes SEO/AEO, schedules publishing |
-| **Lead CRM** | `lead_qualify`, `lead_enrich`, `company_enrich` | Captures from any touchpoint, scores, enriches with company data, routes to sales |
+| **Lead CRM** | `lead_qualify`, `lead_enrich`, `company_enrich` | Captures from any touchpoint, scores, enriches, routes to sales |
 | **Email Campaigns** | `newsletter_create` | Segments audiences, writes copy, sends at optimal times, GDPR-compliant |
-| **Bookings** | `book_appointment`, `availability_check` | Schedules meetings, sends confirmations and reminders, syncs with CRM |
-| **E-commerce** | `order_lookup`, `product_search` | Manages products, processes orders, tracks revenue and conversion |
-| **Analytics** | `analytics_query`, `reflect` | Monitors traffic, identifies trends, generates reports, suggests improvements |
+| **Bookings** | `book_appointment`, `availability_check` | Schedules meetings, sends confirmations, syncs with CRM |
+| **E-commerce** | `order_lookup`, `product_search` | Manages products, processes orders, tracks revenue |
+| **Analytics** | `analytics_query`, `reflect` | Monitors traffic, identifies trends, suggests improvements |
 
 ---
 
 ## 6. Approval Gating & Human-in-the-Loop
 
-Autonomous doesn't mean uncontrolled. Every skill can be configured for approval:
-
 1. Agent calls skill → `agent-execute` intercepts
-2. Activity logged with status `pending_approval`
-3. Response returns `202` with `pending_approval` status
-4. Admin sees pending action in Activity Feed
-5. Admin approves → original args re-executed automatically
-6. Result returned to conversation (if still active)
+2. If `requires_approval`: activity logged with status `pending_approval`, `202` returned
+3. Admin sees pending action in Activity Feed
+4. Admin approves → original args re-executed automatically
+5. Result returned to conversation (if still active)
 
 **Activity logging** — every execution produces an `agent_activity` row:
 
@@ -309,23 +372,11 @@ error_message → if failed
 
 ### Knowledge Base Construction
 
-The `buildKnowledgeBase` function in `chat-completion` constructs the AI's context:
-
+`buildKnowledgeBase` in `chat-completion` constructs the AI's context:
 1. Fetch published pages (optionally filtered by slug whitelist)
-2. Extract text from every content block type (hero, text, accordion, contact, stats, etc.)
+2. Extract text from every content block type
 3. Fetch KB articles where `include_in_chat = true`
 4. Combine into structured sections with token budget
-5. Inject as system prompt context
-
-### Configurable Context
-
-| Setting | Effect |
-|---------|--------|
-| `includeContentAsContext` | Toggle page content inclusion |
-| `contentContextMaxTokens` | Token budget for context window |
-| `includedPageSlugs` | Whitelist specific pages (or `*` for all) |
-| `includeKbArticles` | Include KB Q&A pairs |
-| `allowGeneralKnowledge` | Let AI use its own knowledge beyond site content |
 
 ### AI Provider Flexibility
 
@@ -333,100 +384,96 @@ The `buildKnowledgeBase` function in `chat-completion` constructs the AI's conte
 |----------|---------------|--------------|
 | **OpenAI** | API key + model + optional base URL | ✅ Native |
 | **Gemini** | API key + model | ✅ Native |
-| **Local AI** | Endpoint + model + optional API key | ✅ If OpenAI-compatible (vLLM, Qwen3, Ollama) |
-| **n8n** | Webhook URL | Via webhook response |
+| **Local AI** | Endpoint + model + optional API key | ✅ If OpenAI-compatible |
 
 **Private AI first** — self-host with Ollama or any OpenAI-compatible endpoint. Data never leaves your infrastructure.
 
 ---
 
-## 8. Data Flow Summary
+## 8. Key Files Reference
 
-### Visitor Journey
-```
-Visitor asks question
-  → chat-completion loads site content + KB + skills
-  → AI responds with grounded answer (or invokes skill)
-  → Skill executes via agent-execute
-  → Activity logged
-  → Result returned to visitor
-```
-
-### Admin Operation
-```
-Admin gives instruction in FlowPilot Operate
-  → agent-operate loads soul + identity + memory + objectives + skill instructions
-  → AI plans multi-step execution
-  → Each skill invoked via agent-execute
-  → Approval-gated actions pause for admin
-  → Activity feed shows real-time progress
-  → Memory updated with new learnings
-```
-
-### Heartbeat (Autonomous)
-```
-Scheduled trigger fires (every 12h)
-  → flowpilot-heartbeat loads objectives + stats + skills
-  → FlowPilot reflects on past 7 days
-  → Reviews each active objective
-  → Takes autonomous actions to advance goals
-  → Persists learnings to memory
-  → Logs heartbeat summary to activity feed
-```
-
-### Automated Operation
-```
-Trigger fires (cron tick / webhook event / signal condition)
-  → Dispatcher matches automation
-  → agent-execute invoked with predefined arguments
-  → Activity logged
-  → Automation metadata updated (run_count, next_run_at)
-```
-
----
-
-## 9. Key Files Reference
+### Edge Functions (Backend)
 
 | File | Purpose |
 |------|---------|
-| **Edge Functions** | |
-| `supabase/functions/agent-execute/index.ts` | Unified skill executor — routing, scope, approval, logging |
-| `supabase/functions/agent-operate/index.ts` | FlowPilot Operate — soul/identity, memory, objectives, multi-tool loop, self-evolution |
-| `supabase/functions/chat-completion/index.ts` | Public chat — knowledge base, skill loading, AI provider routing |
-| `supabase/functions/flowpilot-heartbeat/index.ts` | Autonomous heartbeat — scheduled reflect/plan/execute/learn cycle |
-| `supabase/functions/automation-dispatcher/index.ts` | Cron automation executor (pg_cron → agent-execute) |
-| `supabase/functions/signal-dispatcher/index.ts` | Signal condition evaluator (dynamic conditions → agent-execute) |
-| `supabase/functions/qualify-lead/index.ts` | Lead scoring — emits signals for automation |
-| `supabase/functions/gmail-inbox-scan/index.ts` | Gmail integration — email signals |
-| **Types & Config** | |
-| `src/types/agent.ts` | TypeScript types for skills, memory, objectives, activity, automations |
-| `docs/flowpilot.md` | This document — definitive architecture reference |
-| `.lovable/plan.md` | Phase-by-phase implementation log |
-| **Frontend** | |
-| `src/pages/CopilotPage.tsx` | FlowPilot UI — Operate/Migrate mode switcher |
+| `agent-reason/index.ts` | **Core module** — AI config, soul/identity, memory, objectives, 26 built-in tools, self-healing, plan decomposition, priority scoring, reasoning loop. NOT a serve() handler. |
+| `agent-execute/index.ts` | Unified skill executor — handler routing (`edge:`, `module:`, `db:`, `webhook:`), scope validation, approval gating, activity logging, auto-module activation, objective progress tracking |
+| `agent-operate/index.ts` | Interactive SSE streaming wrapper around agent-reason. Token-by-token output with tool iteration status events. |
+| `flowpilot-heartbeat/index.ts` | 7-step autonomous loop — self-heal → propose → plan → advance → automate → reflect → remember |
+| `flowpilot-learn/index.ts` | Daily feedback distillation (03:00 UTC) — page views, chat feedback, lead conversion → memory |
+| `chat-completion/index.ts` | Public chat — knowledge base construction, skill loading, AI provider routing |
+| `signal-ingest/index.ts` | Token-authenticated external signal endpoint for webhooks/extensions |
+| `automation-dispatcher/index.ts` | Cron automation executor (pg_cron → agent-execute) |
+| `signal-dispatcher/index.ts` | Signal condition evaluator (dynamic conditions → agent-execute) |
+| `setup-flowpilot/index.ts` | Bootstrap — seeds skills, soul, identity for new instances |
+
+### Frontend
+
+| File | Purpose |
+|------|---------|
+| `src/pages/CopilotPage.tsx` | FlowAgent UI — Operate/Migrate mode switcher |
 | `src/components/copilot/OperateChat.tsx` | Chat interface with quick actions and skill badges |
 | `src/components/copilot/ActivityFeed.tsx` | Real-time activity sidebar with approve/reject |
+| `src/components/admin/skills/SelfHealingAlert.tsx` | Auto-disabled skill notifications with re-enable |
 | `src/pages/admin/SkillHubPage.tsx` | Skill registry admin — CRUD, activity log, objectives |
-| `src/components/admin/skills/SkillEditorSheet.tsx` | Skill editor with instructions field |
 | `src/hooks/useAgentOperate.ts` | React hook — messages, skills, activity, approval flow |
-| `src/hooks/useSkillHub.ts` | React hook — skill CRUD, activity queries |
-| **Database Tables** | |
+
+### Database Tables
+
+| Table | Purpose |
+|-------|---------|
 | `agent_skills` | Skill registry (name, handler, scope, instructions, tool_definition) |
-| `agent_memory` | Persistent key-value memory (incl. soul & identity) |
-| `agent_objectives` | Goal tracking with progress and success criteria |
+| `agent_memory` | Persistent K-V memory (incl. soul & identity) |
+| `agent_objectives` | Goal tracking with plan decomposition, priority scoring, progress |
 | `agent_activity` | Full execution audit trail |
-| `agent_automations` | Cron/event/signal trigger definitions |
+| `agent_automations` | Cron/event/signal trigger definitions with run tracking |
 | `agent_objective_activities` | Join table linking objectives to activities |
+
+### Types
+
+| File | Purpose |
+|------|---------|
+| `src/types/agent.ts` | TypeScript types for skills, memory, objectives, activity, automations |
+
+---
+
+## 9. OpenClaw Architecture Mapping
+
+| OpenClaw Concept | FlowAgent Implementation | Location |
+|------------------|--------------------------|----------|
+| **Skill Registry** | `agent_skills` table — DB-driven, hot-reloadable | PostgreSQL |
+| **Tool Definition** | OpenAI function-calling JSON format | JSONB |
+| **Tool Router** | `agent-execute` — unified dispatcher | Edge Function |
+| **Handler Routing** | `edge:`, `module:`, `db:`, `webhook:` prefixes | String convention |
+| **Scope Model** | `internal`, `external`, `both` enum | DB enum |
+| **Approval Gate** | `requires_approval` boolean → pending_approval status | DB flag |
+| **Memory** | `agent_memory` — persistent K-V with categories | PostgreSQL |
+| **Soul / Identity** | `agent_memory` entries (keys: `soul`, `identity`) | JSONB |
+| **Skill Knowledge** | `instructions` column on `agent_skills` | Text |
+| **Objectives** | `agent_objectives` with plan decomposition & priority scoring | PostgreSQL |
+| **Plan Decomposition** | `decompose_objective` → AI-generated 3-7 step plans | agent-reason |
+| **Plan Execution** | `advance_plan` → chain up to 4 steps per call | agent-reason |
+| **Proactive Goals** | `propose_objective` → agent creates its own objectives | agent-reason |
+| **Self-Healing** | `runSelfHealing` → auto-disable after 3+ failures | agent-reason |
+| **Activity Log** | `agent_activity` — full I/O audit trail | PostgreSQL |
+| **Automations** | `agent_automations` — cron/event/signal triggers | PostgreSQL |
+| **Signal Ingest** | `signal-ingest` — external webhook/extension signals | Edge Function |
+| **Self-Modification** | `soul_update`, `skill_instruct`, `skill_create/update/disable`, `reflect` | Built-in tools |
+| **Heartbeat** | `flowpilot-heartbeat` — 7-step autonomous loop | Edge Function |
+| **Learning Loop** | `flowpilot-learn` — daily feedback → memory distillation | Edge Function |
+| **Multi-Tool Loop** | Up to 8 iterations per heartbeat, 6 per interactive session | Runtime |
 
 ---
 
 ## 10. FlowWink Replaces Four Products
 
-| Capability | Traditional CMS | AI Chatbot | Marketing Automation | CRM | **FlowWink** |
-|-----------|----------------|-----------|---------------------|-----|-------------|
+| Capability | CMS | Chatbot | Marketing | CRM | **FlowWink** |
+|-----------|-----|---------|-----------|-----|-------------|
 | Visual Page Builder | ✅ | ❌ | ❌ | ❌ | ✅ |
-| Headless API | Some | ❌ | ❌ | ❌ | ✅ |
 | Autonomous AI Agent | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Self-Healing Skills | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Plan Decomposition | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Proactive Goal Setting | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Persistent Memory | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Self-Evolving Skills | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Lead CRM & Scoring | ❌ | ❌ | ✅ | ✅ | ✅ |
@@ -435,6 +482,7 @@ Trigger fires (cron tick / webhook event / signal condition)
 | Booking System | ❌ | ❌ | ❌ | ❌ | ✅ |
 | E-commerce | ✅ | ❌ | ❌ | ❌ | ✅ |
 | Knowledge Base | ❌ | ✅ | ❌ | ❌ | ✅ |
+| Signal Ingest API | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Self-Hostable | Some | ❌ | ❌ | ❌ | ✅ |
 | Private LLM | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Open Source | Some | ❌ | ❌ | ❌ | ✅ |
@@ -447,13 +495,17 @@ Trigger fires (cron tick / webhook event / signal condition)
 |-----------|--------|
 | Skill Engine | ✅ 100% |
 | Persistent Memory | ✅ 100% |
-| Objectives & Goals | ✅ 95% |
-| Signal Automations | ✅ 90% |
-| Self-Evolution (soul, skill_instruct) | ✅ 85% |
-| Multi-Agent Orchestration | 🔧 40% |
+| Objectives & Plan Decomposition | ✅ 100% |
+| Priority Scoring | ✅ 100% |
+| Self-Healing | ✅ 100% |
+| Signal Automations | ✅ 95% |
+| Signal Ingest (External) | ✅ 90% |
+| Self-Evolution (soul, skill_instruct, propose_objective) | ✅ 90% |
+| Proactive Goal Setting | ✅ 85% |
+| Multi-Agent Orchestration (A2A) | 🔧 40% |
 
 ---
 
-*Stop managing. Start directing. — FlowPilot operates your entire digital presence so you can focus on what matters.*
+*Stop managing. Start directing. — FlowAgent operates your entire digital presence so you can focus on what matters.*
 
-*This document is the definitive reference for the FlowPilot agentic framework. Update it when new skills, handlers, or architectural changes are introduced.*
+*This document is the definitive reference for the FlowAgent agentic framework. Update it when new skills, handlers, or architectural changes are introduced.*
