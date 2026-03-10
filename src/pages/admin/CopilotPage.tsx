@@ -62,79 +62,87 @@ export default function CopilotPage() {
     <AdminLayout>
       <AdminSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
 
-      {/* Chat history sidebar — mirrors AdminSidebar structure */}
-      <Sidebar collapsible="none" className="border-r border-sidebar-border">
-        {/* Header — matches AdminSidebar header */}
-        <SidebarHeader className="flex !flex-row !gap-0 !py-0 !px-3 h-10 items-center justify-between shrink-0 border-b border-sidebar-border">
-          <span className="font-serif font-bold text-base truncate">{adminName}</span>
-          <SidebarTrigger className="h-7 w-7 shrink-0" />
-        </SidebarHeader>
-
-        {/* Search Button */}
-        <SearchButton onClick={() => setSearchOpen(true)} />
-
-        {/* New chat button */}
-        <div className="px-2 pt-1 pb-1">
-          <Button onClick={handleNewChat} variant="ghost" className="w-full gap-2 justify-start text-sm h-8" size="sm">
-            <Plus className="h-4 w-4" />
-            New chat
-          </Button>
-        </div>
-
-        {/* Chat history */}
-        <SidebarContent className="px-2 pt-1 pb-2">
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-normal mb-1">
-              Recent chats
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {operate.conversations.map((conv) => (
-                  <SidebarMenuItem key={conv.id} className="group/chat">
-                    <SidebarMenuButton
-                      isActive={operate.conversationId === conv.id}
-                      onClick={() => handleSwitchConversation(conv.id)}
-                      className="w-full"
-                    >
-                      <Zap className="h-4 w-4" />
-                      <div className="flex-1 min-w-0">
-                        <span className="block truncate text-sm">
-                          {conv.title || 'Untitled'}
-                        </span>
-                        <span className="block text-[10px] text-sidebar-foreground/50">
-                          {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
-                        </span>
-                      </div>
-                    </SidebarMenuButton>
-                    <button
-                      onClick={(e) => handleDeleteConversation(conv.id, e)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 transition-opacity p-1 rounded hover:bg-sidebar-accent"
-                      title="Delete chat"
-                    >
-                      <Trash2 className="h-3 w-3 text-sidebar-foreground/60" />
-                    </button>
-                  </SidebarMenuItem>
-                ))}
-
-                {operate.conversations.length === 0 && (
-                  <div className="flex flex-col items-center gap-2 py-8 px-4 text-sidebar-foreground/40">
-                    <MessageSquare className="h-8 w-8 opacity-30" />
-                    <p className="text-xs text-center">No previous chats</p>
-                  </div>
-                )}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-
-        {/* Footer — matches AdminSidebar footer spacing */}
-        <SidebarFooter className="border-t border-sidebar-border p-3">
-          <div className="flex items-center gap-2 text-sidebar-foreground/50">
-            <Zap className="h-3.5 w-3.5" />
-            <span className="text-xs">{operate.skills.length} skills available</span>
+      {/* Chat history sidebar */}
+      {sidebarOpen ? (
+        <div className="w-[--sidebar-width] shrink-0 flex flex-col border-r border-sidebar-border bg-sidebar">
+          {/* Header */}
+          <div className="flex items-center justify-between h-10 px-3 shrink-0 border-b border-sidebar-border">
+            <span className="font-serif font-bold text-base truncate">{adminName}</span>
+            <button onClick={() => setSidebarOpen(false)} className="h-7 w-7 shrink-0 inline-flex items-center justify-center rounded-md hover:bg-sidebar-accent transition-colors">
+              <PanelLeftClose className="h-4 w-4" />
+            </button>
           </div>
-        </SidebarFooter>
-      </Sidebar>
+
+          {/* Search Button */}
+          <SearchButton onClick={() => setSearchOpen(true)} />
+
+          {/* New chat button */}
+          <div className="px-2 pt-1 pb-1">
+            <Button onClick={handleNewChat} variant="ghost" className="w-full gap-2 justify-start text-sm h-8" size="sm">
+              <Plus className="h-4 w-4" />
+              New chat
+            </Button>
+          </div>
+
+          {/* Chat history */}
+          <div className="flex-1 overflow-auto px-2 pt-1 pb-2">
+            <div className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-normal mb-1 px-2">
+              Recent chats
+            </div>
+            {operate.conversations.map((conv) => (
+              <div key={conv.id} className="group/chat relative">
+                <button
+                  onClick={() => handleSwitchConversation(conv.id)}
+                  className={cn(
+                    'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-colors',
+                    operate.conversationId === conv.id
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'hover:bg-sidebar-accent/50'
+                  )}
+                >
+                  <Zap className="h-4 w-4 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="block truncate text-sm">{conv.title || 'Untitled'}</span>
+                    <span className="block text-[10px] text-sidebar-foreground/50">
+                      {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
+                    </span>
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => handleDeleteConversation(conv.id, e)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 transition-opacity p-1 rounded hover:bg-sidebar-accent"
+                  title="Delete chat"
+                >
+                  <Trash2 className="h-3 w-3 text-sidebar-foreground/60" />
+                </button>
+              </div>
+            ))}
+
+            {operate.conversations.length === 0 && (
+              <div className="flex flex-col items-center gap-2 py-8 px-4 text-sidebar-foreground/40">
+                <MessageSquare className="h-8 w-8 opacity-30" />
+                <p className="text-xs text-center">No previous chats</p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t border-sidebar-border p-3">
+            <div className="flex items-center gap-2 text-sidebar-foreground/50">
+              <Zap className="h-3.5 w-3.5" />
+              <span className="text-xs">{operate.skills.length} skills available</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="shrink-0 flex flex-col border-r border-sidebar-border bg-sidebar">
+          <div className="flex items-center justify-center h-10 shrink-0 border-b border-sidebar-border">
+            <button onClick={() => setSidebarOpen(true)} className="h-7 w-7 inline-flex items-center justify-center rounded-md hover:bg-sidebar-accent transition-colors">
+              <PanelLeft className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Right column: header + chat + context */}
       <div className="flex-1 flex flex-col min-w-0">
