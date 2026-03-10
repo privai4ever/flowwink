@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Zap, Plus, Trash2, MessageSquare } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AdminContentHeader } from '@/components/admin/AdminContentHeader';
 import { Button } from '@/components/ui/button';
 import { UnifiedChat } from '@/components/chat/UnifiedChat';
 import { ContextPanel } from '@/components/admin/copilot/ContextPanel';
