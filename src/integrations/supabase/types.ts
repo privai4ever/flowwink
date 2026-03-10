@@ -940,6 +940,84 @@ export type Database = {
         }
         Relationships: []
       }
+      consultant_profiles: {
+        Row: {
+          availability: string | null
+          avatar_url: string | null
+          bio: string | null
+          certifications: string[] | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          education: Json | null
+          email: string | null
+          experience_json: Json | null
+          experience_years: number | null
+          hourly_rate_cents: number | null
+          id: string
+          is_active: boolean
+          languages: string[] | null
+          linkedin_url: string | null
+          name: string
+          phone: string | null
+          portfolio_url: string | null
+          skills: string[]
+          summary: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          availability?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          education?: Json | null
+          email?: string | null
+          experience_json?: Json | null
+          experience_years?: number | null
+          hourly_rate_cents?: number | null
+          id?: string
+          is_active?: boolean
+          languages?: string[] | null
+          linkedin_url?: string | null
+          name: string
+          phone?: string | null
+          portfolio_url?: string | null
+          skills?: string[]
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          availability?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          education?: Json | null
+          email?: string | null
+          experience_json?: Json | null
+          experience_years?: number | null
+          hourly_rate_cents?: number | null
+          id?: string
+          is_active?: boolean
+          languages?: string[] | null
+          linkedin_url?: string | null
+          name?: string
+          phone?: string | null
+          portfolio_url?: string | null
+          skills?: string[]
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       content_proposals: {
         Row: {
           approved_at: string | null
