@@ -70,9 +70,18 @@ export default function SkillHubPage() {
             Manage agent skills, monitor activity, define objectives, and configure automations.
           </p>
         </div>
-        <Badge variant="secondary" className="text-xs">
-          {skills.length} skills
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="text-xs">
+            {skills.length} skills
+          </Badge>
+          <Button 
+            variant="outline" size="sm" className="gap-1.5"
+            onClick={() => navigate('/admin/copilot')}
+          >
+            <Zap className="h-3.5 w-3.5" />
+            Open FlowPilot
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
