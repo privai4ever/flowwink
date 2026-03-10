@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Zap } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Badge } from '@/components/ui/badge';
 import { UnifiedChat } from '@/components/chat/UnifiedChat';
-import { ActivityFeed } from '@/components/admin/copilot/ActivityFeed';
+import { ContextPanel } from '@/components/admin/copilot/ContextPanel';
 import { useAgentOperate } from '@/hooks/useAgentOperate';
 
 export default function CopilotPage() {
@@ -31,13 +31,13 @@ export default function CopilotPage() {
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Your autonomous CMS operator — use @commands to access skills
+                Your autonomous CMS operator — use <kbd className="px-1 py-0.5 rounded bg-muted text-[10px] font-mono">@</kbd> commands to access skills
               </p>
             </div>
           </div>
         </div>
 
-        {/* Main content: Chat + Activity sidebar */}
+        {/* Main content: Chat + Context Panel */}
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 border-r flex flex-col">
             <UnifiedChat
@@ -51,7 +51,7 @@ export default function CopilotPage() {
             />
           </div>
           <div className="w-80 flex flex-col bg-muted/30">
-            <ActivityFeed
+            <ContextPanel
               activities={operate.activities}
               onApprove={operate.approveAction}
               onRefresh={operate.loadActivity}

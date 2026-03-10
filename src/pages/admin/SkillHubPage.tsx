@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Zap } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,10 @@ import { useSkills, useToggleSkill, useUpsertSkill, useDeleteSkill } from '@/hoo
 import type { AgentSkill } from '@/types/agent';
 
 export default function SkillHubPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'skills';
+
   const { data: skills = [], isLoading } = useSkills();
   const toggle = useToggleSkill();
   const upsert = useUpsertSkill();
@@ -65,13 +70,22 @@ export default function SkillHubPage() {
             Manage agent skills, monitor activity, define objectives, and configure automations.
           </p>
         </div>
-        <Badge variant="secondary" className="text-xs">
-          {skills.length} skills
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="text-xs">
+            {skills.length} skills
+          </Badge>
+          <Button 
+            variant="outline" size="sm" className="gap-1.5"
+            onClick={() => navigate('/admin/copilot')}
+          >
+            <Zap className="h-3.5 w-3.5" />
+            Open FlowPilot
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="skills">
+      <Tabs defaultValue={defaultTab}>
         <TabsList>
           <TabsTrigger value="skills">Skills</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
