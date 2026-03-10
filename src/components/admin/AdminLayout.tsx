@@ -57,7 +57,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // In copilot mode: no sidebar, just header + full-width content
+  // In copilot mode: no admin sidebar, but children handle their own left panel
   if (isCopilotMode) {
     return (
       <SidebarProvider>
