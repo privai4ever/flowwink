@@ -125,7 +125,8 @@ export type ContentBlockType =
   | 'parallax-section'
   | 'bento-grid'
   | 'section-divider'
-  | 'featured-carousel';
+  | 'featured-carousel'
+  | 'resume-matcher';
 
 // Form field types
 export type FormFieldType = 'text' | 'email' | 'phone' | 'textarea' | 'checkbox';

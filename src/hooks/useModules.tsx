@@ -202,6 +202,7 @@ export const SIDEBAR_TO_MODULE: Record<string, keyof ModulesSettings> = {
   '/admin/media': 'mediaLibrary',
   '/admin/webinars': 'webinars',
   '/admin/sales-intelligence': 'salesIntelligence',
+  '/admin/resume': 'resume',
 };
 
 export function useModules() {
