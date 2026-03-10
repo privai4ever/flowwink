@@ -57,17 +57,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // In copilot mode: no sidebar, just header + full-width content
+  // In copilot mode: children provide their own left panel at full height
   if (isCopilotMode) {
     return (
       <SidebarProvider>
         <div className="flex h-screen w-full bg-background">
-          <div className="flex-1 flex flex-col min-w-0">
-            <AdminContentHeader />
-            <main className="flex-1 overflow-hidden animate-fade-in">
-              {children}
-            </main>
-          </div>
+          {children}
         </div>
       </SidebarProvider>
     );
