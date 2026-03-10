@@ -87,6 +87,24 @@ export default function CopilotPage() {
     setTimeout(() => operate.loadConversations(), 1500);
   };
 
+  const handleDeletePublicChat = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      // Hard delete: clean up messages + feedback first, then conversation
+      await Promise.all([
+        supabase.from('chat_messages').delete().eq('conversation_id', id),
+        supabase.from('chat_feedback').delete().eq('conversation_id', id),
+      ]);
+      const { error } = await supabase.from('chat_conversations').delete().eq('id', id);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ['copilot-public-chats'] });
+      toast.success('Conversation deleted');
+    } catch (err) {
+      console.error('Failed to delete public chat:', err);
+      toast.error('Failed to delete conversation');
+    }
+  };
+
   return (
     <AdminLayout>
       <AdminSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
