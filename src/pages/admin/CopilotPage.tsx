@@ -75,7 +75,7 @@ export default function CopilotPage() {
 
         {/* New chat button */}
         <div className="px-2 pt-1 pb-1">
-          <Button onClick={handleNewChat} variant="outline" className="w-full gap-2 justify-start text-sm h-8" size="sm">
+          <Button onClick={handleNewChat} variant="ghost" className="w-full gap-2 justify-start text-sm h-8" size="sm">
             <Plus className="h-4 w-4" />
             New chat
           </Button>
