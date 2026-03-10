@@ -44,6 +44,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { ROLE_LABELS } from "@/types/cms";
 import { useModules, type ModulesSettings } from "@/hooks/useModules";
+import { usePinnedPages } from "@/hooks/usePinnedPages";
 import { useBrandingSettings } from "@/hooks/useSiteSettings";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
 import {
