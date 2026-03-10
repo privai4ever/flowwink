@@ -162,7 +162,7 @@ The central innovation is `agent-reason` — a **shared importable module** (not
 
 ## 4. The Seven Core Capabilities
 
-### 4.1 Skill Engine (20+ Skills)
+### 4.1 Skill Engine (19 Default Skills + Runtime Creation)
 
 Every capability is a **skill** — a database-driven, hot-reloadable tool definition in OpenAI function-calling format. FlowAgent can create new skills at runtime.
 
