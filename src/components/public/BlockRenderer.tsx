@@ -256,6 +256,8 @@ export function BlockRenderer({ block, pageId, index = 0 }: BlockRendererProps) 
         return <SectionDividerBlock data={block.data as unknown as SectionDividerBlockData} />;
       case 'featured-carousel':
         return <FeaturedCarouselBlock data={block.data as unknown as FeaturedCarouselBlockData} />;
+      case 'resume-matcher':
+        return <ResumeMatcherBlock data={block.data as Record<string, unknown>} />;
       default:
         return null;
     }
