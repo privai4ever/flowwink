@@ -127,9 +127,13 @@ export function AdminSidebar() {
   }, []);
 
   useEffect(() => {
-    if (sidebarScrollRef.current) {
-      sidebarScrollRef.current.scrollTop = scrollPositionRef.current;
-    }
+    // Use rAF to ensure DOM has settled before restoring scroll
+    const frame = requestAnimationFrame(() => {
+      if (sidebarScrollRef.current) {
+        sidebarScrollRef.current.scrollTop = scrollPositionRef.current;
+      }
+    });
+    return () => cancelAnimationFrame(frame);
   }, [location.pathname]);
   
   const adminName = branding?.adminName || 'FlowWink';
