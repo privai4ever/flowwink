@@ -242,10 +242,10 @@ export const defaultIntegrationsSettings: IntegrationsSettings = {
   firecrawl: {
     enabled: false,
     name: 'Firecrawl',
-    description: 'Web scraping and analysis',
+    description: 'Web scraping and search',
     icon: 'Flame',
-    category: 'media',
-    features: ['Brand analyzer', 'Company enrichment'],
+    category: 'sales',
+    features: ['Web scraping', 'Search', 'Company enrichment'],
     secretName: 'FIRECRAWL_API_KEY',
     docsUrl: 'https://firecrawl.dev/docs',
     docsLabel: 'Get API key',
