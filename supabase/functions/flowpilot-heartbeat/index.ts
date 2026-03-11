@@ -10,7 +10,7 @@ import {
   getBuiltInTools,
   executeBuiltInTool,
   runSelfHealing,
-} from "../agent-reason/index.ts";
+} from "../_shared/agent-reason.ts";
 
 /**
  * FlowPilot Heartbeat — Enhanced Autonomous Loop
