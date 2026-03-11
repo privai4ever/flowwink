@@ -276,6 +276,7 @@ export function useAgentOperate() {
 
     let finalContent = '';
     let skillResults: any[] = [];
+    let relayFollowUp: string | null = null;
 
     try {
       const convId = await getOrCreateConversation();

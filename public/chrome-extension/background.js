@@ -51,7 +51,7 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
       return true;
     }
 
-    chrome.tabs.create({ url, active: false }, (tab) => {
+    chrome.tabs.create({ url, active: true }, (tab) => {
       const tabId = tab.id;
       
       // Wait for page to load
