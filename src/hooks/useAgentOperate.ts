@@ -346,18 +346,26 @@ export function useAgentOperate() {
 
               const relayResult = await relayHandlerRef.current(relayUrl);
               if (relayResult && !relayResult.error) {
+                // Check if the scrape detected an error page
+                const isErrorPage = relayResult.method === 'error' || relayResult.is_error;
+                
                 // Send relay result back to browser-fetch to get formatted response
                 const { data: fetchResult } = await supabase.functions.invoke('browser-fetch', {
                   body: { url: relayUrl, relay_result: relayResult },
                 });
                 // Replace the relay_required result with actual content
                 result.result = fetchResult;
-                result.status = 'success';
+                result.status = isErrorPage ? 'failed' : 'success';
 
                 // Build follow-up content for the agent to continue reasoning
                 const title = relayResult.title || '';
                 const content = relayResult.content || fetchResult?.content || '';
-                relayFollowUp = `Here is the fetched content from ${relayUrl}:\n\n**${title}**\n\n${content}`;
+                
+                if (isErrorPage) {
+                  relayFollowUp = `Browser relay to ${relayUrl} failed: The page returned a 404 or error. The URL may be incorrect. Try a different URL format (e.g. for LinkedIn posts, try the /recent-activity/all/ path, or use the direct post URL).`;
+                } else {
+                  relayFollowUp = `Here is the fetched content from ${relayUrl}:\n\n**${title}**\n\n${content}`;
+                }
               } else {
                 result.result = { error: relayResult?.error || 'Browser relay failed' };
                 result.status = 'failed';
