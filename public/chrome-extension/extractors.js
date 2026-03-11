@@ -232,6 +232,10 @@ const Extractors = (() => {
     let bestLen = 0;
 
     candidates.forEach(el => {
+      // Skip our own injected UI
+      if (el.id === "signal-capture-palette" || el.id === "signal-capture-fab" ||
+          el.closest("#signal-capture-palette")) return;
+
       // Skip nav, header, footer, sidebar
       const tag = el.tagName.toLowerCase();
       const role = el.getAttribute("role") || "";
@@ -253,16 +257,43 @@ const Extractors = (() => {
   }
 
   function cleanText(el) {
-    // Remove script/style/nav/footer content
+    // Remove script/style/nav/footer and our own injected UI
     const clone = el.cloneNode(true);
-    clone.querySelectorAll("script, style, nav, footer, header, aside, [role='navigation'], [role='banner']").forEach(n => n.remove());
+    clone.querySelectorAll(
+      "script, style, nav, footer, header, aside, [role='navigation'], [role='banner'], #signal-capture-palette, #signal-capture-fab, #signal-capture-styles"
+    ).forEach(n => n.remove());
     return (clone.innerText || "").substring(0, 8000).trim();
+  }
+
+  // Detect error pages (404, login walls, etc.)
+  function detectErrorPage() {
+    const title = (document.title || "").toLowerCase();
+    const bodyText = (document.body?.innerText || "").substring(0, 500).toLowerCase();
+    
+    if (title.includes("page not found") || title.includes("404") ||
+        bodyText.includes("page not found") || bodyText.includes("this page doesn") ||
+        bodyText.includes("page you requested") ||
+        // LinkedIn specific
+        title === "" && bodyText.length < 200) {
+      return true;
+    }
+    return false;
   }
 
   // ---- Public API ----
 
   function extract() {
     const host = location.hostname;
+
+    // Check for error pages first
+    if (detectErrorPage()) {
+      return {
+        title: document.title || "Error Page",
+        content: `[ERROR] Page returned an error or 404. URL: ${location.href}. The page may not exist or requires different authentication.`,
+        method: "error",
+        is_error: true
+      };
+    }
 
     // Try selected text first
     const sel = window.getSelection()?.toString()?.trim();
