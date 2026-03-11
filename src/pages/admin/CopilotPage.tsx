@@ -18,6 +18,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 
 export default function CopilotPage() {
   const operate = useAgentOperate();
+  const relay = useExtensionRelay();
   const queryClient = useQueryClient();
   const [chatKey, setChatKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -27,6 +28,27 @@ export default function CopilotPage() {
   const adminName = branding?.adminName || 'FlowWink';
   const showEscalations = chatSettings?.showEscalationsInCopilot ?? false;
   const showPublicChats = chatSettings?.showPublicChatsInCopilot ?? false;
+
+  // Wire extension relay into the agent operate hook
+  useEffect(() => {
+    operate.setRelayHandler(async (url: string) => {
+      // Try to detect extension first
+      const detected = relay.extensionStatus.installed || await relay.detectExtension();
+      if (!detected) {
+        return { error: 'Chrome Extension not detected. Install the Signal Capture extension and set the extension ID in settings.' };
+      }
+      const result = await relay.navigateAndScrape(url);
+      if (result.success) {
+        return {
+          title: result.title || '',
+          content: result.content || '',
+          html: result.html || '',
+          url: result.url || url,
+        };
+      }
+      return { error: result.error || 'Relay failed' };
+    });
+  }, [relay.extensionStatus.installed]);
 
   // Fetch unresolved escalations
   const { data: escalations = [] } = useQuery({
