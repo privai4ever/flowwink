@@ -296,7 +296,7 @@ export function AdminSidebar() {
                               return (
                                 <SidebarMenuItem key={item.name} className="group/pin">
                                   <SidebarMenuButton asChild isActive={isActive} tooltip={item.name}>
-                                    <Link to={item.href}>
+                                    <Link to={item.href} onClick={saveScrollPosition}>
                                       <item.icon className="h-4 w-4" />
                                       <span>{item.name}</span>
                                     </Link>
