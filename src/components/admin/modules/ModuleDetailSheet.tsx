@@ -17,10 +17,15 @@ import {
   CheckCircle2,
   Clock,
   Hash,
+  Bot,
+  Settings2,
+  Eye,
+  Monitor,
 } from "lucide-react";
 import { moduleRegistry } from "@/lib/module-registry";
 import type { ModuleCapability } from "@/types/module-contracts";
 import type { ModuleStats } from "@/hooks/useModuleStats";
+import type { ModuleAutonomy } from "@/hooks/useModules";
 import { formatDistanceToNow } from "date-fns";
 
 interface ModuleDetailSheetProps {
@@ -31,6 +36,8 @@ interface ModuleDetailSheetProps {
   moduleDescription: string;
   stats?: ModuleStats;
   isEnabled: boolean;
+  autonomy: ModuleAutonomy;
+  adminUI: boolean;
 }
 
 const CAPABILITY_INFO: Record<ModuleCapability, { label: string; description: string; icon: React.ComponentType<{ className?: string }> }> = {
