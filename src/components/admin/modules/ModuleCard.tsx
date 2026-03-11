@@ -166,7 +166,7 @@ export function ModuleCard({
                   <Badge 
                     variant="outline" 
                     className={`text-[10px] px-1.5 py-0 gap-1 ${
-                      config.autonomy === 'agent-capable' 
+                      autonomy === 'agent-capable' 
                         ? 'border-primary/40 text-primary' 
                         : ''
                     }`}
