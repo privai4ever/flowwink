@@ -245,6 +245,7 @@ export default function ModulesPage() {
                         dependsOnName={dependency ? localModules?.[dependency]?.name : undefined}
                         stats={stats?.[module.id]}
                         onToggle={(enabled) => handleToggle(module.id, enabled)}
+                        onAdminUIToggle={module.autonomy === 'agent-capable' ? (adminUI) => handleAdminUIToggle(module.id, adminUI) : undefined}
                         isUpdating={updateModules.isPending}
                         IconComponent={IconComponent}
                       />
