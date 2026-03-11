@@ -51,6 +51,9 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Headphones,
   CalendarDays,
   BarChart3,
+  Video,
+  Target,
+  FileUser,
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
