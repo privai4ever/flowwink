@@ -132,6 +132,7 @@ RULES:
         ];
 
         const allSkillResults: any[] = [];
+        const loadedInstructions = new Set<string>();
 
         for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
           const aiResponse = await fetch(apiUrl, {
