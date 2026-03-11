@@ -447,7 +447,7 @@ async function executeResumeAction(
 }
 
 async function executeDbAction(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   table: string,
   skillName: string,
   args: Record<string, unknown>,
