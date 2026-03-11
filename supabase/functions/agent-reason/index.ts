@@ -755,18 +755,36 @@ async function handleReflect(supabase: any, args: { focus?: string }) {
   };
 }
 
-// ─── Skill Instructions Loader ────────────────────────────────────────────────
+// ─── Lazy Skill Instructions Loader ───────────────────────────────────────────
+// Instead of loading ALL skill instructions into the system prompt upfront,
+// we fetch instructions only for skills the LLM actually calls.
+// This keeps the prompt lean and scales with the number of registered skills.
 
-export async function loadSkillInstructions(supabase: any): Promise<string> {
+export async function fetchSkillInstructions(
+  supabase: any,
+  skillNames: string[],
+  alreadyLoaded: Set<string>,
+): Promise<string> {
+  const toFetch = skillNames.filter(n => !alreadyLoaded.has(n));
+  if (toFetch.length === 0) return '';
+
   const { data } = await supabase
     .from('agent_skills')
     .select('name, instructions')
-    .eq('enabled', true)
+    .in('name', toFetch)
     .not('instructions', 'is', null);
 
   if (!data || data.length === 0) return '';
+
+  for (const s of data) alreadyLoaded.add(s.name);
+
   const lines = data.map((s: any) => `### ${s.name}\n${s.instructions}`);
-  return `\n\nSKILL KNOWLEDGE (instructions you've written for your skills):\n${lines.join('\n\n')}`;
+  return `\n\nSKILL CONTEXT (instructions for skills you just used):\n${lines.join('\n\n')}`;
+}
+
+// Keep backward-compat export (now deprecated — returns empty string)
+export async function loadSkillInstructions(_supabase: any): Promise<string> {
+  return '';
 }
 
 // ─── Built-in Tool Definitions ────────────────────────────────────────────────
