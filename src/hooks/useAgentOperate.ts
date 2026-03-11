@@ -534,6 +534,14 @@ export function useAgentOperate() {
     setConversationId(null);
   }, []);
 
+  // ─── Extension relay handler ──────────────────────────────────────────
+  // Can be set by the CopilotPage to handle relay_required responses
+  const relayHandlerRef = useRef<((url: string) => Promise<any>) | null>(null);
+
+  const setRelayHandler = useCallback((handler: (url: string) => Promise<any>) => {
+    relayHandlerRef.current = handler;
+  }, []);
+
   return {
     messages,
     isLoading,
@@ -551,5 +559,6 @@ export function useAgentOperate() {
     switchConversation,
     deleteConversation,
     clearMessages,
+    setRelayHandler,
   };
 }

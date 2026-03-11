@@ -639,28 +639,64 @@ For non-resume PDFs, return the extracted text directly to the user.`,
   },
   // ─── Operator Skills ───────────────────────────────────────────────────────
   {
+    name: 'browser_fetch',
+    description: 'Fetch content from any URL — automatically picks the right strategy. For login-walled sites (LinkedIn, X, Facebook), uses the Chrome Extension relay (user\'s real browser session, ToS-safe). For public URLs, uses Firecrawl server-side scraping. This is the PRIMARY tool for reading web pages.',
+    handler: 'edge:browser-fetch',
+    category: 'search',
+    scope: 'internal',
+    requires_approval: false,
+    instructions: `## When to use
+- ALWAYS prefer browser_fetch over scrape_url — it handles routing automatically
+- User says "fetch/read/check/look at [URL]"
+- User asks about someone's LinkedIn post or profile
+- You need to read any web page for content creation or research
+
+## How it works
+1. You call browser_fetch with a URL
+2. If the URL is login-walled (LinkedIn, X, etc.), you'll get back { action: 'relay_required' }
+   - The admin panel's Chrome Extension relay handles this automatically
+   - The extension opens the page in the user's real browser (their session, their cookies)
+   - Content comes back clean — no ToS violation
+3. If the URL is public, it goes through Firecrawl (fast server-side scraping)
+
+## Chaining examples
+1. "Read Magnus Froste's latest LinkedIn post and write a blog post" →
+   search_web (find LinkedIn URL) → browser_fetch (read it via relay) → write_blog_post
+2. "Summarize this article" → browser_fetch → respond with summary
+3. "Research this company" → browser_fetch (their website) → enrich_company
+
+## Important
+- For LinkedIn: ALWAYS use browser_fetch, never scrape_url directly
+- The relay only works when the admin has the Chrome Extension installed
+- If relay fails, the response will include a fallback suggestion
+- You can force relay mode with force_relay=true for any URL`,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'browser_fetch',
+        description: 'Fetch content from any URL. Automatically uses Chrome Extension relay for login-walled sites (LinkedIn, X) and Firecrawl for public URLs. This is the preferred way to read web pages.',
+        parameters: {
+          type: 'object',
+          properties: {
+            url: { type: 'string', description: 'The URL to fetch' },
+            force_relay: { type: 'boolean', description: 'Force Chrome Extension relay even for public URLs (default false)' },
+          },
+          required: ['url'],
+        },
+      },
+    },
+  },
+  {
     name: 'scrape_url',
-    description: 'Fetch and extract content from any URL — web pages, LinkedIn posts, articles, GitHub repos. Returns clean markdown text. Use this when the user asks you to "go read", "fetch", "check", or "look at" a URL.',
+    description: 'Server-side URL scraping via Firecrawl. For public pages only. Prefer browser_fetch which auto-routes between relay and scraping.',
     handler: 'edge:scrape-url',
     category: 'search',
     scope: 'internal',
     requires_approval: false,
     instructions: `## When to use
-- User says "fetch/read/check/look at [URL]"
-- User asks to write content based on a specific URL
-- You need to read a LinkedIn post, article, or web page
-- Part of a chain: scrape → analyze → create content
-
-## Chaining examples
-1. "Write a blog post about this article" → scrape_url → write_blog_post
-2. "Summarize what's on this page" → scrape_url → respond with summary
-3. "Fetch the latest from [person]'s LinkedIn" → search_web (find URL) → scrape_url → process
-
-## Important
-- Works with any public URL including LinkedIn, GitHub, Twitter/X
-- Content is truncated at 15k chars — sufficient for most use cases
-- For LinkedIn profiles, search_web first to find the right URL
-- Returns markdown format — ideal for further AI processing`,
+- PREFER browser_fetch over this skill — it handles routing automatically
+- Only use scrape_url directly when you specifically need Firecrawl features
+- Never use for LinkedIn, X, or other login-walled sites`,
     tool_definition: {
       type: 'function',
       function: {

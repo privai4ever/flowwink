@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Zap, Plus, Trash2, MessageSquare, PanelLeftClose, PanelLeft, AlertTriangle, Users } from 'lucide-react';
+import { Zap, Plus, Trash2, MessageSquare, PanelLeftClose, PanelLeft, AlertTriangle, Users, Globe } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminContentHeader } from '@/components/admin/AdminContentHeader';
 import { AdminSearchCommand, useAdminSearch, SearchButton } from '@/components/admin/AdminSearchCommand';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { UnifiedChat } from '@/components/chat/UnifiedChat';
 import { ContextPanel } from '@/components/admin/copilot/ContextPanel';
 import { useAgentOperate } from '@/hooks/useAgentOperate';
+import { useExtensionRelay } from '@/hooks/useExtensionRelay';
 import { useBrandingSettings, useChatSettings } from '@/hooks/useSiteSettings';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -17,6 +18,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 
 export default function CopilotPage() {
   const operate = useAgentOperate();
+  const relay = useExtensionRelay();
   const queryClient = useQueryClient();
   const [chatKey, setChatKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -26,6 +28,27 @@ export default function CopilotPage() {
   const adminName = branding?.adminName || 'FlowWink';
   const showEscalations = chatSettings?.showEscalationsInCopilot ?? false;
   const showPublicChats = chatSettings?.showPublicChatsInCopilot ?? false;
+
+  // Wire extension relay into the agent operate hook
+  useEffect(() => {
+    operate.setRelayHandler(async (url: string) => {
+      // Try to detect extension first
+      const detected = relay.extensionStatus.installed || await relay.detectExtension();
+      if (!detected) {
+        return { error: 'Chrome Extension not detected. Install the Signal Capture extension and set the extension ID in settings.' };
+      }
+      const result = await relay.navigateAndScrape(url);
+      if (result.success) {
+        return {
+          title: result.title || '',
+          content: result.content || '',
+          html: result.html || '',
+          url: result.url || url,
+        };
+      }
+      return { error: result.error || 'Relay failed' };
+    });
+  }, [relay.extensionStatus.installed]);
 
   // Fetch unresolved escalations
   const { data: escalations = [] } = useQuery({
@@ -242,10 +265,29 @@ export default function CopilotPage() {
             </div>
           )}
 
-          <div className="border-t border-sidebar-border p-3">
+          <div className="border-t border-sidebar-border p-3 space-y-1.5">
             <div className="flex items-center gap-2 text-sidebar-foreground/50">
               <Zap className="h-3.5 w-3.5" />
               <span className="text-xs">{operate.skills.length} skills available</span>
+            </div>
+            <div className="flex items-center gap-2 text-sidebar-foreground/50">
+              <Globe className="h-3.5 w-3.5" />
+              <span className="text-xs">
+                Extension: {relay.extensionStatus.installed 
+                  ? `v${relay.extensionStatus.version || '?'}` 
+                  : 'not detected'}
+              </span>
+              {!relay.extensionStatus.installed && (
+                <button
+                  onClick={() => {
+                    const id = prompt('Enter Chrome Extension ID:');
+                    if (id) relay.setExtensionId(id.trim());
+                  }}
+                  className="text-[10px] text-primary hover:underline"
+                >
+                  Connect
+                </button>
+              )}
             </div>
           </div>
         </div>
