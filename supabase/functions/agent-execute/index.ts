@@ -845,7 +845,7 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   kb_gap_analysis: ['knowledge', 'support', 'chat', 'content', 'article', 'kb'],
   manage_consultant_profile: ['resume', 'consultant', 'profile', 'talent'],
   match_consultant: ['resume', 'consultant', 'match', 'talent', 'recruitment'],
-  extract_pdf_text: ['resume', 'pdf', 'document', 'extract', 'consultant'],
+  extract_pdf_text: ['pdf', 'document', 'extract', 'content', 'resume', 'report', 'contract'],
 };
 
 async function trackObjectiveProgress(
