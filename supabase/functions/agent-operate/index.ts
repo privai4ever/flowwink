@@ -11,7 +11,7 @@ import {
   getBuiltInTools,
   executeBuiltInTool,
   isBuiltInTool,
-} from "../agent-reason/index.ts";
+} from "../_shared/agent-reason.ts";
 
 /**
  * FlowPilot Operate — Interactive streaming agent
