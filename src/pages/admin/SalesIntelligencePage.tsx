@@ -13,6 +13,7 @@ import { ResearchResultCards } from "@/components/admin/sales-intelligence/Resea
 import { FitAnalysisCard } from "@/components/admin/sales-intelligence/FitAnalysisCard";
 import { SalesProfileSetup } from "@/components/admin/sales-intelligence/SalesProfileSetup";
 import { ResearchHistory } from "@/components/admin/sales-intelligence/ResearchHistory";
+import { CompanyProfileCard } from "@/components/admin/integrations/CompanyProfileCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ResearchResult, FitAnalysisResult } from "@/components/admin/sales-intelligence/types";
 
