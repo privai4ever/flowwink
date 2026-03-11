@@ -99,7 +99,7 @@ async function parseOperateStream(response: Response, callbacks: StreamCallbacks
                   callbacks.onToolDone(data.tools || [], data.iteration || 0);
                   break;
                 case 'skill_results':
-                  callbacks.onSkillResults(data);
+                  await callbacks.onSkillResults(data);
                   break;
                 case 'error':
                   callbacks.onError(data.message || 'Unknown error');
