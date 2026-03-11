@@ -466,7 +466,7 @@ function BrowserControlSetup() {
   );
 }
 
-
+export function ModuleDetailSheet({
   open,
   onOpenChange,
   moduleId,
