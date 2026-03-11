@@ -228,6 +228,74 @@ export default function ConsultantProfilesPage() {
     },
   });
 
+  const handlePdfImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Reset input so same file can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
+      toast({ title: "Invalid file", description: "Please select a PDF file.", variant: "destructive" });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Maximum file size is 10 MB.", variant: "destructive" });
+      return;
+    }
+
+    setIsParsing(true);
+    try {
+      // Extract text from PDF using browser
+      const arrayBuffer = await file.arrayBuffer();
+      const text = await extractTextFromPdf(arrayBuffer);
+
+      if (!text || text.length < 20) {
+        toast({ title: "Could not read PDF", description: "The PDF appears to be empty or image-only. Try a text-based resume.", variant: "destructive" });
+        return;
+      }
+
+      // Send to AI for structured extraction
+      const { data, error } = await supabase.functions.invoke("parse-resume", {
+        body: { resume_text: text },
+      });
+
+      if (error || !data?.success) {
+        toast({ title: "Parsing failed", description: data?.error || "Could not parse the resume.", variant: "destructive" });
+        return;
+      }
+
+      const p = data.profile;
+      setEditingId(null);
+      setForm({
+        name: p.name || "",
+        title: p.title || "",
+        email: p.email || "",
+        phone: p.phone || "",
+        skills: (p.skills || []).join(", "),
+        experience_years: p.experience_years || 0,
+        summary: p.summary || "",
+        bio: p.bio || "",
+        availability: "available",
+        is_active: true,
+        hourly_rate_cents: 0,
+        currency: "SEK",
+        languages: (p.languages || []).join(", "),
+        certifications: (p.certifications || []).join(", "),
+        linkedin_url: p.linkedin_url || "",
+        portfolio_url: p.portfolio_url || "",
+      });
+      setDialogOpen(true);
+      toast({ title: "Resume parsed", description: `Extracted profile for ${p.name || "consultant"}. Review and save.` });
+    } catch (err) {
+      console.error("PDF import error:", err);
+      toast({ title: "Import failed", description: "An error occurred while processing the PDF.", variant: "destructive" });
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyForm);
