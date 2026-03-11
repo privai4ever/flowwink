@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.87.1";
+import { loadSalesContext } from "../_shared/sales-context.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -48,15 +49,9 @@ serve(async (req) => {
       });
     }
 
-    // Load company profile from site_settings
-    const { data: profileSetting } = await supabase
-      .from('site_settings')
-      .select('value')
-      .eq('key', 'company_profile')
-      .maybeSingle();
-
-    const companyProfile = profileSetting?.value || {};
-    console.log('[prospect-research] Company profile loaded:', !!profileSetting);
+    // Load rich sales context (replaces old site_settings company_profile)
+    const salesContext = await loadSalesContext({ includePages: true, maxPageTokens: 4000 });
+    console.log('[prospect-research] Sales context loaded, sections:', salesContext.formatted.length, 'chars');
 
     // --- Step 1: Jina Search for prospect context ---
     console.log('[prospect-research] Jina Search for:', company_name);
@@ -81,7 +76,6 @@ serve(async (req) => {
     let resolvedUrl = company_url;
 
     if (!resolvedUrl && searchContext) {
-      // Try to extract URL from search results
       const urlMatch = searchContext.match(/URL: (https?:\/\/[^\s]+)/);
       if (urlMatch) resolvedUrl = urlMatch[1];
     }
@@ -135,16 +129,16 @@ serve(async (req) => {
       }
     }
 
-    // --- Step 4: AI Analysis ---
+    // --- Step 4: AI Analysis with rich context ---
     const useGemini = !openaiKey && !!geminiKey;
 
-    const systemPrompt = `You are a B2B sales research analyst. Given information about a prospect company and your client's company profile, perform two tasks:
+    const systemPrompt = `You are a B2B sales research analyst. Given information about a prospect company and your client's full business context, perform two tasks:
 
 1. Generate 5 qualifying questions that evaluate whether this prospect is a good fit for your client's services
 2. Answer each question using the research data provided
 
-Your client's company profile:
-${JSON.stringify(companyProfile, null, 2)}
+Your client's business context:
+${salesContext.formatted || '(No company profile configured yet)'}
 
 Return a JSON object with:
 {
@@ -191,7 +185,6 @@ ${hunterContacts.length > 0 ? JSON.stringify(hunterContacts.slice(0, 5), null, 2
       if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
       const data = await res.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      // Extract JSON from response
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) aiResult = JSON.parse(jsonMatch[0]);
     } else {
@@ -218,7 +211,6 @@ ${hunterContacts.length > 0 ? JSON.stringify(hunterContacts.slice(0, 5), null, 2
     // --- Step 5: Insert or find company ---
     const summary = aiResult.company_summary || {};
     
-    // Check if company with this domain already exists
     let companyRecord: any = null;
     if (prospectDomain) {
       const { data: existing } = await supabase
@@ -228,7 +220,6 @@ ${hunterContacts.length > 0 ? JSON.stringify(hunterContacts.slice(0, 5), null, 2
         .maybeSingle();
       
       if (existing) {
-        // Update existing company
         await supabase.from('companies').update({
           industry: summary.industry || null,
           size: summary.size_estimate || null,
@@ -265,7 +256,6 @@ ${hunterContacts.length > 0 ? JSON.stringify(hunterContacts.slice(0, 5), null, 2
       for (const contact of hunterContacts.slice(0, 10)) {
         const leadName = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || null;
         
-        // Check if lead with this email already exists
         const { data: existing } = await supabase
           .from('leads')
           .select('id, email, name')

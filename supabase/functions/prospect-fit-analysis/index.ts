@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.87.1";
+import { loadSalesContext } from "../_shared/sales-context.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,6 +12,7 @@ interface FitAnalysisInput {
   company_name?: string;
   decision_maker_first_name?: string;
   decision_maker_last_name?: string;
+  user_id?: string; // requesting user for personalized letters
 }
 
 serve(async (req) => {
@@ -40,33 +42,24 @@ serve(async (req) => {
       });
     }
 
-    // Load your company profile
-    const { data: profileSetting } = await supabase
-      .from('site_settings')
-      .select('value')
-      .eq('key', 'company_profile')
-      .maybeSingle();
-
-    const myProfile = profileSetting?.value || {};
+    // Load rich sales context (with user profile if provided)
+    const salesContext = await loadSalesContext({
+      userId: input.user_id,
+      includePages: true,
+      maxPageTokens: 6000,
+    });
+    console.log('[prospect-fit] Sales context loaded:', salesContext.formatted.length, 'chars');
 
     // Load prospect company data
     let prospectCompany: any = null;
     let companyId = input.company_id;
 
     if (companyId) {
-      const { data } = await supabase
-        .from('companies')
-        .select('*')
-        .eq('id', companyId)
-        .single();
+      const { data } = await supabase.from('companies').select('*').eq('id', companyId).single();
       prospectCompany = data;
     } else if (input.company_name) {
-      const { data } = await supabase
-        .from('companies')
-        .select('*')
-        .ilike('name', `%${input.company_name}%`)
-        .limit(1)
-        .maybeSingle();
+      const { data } = await supabase.from('companies').select('*')
+        .ilike('name', `%${input.company_name}%`).limit(1).maybeSingle();
       prospectCompany = data;
       companyId = data?.id;
     }
@@ -80,20 +73,15 @@ serve(async (req) => {
     // Load previous research from agent_memory
     let researchData: any = {};
     if (companyId) {
-      const { data: memory } = await supabase
-        .from('agent_memory')
-        .select('value')
-        .eq('key', `prospect_research_${companyId}`)
-        .maybeSingle();
+      const { data: memory } = await supabase.from('agent_memory').select('value')
+        .eq('key', `prospect_research_${companyId}`).maybeSingle();
       researchData = memory?.value || {};
     }
 
     // Load existing leads for this company
-    const { data: leads } = await supabase
-      .from('leads')
+    const { data: leads } = await supabase.from('leads')
       .select('id, name, email, phone, ai_summary, score')
-      .eq('company_id', companyId)
-      .limit(20);
+      .eq('company_id', companyId).limit(20);
 
     // --- Hunter Email Finder for decision-maker ---
     let decisionMakerEmail: any = null;
@@ -129,15 +117,15 @@ serve(async (req) => {
     // --- AI Fit Analysis + Introduction Letter ---
     const useGemini = !openaiKey && !!geminiKey;
 
-    const systemPrompt = `You are a B2B sales strategist. Given your client's company profile and a prospect's research data, perform these tasks:
+    const systemPrompt = `You are a B2B sales strategist. Given your client's full business context and a prospect's research data, perform these tasks:
 
 1. Evaluate the fit between client and prospect (score 0-100)
 2. Map the prospect's potential problems to the client's services
 3. Draft a personalized, professional introduction letter
 4. Generate an email subject line
 
-Your client's company profile:
-${JSON.stringify(myProfile, null, 2)}
+Your client's business context:
+${salesContext.formatted || '(No company profile configured yet)'}
 
 Return a JSON object:
 {
@@ -209,15 +197,12 @@ ${decisionMakerEmail ? `Decision Maker Found: ${decisionMakerEmail.first_name} $
     const fitScore = aiResult.fit_score || 0;
     if (leads && leads.length > 0) {
       for (const lead of leads) {
-        await supabase
-          .from('leads')
-          .update({
-            score: fitScore,
-            ai_summary: lead.ai_summary
-              ? `${lead.ai_summary} | Fit: ${fitScore}/100`
-              : `Fit: ${fitScore}/100`,
-          })
-          .eq('id', lead.id);
+        await supabase.from('leads').update({
+          score: fitScore,
+          ai_summary: lead.ai_summary
+            ? `${lead.ai_summary} | Fit: ${fitScore}/100`
+            : `Fit: ${fitScore}/100`,
+        }).eq('id', lead.id);
       }
     }
 
