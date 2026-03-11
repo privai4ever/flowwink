@@ -37,6 +37,7 @@ import {
   BarChart3,
   Target,
   MessageSquare,
+  Search,
 } from "lucide-react";
 import { useUnsavedChanges, UnsavedChangesDialog } from "@/hooks/useUnsavedChanges";
 import {
