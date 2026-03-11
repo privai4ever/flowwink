@@ -257,9 +257,11 @@ const Extractors = (() => {
   }
 
   function cleanText(el) {
-    // Remove script/style/nav/footer content
+    // Remove script/style/nav/footer and our own injected UI
     const clone = el.cloneNode(true);
-    clone.querySelectorAll("script, style, nav, footer, header, aside, [role='navigation'], [role='banner']").forEach(n => n.remove());
+    clone.querySelectorAll(
+      "script, style, nav, footer, header, aside, [role='navigation'], [role='banner'], #signal-capture-palette, #signal-capture-fab, #signal-capture-styles"
+    ).forEach(n => n.remove());
     return (clone.innerText || "").substring(0, 8000).trim();
   }
 
