@@ -818,12 +818,12 @@ Deno.serve(async (req) => {
         .select('id')
         .limit(1);
 
-      if (existingSkills && existingSkills.length > 0) {
-        console.log('[setup-flowpilot] Already set up with skills');
+      if (existingSkills && existingSkills.length > 0 && !seed_skills) {
+        console.log('[setup-flowpilot] Already set up with skills, skipping (pass seed_skills=true to upsert)');
         return new Response(
           JSON.stringify({
             success: true,
-            message: 'FlowPilot agentic layer is already configured.',
+            message: 'FlowPilot agentic layer is already configured. Pass seed_skills=true to upsert new skills.',
             already_setup: true,
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
