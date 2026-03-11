@@ -918,6 +918,7 @@ export async function reason(
   const actionsExecuted: string[] = [];
   const skillResults: ReasonResult['skillResults'] = [];
   let finalResponse = '';
+  const loadedInstructions = new Set<string>();
 
   for (let i = 0; i < maxIterations; i++) {
     const aiResponse = await fetch(apiUrl, {
@@ -950,6 +951,8 @@ export async function reason(
 
     conversationMessages.push(msg);
 
+    const calledSkillNames: string[] = [];
+
     for (const tc of msg.tool_calls) {
       const fnName = tc.function.name;
       let fnArgs: any;
@@ -967,9 +970,18 @@ export async function reason(
 
       if (!isBuiltInTool(fnName)) {
         skillResults.push({ skill: fnName, status: result?.status || 'success', result: result?.result || result });
+        calledSkillNames.push(fnName);
       }
 
       conversationMessages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
+    }
+
+    // Lazy instruction loading: inject instructions for skills just called
+    if (calledSkillNames.length > 0) {
+      const instrContext = await fetchSkillInstructions(supabase, calledSkillNames, loadedInstructions);
+      if (instrContext) {
+        conversationMessages.push({ role: 'system', content: instrContext });
+      }
     }
   }
 
