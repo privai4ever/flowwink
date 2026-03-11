@@ -250,8 +250,8 @@ export function ModuleCard({
         moduleDescription={config.description}
         stats={stats}
         isEnabled={isEnabled}
-        autonomy={config.autonomy}
-        adminUI={config.adminUI}
+        autonomy={autonomy}
+        adminUI={adminUI}
       />
     </>
   );
