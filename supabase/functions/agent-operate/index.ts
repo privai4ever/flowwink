@@ -201,6 +201,18 @@ RULES:
           );
 
           conversationMessages.push(...toolResults);
+
+          // Lazy instruction loading: inject instructions for non-built-in skills just called
+          const calledSkillNames = assistantMessage.tool_calls
+            .map((tc: any) => tc.function.name)
+            .filter((n: string) => !isBuiltInTool(n));
+          if (calledSkillNames.length > 0) {
+            const instrContext = await fetchSkillInstructions(supabase, calledSkillNames, loadedInstructions);
+            if (instrContext) {
+              conversationMessages.push({ role: 'system', content: instrContext });
+            }
+          }
+
           await sseEvent(writer, encoder, 'tool_done', { iteration: iteration + 1, tools: toolNames, results_count: toolResults.length });
         }
       } catch (err: any) {
