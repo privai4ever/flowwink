@@ -319,11 +319,11 @@ function BrowserControlSetup() {
       return;
     }
     setIsChecking(true);
-    relay.setExtensionId(extensionId.trim());
-    await new Promise(r => setTimeout(r, 2500));
+    localStorage.setItem('flowwink_extension_id', extensionId.trim());
+    const found = await relay.detectExtension(extensionId.trim());
     setIsChecking(false);
-    if (relay.extensionStatus.installed) {
-      toast.success(`Connected to extension v${relay.extensionStatus.version}`);
+    if (found) {
+      toast.success('Extension connected!');
     } else {
       toast.error('Extension not detected. Make sure it\'s installed and the ID is correct.');
     }
