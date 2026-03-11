@@ -637,6 +637,80 @@ For non-resume PDFs, return the extracted text directly to the user.`,
       },
     },
   },
+  // ─── Operator Skills ───────────────────────────────────────────────────────
+  {
+    name: 'scrape_url',
+    description: 'Fetch and extract content from any URL — web pages, LinkedIn posts, articles, GitHub repos. Returns clean markdown text. Use this when the user asks you to "go read", "fetch", "check", or "look at" a URL.',
+    handler: 'edge:scrape-url',
+    category: 'search',
+    scope: 'internal',
+    requires_approval: false,
+    instructions: `## When to use
+- User says "fetch/read/check/look at [URL]"
+- User asks to write content based on a specific URL
+- You need to read a LinkedIn post, article, or web page
+- Part of a chain: scrape → analyze → create content
+
+## Chaining examples
+1. "Write a blog post about this article" → scrape_url → write_blog_post
+2. "Summarize what's on this page" → scrape_url → respond with summary
+3. "Fetch the latest from [person]'s LinkedIn" → search_web (find URL) → scrape_url → process
+
+## Important
+- Works with any public URL including LinkedIn, GitHub, Twitter/X
+- Content is truncated at 15k chars — sufficient for most use cases
+- For LinkedIn profiles, search_web first to find the right URL
+- Returns markdown format — ideal for further AI processing`,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'scrape_url',
+        description: 'Fetch and extract content from any URL. Returns title, description, and clean markdown text. Use for reading web pages, LinkedIn posts, articles, etc.',
+        parameters: {
+          type: 'object',
+          properties: {
+            url: { type: 'string', description: 'The URL to scrape' },
+            extract_links: { type: 'boolean', description: 'Also extract all links from the page (default false)' },
+          },
+          required: ['url'],
+        },
+      },
+    },
+  },
+  {
+    name: 'process_signal',
+    description: 'Process an incoming signal captured by the Chrome extension or external webhook. Analyzes the content and determines next actions.',
+    handler: 'edge:signal-ingest',
+    category: 'automation',
+    scope: 'internal',
+    requires_approval: false,
+    instructions: `## Context
+Signals arrive from external operators (Chrome extension, webhooks).
+They are automatically stored in agent_activity.
+This skill is primarily triggered by automations, not directly by users.
+
+## Signal types
+- signal: Raw capture for AI processing
+- draft: Creates a blog post draft from captured content
+- bookmark: Saves to agent memory for future reference`,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'process_signal',
+        description: 'Process a captured signal from an external operator.',
+        parameters: {
+          type: 'object',
+          properties: {
+            url: { type: 'string', description: 'Source URL' },
+            title: { type: 'string', description: 'Page title' },
+            content: { type: 'string', description: 'Captured content' },
+            note: { type: 'string', description: 'User note' },
+            source_type: { type: 'string', enum: ['web', 'linkedin', 'x', 'github', 'reddit', 'youtube'], description: 'Source platform' },
+          },
+        },
+      },
+    },
+  },
 ];
 
 // Default Soul & Identity
