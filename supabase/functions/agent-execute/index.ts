@@ -201,7 +201,7 @@ async function autoActivateModule(
 // =============================================================================
 
 async function executeModuleAction(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   moduleName: string,
   skillName: string,
   args: Record<string, unknown>,
