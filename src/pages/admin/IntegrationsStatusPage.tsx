@@ -827,7 +827,7 @@ export default function IntegrationsStatusPage() {
                     const status: IntegrationStatus = !hasKey ? 'not_configured' : isEnabled ? 'active' : 'disabled';
                     const IconComponent = iconMap[integration.icon as keyof typeof iconMap] || Bot;
                     const currentConfig = getDisplayConfig(key) || integration.config;
-                    const hasConfigSection = ['openai', 'gemini', 'local_llm', 'n8n', 'resend', 'google_analytics', 'meta_pixel', 'slack'].includes(key);
+                    const hasConfigSection = ['openai', 'gemini', 'local_llm', 'n8n', 'resend', 'google_analytics', 'meta_pixel', 'slack', 'jina'].includes(key);
                     const isExpanded = expandedCards.has(key);
 
                     return (

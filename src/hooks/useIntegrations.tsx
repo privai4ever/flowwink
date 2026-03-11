@@ -264,6 +264,20 @@ export const defaultIntegrationsSettings: IntegrationsSettings = {
     docsUrl: 'https://hunter.io/api',
     docsLabel: 'Get API key',
   },
+  jina: {
+    enabled: false,
+    name: 'Jina AI',
+    description: 'Web search & reader API',
+    icon: 'Search',
+    category: 'sales',
+    features: ['Jina Search', 'Jina Reader', 'Prospect Research', 'Content Extraction'],
+    secretName: 'JINA_API_KEY',
+    docsUrl: 'https://jina.ai/reader/',
+    docsLabel: 'Get API key',
+    config: {
+      preferFreeTier: true,
+    },
+  },
 };
 
 // Category definitions
