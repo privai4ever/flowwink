@@ -177,7 +177,7 @@ CREATE POLICY "System can update automations" ON public.agent_automations FOR UP
 const DEFAULT_SKILLS = [
   {
     name: 'write_blog_post',
-    description: 'Create a draft blog post with title, topic, and tone.',
+    description: 'Create a draft blog post with title, topic, tone, and optional pre-written content. If content is provided it will be used directly; otherwise AI generates it.',
     handler: 'module:blog',
     category: 'content',
     scope: 'internal',
@@ -186,12 +186,13 @@ const DEFAULT_SKILLS = [
       type: 'function',
       function: {
         name: 'write_blog_post',
-        description: 'Create a draft blog post.',
+        description: 'Create a draft blog post. IMPORTANT: Always provide the content parameter with the full blog post text in markdown. If you have source material, write the blog content yourself and pass it in the content field.',
         parameters: {
           type: 'object',
           properties: {
             title: { type: 'string', description: 'Blog post title' },
             topic: { type: 'string', description: 'Topic or brief for the post' },
+            content: { type: 'string', description: 'Full blog post content in markdown format. Use ## for headings, paragraphs, and bullet points. Do NOT include the title as H1.' },
             tone: { type: 'string', enum: ['professional', 'casual', 'technical', 'storytelling'], description: 'Writing tone' },
             language: { type: 'string', description: 'Language code (en, sv, etc.)' },
           },
