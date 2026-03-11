@@ -423,23 +423,6 @@ async function executeResumeAction(
       return { error: `Unknown resume action: ${action}` };
     }
 
-    case 'extract_pdf_text': {
-      const { file_url, storage_path } = args as any;
-      if (!file_url && !storage_path) throw new Error('file_url or storage_path is required');
-      
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      const response = await fetch(`${supabaseUrl}/functions/v1/extract-pdf-text`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${serviceKey}`,
-        },
-        body: JSON.stringify({ file_url, storage_path }),
-      });
-      return await response.json();
-    }
-
     case 'match_consultant': {
       const { job_description, max_results = 3 } = args as any;
       if (!job_description) throw new Error('job_description is required');
