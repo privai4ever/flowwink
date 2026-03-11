@@ -225,7 +225,7 @@ export function ModuleCard({
                 <span>Admin interface</span>
               </div>
               <Switch
-                checked={config.adminUI}
+                checked={adminUI}
                 onCheckedChange={onAdminUIToggle}
                 disabled={isUpdating}
                 className="scale-75 data-[state=checked]:bg-primary"
