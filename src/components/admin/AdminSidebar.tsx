@@ -159,8 +159,9 @@ export function AdminSidebar() {
           if (!item.moduleId) return true;
           // If modules not loaded yet, show all
           if (!modules) return true;
-          // Check if module is enabled
-          return modules[item.moduleId]?.enabled ?? true;
+          const mod = modules[item.moduleId];
+          if (!mod?.enabled) return false;
+          return mod.adminUI !== false;
         }),
       }))
       .filter(group => group.items.length > 0)
