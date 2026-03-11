@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -136,7 +136,7 @@ serve(async (req) => {
 
   } catch (err) {
     console.error('agent-execute error:', err);
-    return new Response(JSON.stringify({ error: err.message || 'Internal error' }), {
+    return new Response(JSON.stringify({ error: (err as Error).message || 'Internal error' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
@@ -160,7 +160,7 @@ const MODULE_HANDLER_TO_SETTING: Record<string, string> = {
 };
 
 async function autoActivateModule(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   moduleName: string,
 ): Promise<void> {
   const settingKey = MODULE_HANDLER_TO_SETTING[moduleName];
@@ -201,7 +201,7 @@ async function autoActivateModule(
 // =============================================================================
 
 async function executeModuleAction(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   moduleName: string,
   skillName: string,
   args: Record<string, unknown>,
@@ -387,7 +387,7 @@ async function executeModuleAction(
 // =============================================================================
 
 async function executeResumeAction(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   skillName: string,
   args: Record<string, unknown>,
 ): Promise<unknown> {
@@ -447,7 +447,7 @@ async function executeResumeAction(
 }
 
 async function executeDbAction(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   table: string,
   skillName: string,
   args: Record<string, unknown>,
@@ -498,7 +498,7 @@ async function executeDbAction(
 // =============================================================================
 
 async function executeAnalyticsAction(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   skillName: string,
   args: Record<string, unknown>,
 ): Promise<unknown> {
@@ -756,7 +756,7 @@ async function executeAnalyticsAction(
 }
 
 async function executeWebhook(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   args: Record<string, unknown>,
 ): Promise<unknown> {
   // Get active webhooks, find one matching the event
@@ -788,7 +788,7 @@ async function executeWebhook(
 // =============================================================================
 
 async function logActivity(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   activity: {
     agent: string;
     skill_id: string;
@@ -849,7 +849,7 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
 };
 
 async function trackObjectiveProgress(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   skillName: string,
   activityId: string,
 ): Promise<void> {
