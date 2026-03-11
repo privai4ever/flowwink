@@ -18,22 +18,13 @@
 
 import { useState, useCallback, useRef } from 'react';
 
-// Chrome extension types (only available when running in Chrome with extensions)
-declare global {
-  interface Window {
-    chrome?: {
-      runtime?: {
-        sendMessage: (extensionId: string, message: any, callback: (response: any) => void) => void;
-        lastError?: { message: string };
-      };
-    };
-  }
-}
-
-const getChrome = () => (window as any).chrome;
-
-// The extension ID — users set this in site_settings or we detect via ping
 const EXTENSION_PING_TIMEOUT = 2000;
+
+// Safe accessor for chrome.runtime (only exists in Chrome with extensions)
+function getChromeRuntime(): any {
+  const w = window as any;
+  return w?.chrome?.runtime;
+}
 
 interface RelayResult {
   success: boolean;
@@ -55,18 +46,14 @@ export function useExtensionRelay() {
   const [isRelaying, setIsRelaying] = useState(false);
   const extensionIdRef = useRef<string | null>(null);
 
-  // Try to detect the extension by sending pings to known extension IDs
-  // The extension ID is set in chrome-extension/manifest.json
-  // Users can configure it in site_settings
   const detectExtension = useCallback(async (knownExtensionId?: string): Promise<boolean> => {
-    if (typeof chrome === 'undefined' || !chrome?.runtime?.sendMessage) {
+    const runtime = getChromeRuntime();
+    if (!runtime?.sendMessage) {
       console.log('[relay] Chrome runtime not available');
       return false;
     }
 
     const idsToTry = knownExtensionId ? [knownExtensionId] : [];
-
-    // Also try to get from localStorage (user may have set it)
     const savedId = localStorage.getItem('flowwink_extension_id');
     if (savedId && !idsToTry.includes(savedId)) idsToTry.push(savedId);
 
@@ -74,12 +61,9 @@ export function useExtensionRelay() {
       try {
         const result = await Promise.race([
           new Promise<any>((resolve) => {
-            chrome.runtime.sendMessage(id, { type: 'ping' }, (response) => {
-              if (chrome.runtime.lastError) {
-                resolve(null);
-              } else {
-                resolve(response);
-              }
+            runtime.sendMessage(id, { type: 'ping' }, (response: any) => {
+              if (runtime.lastError) resolve(null);
+              else resolve(response);
             });
           }),
           new Promise<null>((resolve) => setTimeout(() => resolve(null), EXTENSION_PING_TIMEOUT)),
@@ -92,7 +76,7 @@ export function useExtensionRelay() {
           return true;
         }
       } catch {
-        // Extension not reachable at this ID
+        // Extension not reachable
       }
     }
 
@@ -100,38 +84,29 @@ export function useExtensionRelay() {
     return false;
   }, []);
 
-  // Send a navigate_and_scrape command to the extension
   const navigateAndScrape = useCallback(async (url: string): Promise<RelayResult> => {
     const extId = extensionIdRef.current;
-    if (!extId) {
-      return { success: false, error: 'Extension not connected. Install the Signal Capture extension and set the extension ID.' };
-    }
-
-    if (typeof chrome === 'undefined' || !chrome?.runtime?.sendMessage) {
-      return { success: false, error: 'Chrome runtime not available' };
+    const runtime = getChromeRuntime();
+    if (!extId || !runtime?.sendMessage) {
+      return { success: false, error: 'Extension not connected. Install the Signal Capture extension and configure the extension ID.' };
     }
 
     setIsRelaying(true);
-
     try {
       const result = await new Promise<RelayResult>((resolve) => {
         const timeout = setTimeout(() => {
           resolve({ success: false, error: 'Extension relay timed out (30s)' });
         }, 30000);
 
-        chrome.runtime.sendMessage(extId, {
-          type: 'navigate_and_scrape',
-          url,
-        }, (response) => {
+        runtime.sendMessage(extId, { type: 'navigate_and_scrape', url }, (response: any) => {
           clearTimeout(timeout);
-          if (chrome.runtime.lastError) {
-            resolve({ success: false, error: chrome.runtime.lastError.message });
+          if (runtime.lastError) {
+            resolve({ success: false, error: runtime.lastError.message });
           } else {
             resolve(response || { success: false, error: 'No response from extension' });
           }
         });
       });
-
       return result;
     } catch (err: any) {
       return { success: false, error: err.message };
@@ -140,35 +115,29 @@ export function useExtensionRelay() {
     }
   }, []);
 
-  // Scrape the currently active tab
   const scrapeActiveTab = useCallback(async (): Promise<RelayResult> => {
     const extId = extensionIdRef.current;
-    if (!extId) {
+    const runtime = getChromeRuntime();
+    if (!extId || !runtime?.sendMessage) {
       return { success: false, error: 'Extension not connected' };
     }
 
-    if (typeof chrome === 'undefined' || !chrome?.runtime?.sendMessage) {
-      return { success: false, error: 'Chrome runtime not available' };
-    }
-
     setIsRelaying(true);
-
     try {
       const result = await new Promise<RelayResult>((resolve) => {
         const timeout = setTimeout(() => {
           resolve({ success: false, error: 'Scrape timed out (15s)' });
         }, 15000);
 
-        chrome.runtime.sendMessage(extId, { type: 'scrape_active_tab' }, (response) => {
+        runtime.sendMessage(extId, { type: 'scrape_active_tab' }, (response: any) => {
           clearTimeout(timeout);
-          if (chrome.runtime.lastError) {
-            resolve({ success: false, error: chrome.runtime.lastError.message });
+          if (runtime.lastError) {
+            resolve({ success: false, error: runtime.lastError.message });
           } else {
             resolve(response || { success: false, error: 'No response' });
           }
         });
       });
-
       return result;
     } catch (err: any) {
       return { success: false, error: err.message };
@@ -177,7 +146,6 @@ export function useExtensionRelay() {
     }
   }, []);
 
-  // Set extension ID manually
   const setExtensionId = useCallback((id: string) => {
     localStorage.setItem('flowwink_extension_id', id);
     extensionIdRef.current = id;
