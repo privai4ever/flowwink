@@ -849,7 +849,7 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
 };
 
 async function trackObjectiveProgress(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   skillName: string,
   activityId: string,
 ): Promise<void> {
