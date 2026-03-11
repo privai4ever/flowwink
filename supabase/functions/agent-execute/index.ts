@@ -1015,6 +1015,8 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   manage_consultant_profile: ['resume', 'consultant', 'profile', 'talent'],
   match_consultant: ['resume', 'consultant', 'match', 'talent', 'recruitment'],
   extract_pdf_text: ['pdf', 'document', 'extract', 'content', 'resume', 'report', 'contract'],
+  competitor_monitor: ['competitor', 'market', 'positioning', 'content', 'intelligence'],
+  generate_social_post: ['social', 'linkedin', 'content', 'authority', 'engagement', 'repurpose'],
 };
 
 async function trackObjectiveProgress(
