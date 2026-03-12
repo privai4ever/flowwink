@@ -1585,7 +1585,7 @@ async function executeAnalyticsAction(
         uncovered_count: uncoveredQuestions.length,
         underperforming_articles: underperforming,
         negative_feedback_count: negativeThemes.length,
-        negative_without_kb: negativeThemes.filter(n => !n.had_kb_context).length,
+        negative_without_kb: negativeThemes.filter((n: any) => !n.had_kb_context).length,
         suggestions: [
           uncoveredQuestions.length > 5 ? `${uncoveredQuestions.length} user questions have no matching KB article — consider creating articles for the most common ones.` : null,
           underperforming.length > 0 ? `${underperforming.length} articles have more negative than positive feedback — review and improve them.` : null,
