@@ -397,6 +397,32 @@ export const BLOCK_REFERENCE: BlockInfo[] = [
     ],
   },
   {
+    type: 'featured-product',
+    name: 'Featured Product',
+    description: 'Hero-style spotlight for a single product with large image, price, and add-to-cart CTA.',
+    category: 'commerce',
+    fields: [
+      { name: 'productId', type: 'string', required: false, description: 'Product ID to feature' },
+      { name: 'badge', type: 'string', required: false, description: 'Badge text (e.g. "New", "Sale")' },
+      { name: 'ctaText', type: 'string', required: false, description: 'CTA button text', default: 'Add to cart' },
+      { name: 'layout', type: 'string', required: false, description: 'Image position', default: 'image-left', options: ['image-left', 'image-right'] },
+      { name: 'showDescription', type: 'boolean', required: false, description: 'Show product description', default: true },
+      { name: 'backgroundStyle', type: 'string', required: false, description: 'Background style', default: 'default', options: ['default', 'muted', 'gradient'] },
+    ],
+  },
+  {
+    type: 'trust-bar',
+    name: 'Trust Bar',
+    description: 'Horizontal bar with trust signals like free shipping, returns policy, secure payment.',
+    category: 'commerce',
+    fields: [
+      { name: 'items', type: 'array', required: false, description: 'Array of { icon, text } items. Icons: truck, rotate-ccw, shield-check, credit-card, clock, star, heart-handshake, award, leaf, zap, globe, lock' },
+      { name: 'variant', type: 'string', required: false, description: 'Visual style', default: 'default', options: ['default', 'bordered', 'filled'] },
+      { name: 'size', type: 'string', required: false, description: 'Size', default: 'md', options: ['sm', 'md', 'lg'] },
+      { name: 'columns', type: 'number', required: false, description: 'Number of columns', default: 4 },
+    ],
+  },
+  {
     type: 'article-grid',
     name: 'Article Grid',
     description: 'Blog post or article grid.',
