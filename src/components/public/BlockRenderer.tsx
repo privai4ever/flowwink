@@ -55,6 +55,8 @@ import {
   SectionDividerBlock,
   FeaturedCarouselBlock,
   ResumeMatcherBlock,
+  FeaturedProductBlock,
+  TrustBarBlock,
 } from './blocks';
 import type { ChatLauncherBlockData } from './blocks/ChatLauncherBlock';
 import type { KbHubBlockData } from './blocks/KbHubBlock';
