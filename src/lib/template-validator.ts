@@ -44,7 +44,11 @@ const VALID_BLOCK_TYPES: ContentBlockType[] = [
   // Layout blocks
   'section-divider', 'bento-grid', 'parallax-section', 'featured-carousel',
   // Module-specific blocks
-  'webinar'
+  'webinar',
+  // E-commerce blocks
+  'featured-product', 'trust-bar',
+  // Module-specific
+  'resume-matcher'
 ];
 
 // Required fields per block type
