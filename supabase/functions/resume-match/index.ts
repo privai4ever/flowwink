@@ -184,7 +184,7 @@ ${profileSummaries.map((p, i) => `### Consultant ${i + 1} (ID: ${p.id})
   } catch (err) {
     console.error('resume-match error:', err);
     return new Response(
-      JSON.stringify({ success: false, error: err.message || 'Internal error' }),
+      JSON.stringify({ success: false, error: (err as Error).message || 'Internal error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

@@ -336,7 +336,7 @@ async function buildKnowledgeBase(
 }
 
 // Load external/both agent skills as tools
-async function loadAgentSkillTools(supabase: ReturnType<typeof createClient>): Promise<{tools: any[], skillMap: Map<string, string>}> {
+async function loadAgentSkillTools(supabase: any): Promise<{tools: any[], skillMap: Map<string, string>}> {
   const { data: skills, error } = await supabase
     .from('agent_skills')
     .select('id, name, scope, tool_definition, handler')

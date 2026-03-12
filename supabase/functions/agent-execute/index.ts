@@ -1589,7 +1589,7 @@ async function executeAnalyticsAction(
         suggestions: [
           uncoveredQuestions.length > 5 ? `${uncoveredQuestions.length} user questions have no matching KB article — consider creating articles for the most common ones.` : null,
           underperforming.length > 0 ? `${underperforming.length} articles have more negative than positive feedback — review and improve them.` : null,
-          negativeThemes.filter(n => !n.had_kb_context).length > 0 ? `${negativeThemes.filter(n => !n.had_kb_context).length} negative feedbacks had no KB context — the chat couldn't find relevant articles.` : null,
+          negativeThemes.filter((n: any) => !n.had_kb_context).length > 0 ? `${negativeThemes.filter((n: any) => !n.had_kb_context).length} negative feedbacks had no KB context — the chat couldn't find relevant articles.` : null,
         ].filter(Boolean),
       };
     }

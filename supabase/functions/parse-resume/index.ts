@@ -120,7 +120,7 @@ Rules:
   } catch (error) {
     console.error('parse-resume error:', error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message || 'Unknown error' }),
+      JSON.stringify({ success: false, error: (error as Error).message || 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

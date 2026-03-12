@@ -320,7 +320,7 @@ Deno.serve(async (req) => {
               .from('agent_automations')
               .update({
                 last_triggered_at: new Date().toISOString(),
-                run_count: supabase.rpc ? undefined : undefined, // handled below
+                // run_count handled below via separate query
               })
               .eq('id', auto.id)
 
