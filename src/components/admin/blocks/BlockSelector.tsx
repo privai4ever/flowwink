@@ -424,6 +424,12 @@ const BLOCK_GROUPS: BlockGroup[] = [
         description: 'Shipping, delivery, and returns info',
       },
       {
+        type: 'ai-assistant',
+        label: 'AI Shopping Assistant',
+        icon: <Sparkles className="h-5 w-5" />,
+        description: 'Conversational AI assistant with chat input and suggested prompts',
+      },
+      {
         type: 'kb-featured',
         label: 'KB Featured',
         icon: <HelpCircle className="h-5 w-5" />,
