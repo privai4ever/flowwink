@@ -66,6 +66,8 @@ const BLOCK_LABELS: Record<ContentBlockType, string> = {
   'section-divider': 'Section Divider',
   'featured-carousel': 'Featured Carousel',
   'resume-matcher': 'Resume Matcher',
+  'featured-product': 'Featured Product',
+  'trust-bar': 'Trust Bar',
 };
 
 interface BlockWrapperProps {

@@ -262,6 +262,10 @@ export function BlockRenderer({ block, pageId, index = 0 }: BlockRendererProps) 
         return <FeaturedCarouselBlock data={block.data as unknown as FeaturedCarouselBlockData} />;
       case 'resume-matcher':
         return <ResumeMatcherBlock data={block.data as Record<string, unknown>} />;
+      case 'featured-product':
+        return <FeaturedProductBlock data={block.data as unknown as FeaturedProductBlockData} />;
+      case 'trust-bar':
+        return <TrustBarBlock data={block.data as unknown as TrustBarBlockData} />;
       default:
         return null;
     }
