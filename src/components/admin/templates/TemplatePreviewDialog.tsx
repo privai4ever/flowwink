@@ -19,6 +19,7 @@ import {
   ImageIcon,
   Trash2,
   Target,
+  UserCheck,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ export interface TemplateOverwriteOptions {
   blogPosts: boolean;
   kbContent: boolean;
   products: boolean;
+  consultants: boolean;
   modules: boolean;
   // Additional options
   resetObjectives: boolean;
@@ -191,6 +193,7 @@ export function TemplatePreviewDialog({
     blogPosts: !!template.blogPosts?.length,
     kbContent: !!template.kbCategories?.length,
     products: !!template.products?.length,
+    consultants: !!template.consultants?.length,
     modules: !!template.requiredModules?.length,
     // Additional options
     resetObjectives: !!template.flowpilot?.objectives?.length,
@@ -300,6 +303,7 @@ export function TemplatePreviewDialog({
       blogPosts: false,
       kbContent: false,
       products: false,
+      consultants: false,
       modules: false,
       resetObjectives: false,
       clearMedia: false,
@@ -488,6 +492,19 @@ export function TemplatePreviewDialog({
                 enabled={options.products}
                 onToggle={(v) => updateOption('products', v)}
                 hasExisting={existingContent.productsCount > 0}
+              />
+            )}
+
+            {/* Consultants - only show if template has them */}
+            {template.consultants && template.consultants.length > 0 && (
+              <SettingRow
+                icon={<UserCheck className="h-4 w-4" />}
+                label="Consultant Profiles"
+                templateValue={`${template.consultants.length} consultants`}
+                existingValue="Existing profiles"
+                enabled={options.consultants}
+                onToggle={(v) => updateOption('consultants', v)}
+                hasExisting={false}
               />
             )}
 

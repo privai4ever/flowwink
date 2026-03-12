@@ -22,7 +22,7 @@
  */
 
 // Re-export types for convenience
-export type { StarterTemplate, TemplatePage, TemplateBlogPost, TemplateProduct, HelpStyle } from './types';
+export type { StarterTemplate, TemplatePage, TemplateBlogPost, TemplateProduct, TemplateConsultant, HelpStyle } from './types';
 
 // Individual template re-exports
 export { launchpadTemplate } from './launchpad';

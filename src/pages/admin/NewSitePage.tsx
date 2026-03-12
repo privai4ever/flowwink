@@ -289,6 +289,7 @@ export default function NewSitePage() {
       blogPosts: !!selectedTemplate.blogPosts?.length,
       kbContent: !!selectedTemplate.kbCategories?.length,
       products: !!selectedTemplate.products?.length,
+      consultants: !!selectedTemplate.consultants?.length,
       modules: !!selectedTemplate.requiredModules?.length,
       resetObjectives: !!selectedTemplate.flowpilot?.objectives?.length,
       clearMedia: false,
@@ -541,6 +542,32 @@ export default function NewSitePage() {
               stripe_price_id: null,
             });
           }
+        }
+      }
+
+      // Step 9b: Seed consultant profiles if template has them
+      if (selectedTemplate.consultants?.length) {
+        const consultants = selectedTemplate.consultants;
+        setProgress({ currentPage: 0, totalPages: consultants.length, currentStep: 'Seeding consultant profiles...' });
+        for (let i = 0; i < consultants.length; i++) {
+          const c = consultants[i];
+          setProgress({ currentPage: i + 1, totalPages: consultants.length, currentStep: `Adding consultant "${c.name}"...` });
+          await supabase.from('consultant_profiles').insert({
+            name: c.name,
+            title: c.title,
+            summary: c.summary,
+            bio: c.bio || null,
+            skills: c.skills,
+            experience_years: c.experience_years,
+            certifications: c.certifications || [],
+            languages: c.languages || ['English'],
+            availability: c.availability,
+            hourly_rate_cents: c.hourly_rate_cents || null,
+            currency: c.currency || 'SEK',
+            avatar_url: c.avatar_url || null,
+            linkedin_url: c.linkedin_url || null,
+            is_active: c.is_active ?? true,
+          });
         }
       }
 

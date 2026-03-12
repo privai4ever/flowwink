@@ -24,6 +24,24 @@ export interface TemplateProduct {
   is_active?: boolean;
 }
 
+// Consultant profile for consulting/agency templates
+export interface TemplateConsultant {
+  name: string;
+  title: string;
+  summary: string;
+  bio?: string;
+  skills: string[];
+  experience_years: number;
+  certifications?: string[];
+  languages?: string[];
+  availability: 'available' | 'partially_available' | 'unavailable';
+  hourly_rate_cents?: number;
+  currency?: string;
+  avatar_url?: string;
+  linkedin_url?: string;
+  is_active?: boolean;
+}
+
 // Page definition within a template
 export interface TemplatePage {
   title: string;
@@ -74,6 +92,9 @@ export interface StarterTemplate {
   
   // Products for e-commerce templates
   products?: TemplateProduct[];
+
+  // Consultant profiles for consulting/agency templates
+  consultants?: TemplateConsultant[];
   
   // Site-wide settings
   branding: Partial<BrandingSettings>;
