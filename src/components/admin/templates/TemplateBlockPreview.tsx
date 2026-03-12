@@ -45,6 +45,7 @@ import { BentoGridBlock } from '@/components/public/blocks/BentoGridBlock';
 import { SectionDividerBlock } from '@/components/public/blocks/SectionDividerBlock';
 import { FeaturedCarouselBlock } from '@/components/public/blocks/FeaturedCarouselBlock';
 import { ChatLauncherBlock } from '@/components/public/blocks/ChatLauncherBlock';
+import { AiAssistantBlock } from '@/components/public/blocks/AiAssistantBlock';
 
 import type {
   HeroBlockData,
