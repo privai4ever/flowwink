@@ -142,6 +142,9 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
               />
             )}
           </div>
+
+          <div className="space-y-2">
+            <Label>Type</Label>
             <Select
               value={productType}
               onValueChange={(value: ProductType) => setValue('type', value)}
