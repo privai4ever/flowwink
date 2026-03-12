@@ -151,6 +151,16 @@ export default function ProductDetailPage() {
                     <Link to="/cart">View cart</Link>
                   </Button>
                 )}
+                {user && (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => toggleWishlist.mutate(product.id)}
+                    className={isInWishlist ? 'text-destructive border-destructive/30' : ''}
+                  >
+                    <Heart className={`h-5 w-5 ${isInWishlist ? 'fill-current' : ''}`} />
+                  </Button>
+                )}
               </div>
             </div>
           </div>
