@@ -362,7 +362,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get auth user
+    // Auth: accept user JWT or service role key (called from agent-execute/FlowPilot)
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "No authorization header" }), {
@@ -372,27 +372,37 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Read body once (cannot read twice)
+    const requestData: GenerateRequest & { user_id?: string } = await req.json();
+
+    let userId: string;
+    if (token === serviceKey) {
+      // Called from agent-execute — user_id passed in body for attribution
+      userId = requestData.user_id || 'system';
+    } else {
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError || !user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      userId = user.id;
     }
 
-    const requestData: GenerateRequest = await req.json();
-    const { 
-      topic, 
-      pillar_content, 
-      target_channels, 
+    const {
+      topic,
+      pillar_content,
+      target_channels,
       brand_voice,
       target_audience,
       tone_level,
       industry,
       content_goals,
       unique_angle,
-      schedule_for 
+      schedule_for
     } = requestData;
 
     if (!topic) {
@@ -566,7 +576,7 @@ CRITICAL: Generate comprehensive, publication-ready content. Each piece should r
           generated_at: new Date().toISOString(),
         },
         scheduled_for: schedule_for || null,
-        created_by: user.id,
+        created_by: userId === 'system' ? null : userId,
         status: "draft",
       })
       .select()
