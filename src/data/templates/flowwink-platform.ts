@@ -139,20 +139,20 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
           id: 'bento-agent-brain',
           type: 'bento-grid',
           data: {
-            title: 'The Agent Brain',
-            subtitle: 'FlowPilot isn\'t a chatbot with tools. It\'s an autonomous operator with a persistent mind.',
-            eyebrow: 'ARCHITECTURE',
+            title: 'Built for the Agentic Web',
+            subtitle: 'Your website stopped being a brochure. FlowPilot is the autonomous operator running your entire digital presence — 24/7, no prompts needed.',
+            eyebrow: 'AGENTIC WEB',
             columns: 3,
             variant: 'glass',
             gap: 'md',
             staggeredReveal: true,
             items: [
-              { id: 'bg-skills', title: 'Skill Engine', description: '20+ skills spanning content, CRM, email, analytics, and more. FlowPilot can even create new skills for itself.', icon: 'Zap', span: 'wide', accentColor: '#3B82F6' },
-              { id: 'bg-memory', title: 'Persistent Memory', description: 'Learns your preferences, remembers past decisions, stores facts about your business. Context that survives across sessions.', icon: 'Brain', span: 'large', accentColor: '#8B5CF6' },
-              { id: 'bg-objectives', title: 'Objectives & Goals', description: 'Define success criteria. FlowPilot tracks progress, breaks goals into tasks, and reports on completion.', icon: 'Target', accentColor: '#10B981' },
-              { id: 'bg-heartbeat', title: 'Autonomous Heartbeat', description: 'Every 12 hours, FlowPilot reflects on what happened, what to improve, and what to do next. No prompts needed.', icon: 'Activity', accentColor: '#F59E0B' },
-              { id: 'bg-automations', title: 'Signal Automations', description: 'Event-driven reactions: new lead → qualify instantly. New blog post → distribute across channels. Form submitted → follow up.', icon: 'GitBranch', accentColor: '#EC4899' },
-              { id: 'bg-evolution', title: 'Self-Evolution', description: 'FlowPilot rewrites its own soul, updates its skill instructions, and evolves its behavior based on what works.', icon: 'Sparkles', span: 'wide', accentColor: '#06B6D4' },
+              { id: 'bg-skills', title: 'Skill Engine', description: '20+ built-in skills across content, CRM, email, and analytics. FlowPilot doesn\'t just suggest — it executes. Publish, qualify, send. And it can forge new skills for itself.', icon: 'Zap', span: 'wide', accentColor: '#3B82F6' },
+              { id: 'bg-memory', title: 'Persistent Memory', description: 'Not session context — deep organizational memory. FlowPilot knows your brand voice, remembers every lead, recalls past decisions, and builds a richer picture of your business with every interaction. The longer it runs, the sharper it gets.', icon: 'Brain', span: 'large', accentColor: '#8B5CF6' },
+              { id: 'bg-objectives', title: 'Objectives & Goals', description: 'Set the destination. FlowPilot maps the route, executes step by step, and reports back. Goal-first intelligence — not prompt-first guesswork.', icon: 'Target', accentColor: '#10B981' },
+              { id: 'bg-heartbeat', title: 'Autonomous Heartbeat', description: 'Every 12 hours, FlowPilot reviews performance, reflects on what to improve, and queues the next moves. Your digital presence never idles.', icon: 'Activity', accentColor: '#F59E0B' },
+              { id: 'bg-automations', title: 'Signal Automations', description: 'New lead → qualified in seconds. Post published → distributed instantly. Form submitted → follow-up sent. Event-driven execution replaces manual workflows permanently.', icon: 'GitBranch', accentColor: '#EC4899' },
+              { id: 'bg-evolution', title: 'Self-Evolution', description: 'FlowPilot rewrites its own instructions, upgrades its skill behavior, and evolves based on what actually works. It ships its own improvements.', icon: 'Sparkles', span: 'wide', accentColor: '#06B6D4' },
             ],
           },
         },
@@ -976,11 +976,220 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
         },
       ],
     },
+    // ===== FLOWPILOT PAGE — The Autonomous Operator =====
+    {
+      title: 'FlowPilot',
+      slug: 'flowpilot',
+      menu_order: 4,
+      showInMenu: true,
+      meta: {
+        description: 'FlowPilot is the autonomous AI operator at the heart of FlowWink. Unified knowledge, A2A protocol, and next-gen digital presence.',
+        showTitle: false,
+        titleAlignment: 'center',
+      },
+      blocks: [
+        // HERO
+        {
+          id: 'hero-flowpilot',
+          type: 'hero',
+          data: {
+            title: 'Meet FlowPilot',
+            subtitle: 'Not a chatbot. Not a plugin. An autonomous operator with memory, goals, and self-evolving skills. FlowPilot runs your entire digital presence while you focus on what matters.',
+            backgroundType: 'color',
+            heightMode: 'auto',
+            contentAlignment: 'center',
+            overlayOpacity: 0,
+            primaryButton: { text: 'See It Operate', url: '/demo' },
+            secondaryButton: { text: 'Self-Host Free', url: 'https://github.com/flowwink/flowwink' },
+          },
+        },
+        {
+          id: 'stats-flowpilot',
+          type: 'stats',
+          data: {
+            items: [
+              { id: 'fp-s1', value: '20+', label: 'Autonomous Skills' },
+              { id: 'fp-s2', value: '∞', label: 'Knowledge Sources' },
+              { id: 'fp-s3', value: 'A2A', label: 'Protocol Ready' },
+              { id: 'fp-s4', value: '24/7', label: 'Always Operating' },
+            ],
+            columns: 4,
+            variant: 'minimal',
+          },
+        },
+        // UNIFIED KNOWLEDGE
+        {
+          id: 'divider-unified',
+          type: 'section-divider',
+          data: { shape: 'wave', height: 'sm' },
+        },
+        {
+          id: 'twocol-unified-knowledge',
+          type: 'two-column',
+          data: {
+            eyebrow: 'UNIFIED KNOWLEDGE',
+            title: 'One Brain.',
+            accentText: 'Every Touchpoint.',
+            accentPosition: 'end',
+            leftColumn: {
+              type: 'doc',
+              content: [
+                { type: 'paragraph', content: [{ type: 'text', text: 'Every module in FlowWink feeds into a single shared knowledge context. Blog posts. KB articles. Product catalog. Lead history. Booking data. Company profiles. Form submissions. Analytics.' }] },
+                { type: 'paragraph', content: [{ type: 'text', text: 'FlowPilot doesn\'t just have access to this data — it reasons over it. When a visitor asks a question, it answers from the full picture. When it operates autonomously, it acts on the complete context of your business.' }] },
+              ],
+            },
+            rightColumn: {
+              type: 'doc',
+              content: [
+                { type: 'bulletList', content: [
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: '📝 Content' }, { type: 'text', text: ' — blog posts, pages, KB articles inform brand voice and expertise' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: '👥 CRM' }, { type: 'text', text: ' — lead history, company data, deal context personalize every interaction' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: '🛒 Commerce' }, { type: 'text', text: ' — products, orders, bookings feed recommendation and follow-up logic' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: '📊 Analytics' }, { type: 'text', text: ' — performance data drives strategy, content priorities, and campaign timing' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: '🧠 Memory' }, { type: 'text', text: ' — everything FlowPilot learns is stored and recalled across sessions and touchpoints' }] }] },
+                ]},
+              ],
+            },
+            layout: '50-50',
+          },
+        },
+        {
+          id: 'features-unified',
+          type: 'features',
+          data: {
+            title: 'Knowledge That Works in Every Direction',
+            subtitle: 'The same context that helps visitors also drives FlowPilot\'s autonomous decisions.',
+            features: [
+              { id: 'uk-chat', icon: 'MessageSquare', title: 'Visitor Chat', description: 'When a visitor asks a question, FlowPilot answers from your complete content library, product catalog, and KB — not a hardcoded FAQ.' },
+              { id: 'uk-content', icon: 'FileText', title: 'Content Strategy', description: 'FlowPilot knows which topics you\'ve covered, what your audience engages with, and what gaps to fill next.' },
+              { id: 'uk-leads', icon: 'UserCheck', title: 'Lead Context', description: 'When qualifying a lead, FlowPilot cross-references company data, past interactions, and deal history for a complete picture.' },
+              { id: 'uk-email', icon: 'Mail', title: 'Personalized Campaigns', description: 'Campaigns are crafted using purchase history, content interests, and behavioral signals from across every module.' },
+              { id: 'uk-ops', icon: 'Settings', title: 'Operational Decisions', description: 'FlowPilot\'s autonomous heartbeat draws on analytics, objectives, and recent activity to decide what to do next.' },
+              { id: 'uk-a2a', icon: 'Network', title: 'A2A Responses', description: 'When another agent queries your FlowPilot instance, it answers from the same unified context — structured, accurate, instantly.' },
+            ],
+            columns: 3,
+            layout: 'grid',
+            variant: 'cards',
+            iconStyle: 'circle',
+          },
+        },
+        // A2A
+        {
+          id: 'parallax-a2a',
+          type: 'parallax-section',
+          data: {
+            backgroundImage: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1920',
+            title: 'The Agentic Web is Arriving.',
+            subtitle: 'AI agents don\'t browse websites. They query agents. FlowPilot is ready.',
+            height: 'md',
+            textColor: 'light',
+            overlayOpacity: 70,
+            contentAlignment: 'center',
+          },
+        },
+        {
+          id: 'bento-a2a',
+          type: 'bento-grid',
+          data: {
+            title: 'Agent-to-Agent Ready',
+            subtitle: 'FlowPilot participates in the emerging A2A protocol. Your site becomes a node in the agentic web — capable of responding to external agents with structured, contextual intelligence.',
+            eyebrow: 'A2A PROTOCOL',
+            columns: 3,
+            variant: 'glass',
+            gap: 'md',
+            staggeredReveal: true,
+            items: [
+              { id: 'a2a-1', title: 'Machine-Readable Presence', description: 'Your website doesn\'t just serve HTML to browsers. FlowPilot exposes structured endpoints that other AI agents can query directly — services, expertise, products, people.', icon: 'Network', span: 'wide', accentColor: '#6366F1' },
+              { id: 'a2a-2', title: 'Fully Autonomous Response', description: 'No human in the loop required. When an external agent asks "who are your best consultants for a React project?", FlowPilot evaluates your CRM, scores profiles, and responds — instantly and autonomously.', icon: 'Bot', span: 'large', accentColor: '#8B5CF6' },
+              { id: 'a2a-3', title: 'Rich Block Responses', description: 'A2A responses aren\'t just text. FlowPilot renders full blocks — a Resume block with ranked profiles, a product grid, a booking widget — directly in the response.', icon: 'LayoutGrid', accentColor: '#06B6D4' },
+              { id: 'a2a-4', title: 'Context Persistence', description: 'Every A2A interaction is stored in memory. FlowPilot learns what external agents ask and improves its response quality over time.', icon: 'Brain', accentColor: '#10B981' },
+              { id: 'a2a-5', title: 'Scoped & Auditable', description: 'Configure which agents can query your FlowPilot instance, with what scope. Every interaction is logged with full audit trail.', icon: 'Shield', span: 'wide', accentColor: '#F59E0B' },
+            ],
+          },
+        },
+        // RESUME BLOCK
+        {
+          id: 'divider-resume',
+          type: 'section-divider',
+          data: { shape: 'curved', height: 'sm' },
+        },
+        {
+          id: 'twocol-resume-block',
+          type: 'two-column',
+          data: {
+            eyebrow: 'A2A IN PRACTICE',
+            title: 'The Resume Block:',
+            accentText: 'AI Matchmaking',
+            accentPosition: 'end',
+            leftColumn: {
+              type: 'doc',
+              content: [
+                { type: 'paragraph', content: [{ type: 'text', text: 'A staffing agency. A client\'s recruiting AI sends a query: "Find me three senior React developers available in Q3."' }] },
+                { type: 'paragraph', content: [{ type: 'text', text: 'FlowPilot doesn\'t return a webpage. It searches your consultant CRM, evaluates skills and availability, scores for fit — then responds with a rendered Resume block: structured profiles, ranked by relevance, ready for the human to act on.' }] },
+                { type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'This is the agentic web in action. Your site doesn\'t get visited — it gets consulted.' }] },
+                { type: 'bulletList', content: [
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Sourced from your CRM — real profiles, real availability' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ranked by FlowPilot — skills, experience, match score' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Rendered as a structured block — not just text' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Fully autonomous — no human approval needed' }] }] },
+                ]},
+              ],
+            },
+            rightColumn: {
+              type: 'doc',
+              content: [
+                { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: '🧑‍💻 Resume Block Use Cases' }] },
+                { type: 'bulletList', content: [
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Staffing & Consulting' }, { type: 'text', text: ' — Present matched candidates to client agents or hiring portals' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Professional Services' }, { type: 'text', text: ' — Showcase team expertise to inbound A2A procurement queries' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Job Boards' }, { type: 'text', text: ' — Let recruitment agents query open positions and candidate profiles' }] }] },
+                  { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Marketplaces' }, { type: 'text', text: ' — Surface the right service providers for any request, autonomously' }] }] },
+                ]},
+                { type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'italic' }], text: 'The Resume block is FlowPilot\'s native response format for people and service matching. Add it to any page — or let FlowPilot render it autonomously in A2A responses.' }] },
+              ],
+            },
+            layout: '50-50',
+          },
+        },
+        // RESUME DEMO — using team block as visual
+        {
+          id: 'resume-demo',
+          type: 'team',
+          data: {
+            title: 'Example: FlowPilot Resume Block Response',
+            subtitle: '"Find me senior React consultants available for a 3-month project." — FlowPilot sourced, scored, and rendered these profiles autonomously from the CRM.',
+            members: [
+              { id: 'res-1', name: 'Elena Vasquez', role: 'Senior React Developer', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400', bio: '8 years React & TypeScript. Available from July. Match score: 97%.', linkedin: 'https://linkedin.com' },
+              { id: 'res-2', name: 'Jonas Bergström', role: 'Full-Stack Engineer', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400', bio: '6 years React, Node.js, AWS. Available now. Match score: 94%.', linkedin: 'https://linkedin.com' },
+              { id: 'res-3', name: 'Priya Nair', role: 'Frontend Architect', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400', bio: '10 years frontend, design systems, React Native. Part-time available. Match score: 91%.', linkedin: 'https://linkedin.com' },
+            ],
+            columns: 3,
+            layout: 'grid',
+            showBio: true,
+            showSocial: true,
+          },
+        },
+        // CTA
+        {
+          id: 'cta-flowpilot',
+          type: 'cta',
+          data: {
+            title: 'Your Site. Your Agent. Your Web.',
+            subtitle: 'FlowPilot turns your digital presence into an active participant in the agentic web. Not visited — consulted.',
+            buttonText: 'See It Live',
+            buttonUrl: '/demo',
+            secondaryButtonText: 'Self-Host Free',
+            secondaryButtonUrl: 'https://github.com/flowwink/flowwink',
+            gradient: true,
+          },
+        },
+      ],
+    },
     // ===== BLOCKS SHOWCASE PAGE (kept as-is) =====
     {
       title: 'Blocks',
       slug: 'blocks',
-      menu_order: 4,
+      menu_order: 5,
       showInMenu: true,
       meta: {
         description: 'Explore all 47+ block types available in FlowWink - from content blocks to interactive elements and AI-powered features.',

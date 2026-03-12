@@ -2,8 +2,10 @@
 -- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;
 
+SET search_path TO public, extensions;
+
 -- Add embedding column to agent_memory
-ALTER TABLE public.agent_memory ADD COLUMN IF NOT EXISTS embedding vector(768);
+ALTER TABLE public.agent_memory ADD COLUMN IF NOT EXISTS embedding extensions.vector(768);
 
 -- Create index for similarity search
 CREATE INDEX IF NOT EXISTS agent_memory_embedding_idx ON public.agent_memory

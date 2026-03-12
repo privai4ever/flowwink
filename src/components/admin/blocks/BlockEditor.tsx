@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Plus, FileUser } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -76,6 +76,9 @@ import { FeaturedProductBlockEditor } from './FeaturedProductBlockEditor';
 import { TrustBarBlockEditor } from './TrustBarBlockEditor';
 import { CategoryNavBlockEditor } from './CategoryNavBlockEditor';
 import { ShippingInfoBlockEditor } from './ShippingInfoBlockEditor';
+import { AiAssistantBlockEditor } from './AiAssistantBlockEditor';
+import { SmartBookingBlockEditor } from './SmartBookingBlockEditor';
+import { ResumeMatcherBlockEditor } from './ResumeMatcherBlockEditor';
 import type { ProductsBlockData } from '@/components/public/blocks/ProductsBlock';
 import type { CartBlockData } from '@/components/public/blocks/CartBlock';
 import type { KbFeaturedBlockData } from '@/components/public/blocks/KbFeaturedBlock';
@@ -102,6 +105,7 @@ import type { FeaturedProductBlockData } from '@/components/public/blocks/Featur
 import type { TrustBarBlockData } from '@/components/public/blocks/TrustBarBlock';
 import type { CategoryNavBlockData } from '@/components/public/blocks/CategoryNavBlock';
 import type { ShippingInfoBlockData } from '@/components/public/blocks/ShippingInfoBlock';
+import type { AiAssistantBlockData } from '@/components/public/blocks/AiAssistantBlock';
 
 interface NewsletterBlockData {
   title?: string;
@@ -1070,35 +1074,29 @@ export function BlockEditor({ blocks, onChange, canEdit }: BlockEditorProps) {
             isEditing={isEditing}
           />
         );
+      case 'ai-assistant':
+        return (
+          <AiAssistantBlockEditor
+            data={block.data as unknown as AiAssistantBlockData}
+            onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
+            isEditing={isEditing}
+          />
+        );
+      case 'smart-booking':
+        return (
+          <SmartBookingBlockEditor
+            data={block.data as unknown as BookingBlockData}
+            onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
+            isEditing={isEditing}
+          />
+        );
       case 'resume-matcher':
         return (
-          <div className="p-6 border rounded-lg bg-muted/30 text-center space-y-2">
-            <FileUser className="w-8 h-8 mx-auto text-primary" />
-            <p className="font-medium text-foreground">Resume Matcher Block</p>
-            <p className="text-sm text-muted-foreground">Visitors can paste a job description to get AI-matched consultant profiles</p>
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Title</label>
-                <input
-                  type="text"
-                  className="w-full mt-1 px-3 py-1.5 text-sm border rounded bg-background"
-                  value={(block.data as any).title || ''}
-                  onChange={(e) => handleUpdateBlock(block.id, { ...block.data, title: e.target.value })}
-                  placeholder="Find the Perfect Consultant"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Button Text</label>
-                <input
-                  type="text"
-                  className="w-full mt-1 px-3 py-1.5 text-sm border rounded bg-background"
-                  value={(block.data as any).buttonText || ''}
-                  onChange={(e) => handleUpdateBlock(block.id, { ...block.data, buttonText: e.target.value })}
-                  placeholder="Find Match"
-                />
-              </div>
-            </div>
-          </div>
+          <ResumeMatcherBlockEditor
+            data={block.data as unknown as { title?: string; subtitle?: string; placeholder?: string; buttonText?: string }}
+            onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
+            isEditing={isEditing}
+          />
         );
       case 'featured-product':
         return (

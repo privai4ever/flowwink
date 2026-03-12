@@ -35,6 +35,7 @@ export { serviceProTemplate } from './service-pro';
 export { digitalShopTemplate } from './digital-shop';
 export { flowwinkAgencyTemplate } from './flowwink-agency';
 export { BLANK_TEMPLATE } from './blank';
+export { consultAgencyTemplate } from './consult-agency';
 
 // Import for aggregation
 import { launchpadTemplate } from './launchpad';
@@ -46,6 +47,7 @@ import { helpCenterTemplate } from './helpcenter';
 import { serviceProTemplate } from './service-pro';
 import { digitalShopTemplate } from './digital-shop';
 import { flowwinkAgencyTemplate } from './flowwink-agency';
+import { consultAgencyTemplate } from './consult-agency';
 
 import type { StarterTemplate } from './types';
 
@@ -65,6 +67,7 @@ export const ALL_TEMPLATES: StarterTemplate[] = [
   serviceProTemplate,
   digitalShopTemplate,
   flowwinkAgencyTemplate,
+  consultAgencyTemplate,
 ];
 
 /** @deprecated Use ALL_TEMPLATES instead */

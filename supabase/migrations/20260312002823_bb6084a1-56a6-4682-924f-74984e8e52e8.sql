@@ -15,12 +15,15 @@ CREATE TABLE IF NOT EXISTS public.agent_workflows (
 
 ALTER TABLE public.agent_workflows ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admins can manage workflows" ON public.agent_workflows;
 CREATE POLICY "Admins can manage workflows" ON public.agent_workflows FOR ALL TO authenticated
   USING (has_role(auth.uid(), 'admin'::app_role)) WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
 
+DROP POLICY IF EXISTS "System can manage workflows" ON public.agent_workflows;
 CREATE POLICY "System can manage workflows" ON public.agent_workflows FOR ALL TO public
   USING (true) WITH CHECK (true);
 
+DROP TRIGGER IF EXISTS update_agent_workflows_updated_at ON public.agent_workflows;
 CREATE TRIGGER update_agent_workflows_updated_at BEFORE UPDATE ON public.agent_workflows FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 CREATE TABLE IF NOT EXISTS public.agent_skill_packs (
@@ -36,8 +39,10 @@ CREATE TABLE IF NOT EXISTS public.agent_skill_packs (
 
 ALTER TABLE public.agent_skill_packs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admins can manage skill packs" ON public.agent_skill_packs;
 CREATE POLICY "Admins can manage skill packs" ON public.agent_skill_packs FOR ALL TO authenticated
   USING (has_role(auth.uid(), 'admin'::app_role)) WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
 
+DROP POLICY IF EXISTS "System can manage skill packs" ON public.agent_skill_packs;
 CREATE POLICY "System can manage skill packs" ON public.agent_skill_packs FOR ALL TO public
   USING (true) WITH CHECK (true)

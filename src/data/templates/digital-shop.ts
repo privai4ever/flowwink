@@ -176,7 +176,7 @@ const digitalShopPages: TemplatePage[] = [
             {
               id: 'bento-templates',
               title: 'Templates',
-              description: 'Pitch decks, brand kits, social media packs',
+              description: 'Professional pitch decks, brand kits, and social media packs used by 10,000+ creators. Download once, use forever.',
               image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80',
               colSpan: 2,
               rowSpan: 2,
@@ -186,7 +186,7 @@ const digitalShopPages: TemplatePage[] = [
             {
               id: 'bento-courses',
               title: 'Online Courses',
-              description: '40+ expert-led video lessons',
+              description: '40+ expert-led lessons taught by industry practitioners. Learn at your pace, apply immediately.',
               image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80',
               colSpan: 1,
               rowSpan: 1,
@@ -196,7 +196,7 @@ const digitalShopPages: TemplatePage[] = [
             {
               id: 'bento-tools',
               title: 'Design Systems',
-              description: 'UI kits, icon packs, component libraries',
+              description: 'Production-ready UI kits, icon packs, and component libraries for Figma and code. Ship faster, stay consistent.',
               image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80',
               colSpan: 1,
               rowSpan: 1,
