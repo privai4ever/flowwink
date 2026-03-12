@@ -7,6 +7,7 @@ import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 import { useBranding } from '@/providers/BrandingProvider';
 import { ThemeToggle } from './ThemeToggle';
+import { CartIndicator } from './CartIndicator';
 import { useHeaderBlock, defaultHeaderData } from '@/hooks/useGlobalBlocks';
 import { useBlogSettings } from '@/hooks/useSiteSettings';
 import type { HeaderNavItem } from '@/types/cms';
