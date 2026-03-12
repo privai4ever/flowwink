@@ -46,8 +46,6 @@ export function ChatWidget() {
     window.addEventListener('open-chat-widget', handler);
     return () => window.removeEventListener('open-chat-widget', handler);
   }, []);
-  const { data: settings, isLoading } = useChatSettings();
-  const { branding } = useBranding();
 
   if (isLoading || !settings?.enabled || !settings?.widgetEnabled) {
     return null;
