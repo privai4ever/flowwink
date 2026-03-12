@@ -18,6 +18,10 @@ interface CartContextType {
   totalItems: number;
   totalPriceCents: number;
   currency: string;
+  isOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
+  toggleCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -34,6 +38,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [];
     }
   });
+  const [isOpen, setIsOpen] = useState(false);
 
   // Persist cart to localStorage
   useEffect(() => {
@@ -56,6 +61,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...current, { ...item, quantity }];
     });
+    // Auto-open cart when adding items
+    setIsOpen(true);
   }, []);
 
   const removeItem = useCallback((productId: string) => {
@@ -78,6 +85,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems([]);
   }, []);
 
+  const openCart = useCallback(() => setIsOpen(true), []);
+  const closeCart = useCallback(() => setIsOpen(false), []);
+  const toggleCart = useCallback(() => setIsOpen(prev => !prev), []);
+
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPriceCents = items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
   const currency = items[0]?.currency || 'SEK';
@@ -93,6 +104,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         totalItems,
         totalPriceCents,
         currency,
+        isOpen,
+        openCart,
+        closeCart,
+        toggleCart,
       }}
     >
       {children}
