@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { BrandingProvider } from "@/providers/BrandingProvider";
 import { CartProvider } from "@/contexts/CartContext";
+import { CartSidebar } from "@/components/public/CartSidebar";
 
 import AuthPage from "./pages/AuthPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
