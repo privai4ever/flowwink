@@ -423,7 +423,30 @@ export const BLOCK_REFERENCE: BlockInfo[] = [
     ],
   },
   {
-    type: 'article-grid',
+    type: 'category-nav',
+    name: 'Category Navigation',
+    description: 'Visual tiles linking to product categories with images and names.',
+    category: 'commerce',
+    fields: [
+      { name: 'title', type: 'string', required: false, description: 'Section title' },
+      { name: 'columns', type: 'number', required: false, description: 'Grid columns', default: 3 },
+      { name: 'variant', type: 'string', required: false, description: 'Visual style', default: 'cards', options: ['cards', 'minimal', 'overlay'] },
+      { name: 'showDescription', type: 'boolean', required: false, description: 'Show category descriptions', default: false },
+      { name: 'linkBase', type: 'string', required: false, description: 'Base URL path', default: '/shop' },
+    ],
+  },
+  {
+    type: 'shipping-info',
+    name: 'Shipping Info',
+    description: 'Shipping, delivery, and returns information block.',
+    category: 'commerce',
+    fields: [
+      { name: 'title', type: 'string', required: false, description: 'Section title' },
+      { name: 'items', type: 'array', required: false, description: 'Array of { icon, title, description } items' },
+      { name: 'variant', type: 'string', required: false, description: 'Layout variant', default: 'list', options: ['list', 'grid', 'compact'] },
+    ],
+  },
+  {
     name: 'Article Grid',
     description: 'Blog post or article grid.',
     category: 'content',
