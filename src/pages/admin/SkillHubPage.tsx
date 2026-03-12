@@ -175,6 +175,11 @@ export default function SkillHubPage() {
           <AutomationsPanel />
         </TabsContent>
 
+        {/* Workflows Tab */}
+        <TabsContent value="workflows">
+          <WorkflowsPanel />
+        </TabsContent>
+
         {/* Evolution Tab */}
         <TabsContent value="evolution">
           <EvolutionPanel />
