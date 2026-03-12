@@ -146,6 +146,16 @@ export default function BlogPostsPage() {
             {filteredPosts.map((post) => (
               <Card key={post.id} className="p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between gap-4">
+                  {/* Thumbnail */}
+                  {post.featured_image && (
+                    <div className="w-20 h-14 rounded-md overflow-hidden bg-muted shrink-0">
+                      <img
+                        src={post.featured_image}
+                        alt={post.featured_image_alt || post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Link
