@@ -72,6 +72,7 @@ export default function CheckoutPage() {
           })),
           customerName: formData.name,
           customerEmail: formData.email,
+          userId: user?.id || null,
           currency: currency,
           successUrl: `${window.location.origin}/checkout/success`,
           cancelUrl: `${window.location.origin}/checkout`,
