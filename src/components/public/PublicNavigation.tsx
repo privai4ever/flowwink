@@ -409,6 +409,7 @@ export function PublicNavigation() {
             {/* Custom nav items - with mega menu support */}
             {customNavItems.map((item) => renderNavItem(item))}
             {headerSettings.showThemeToggle !== false && <ThemeToggle />}
+            <CartIndicator />
           </nav>
 
           {/* Mobile Menu Button */}
