@@ -55,6 +55,8 @@ import {
   SectionDividerBlock,
   FeaturedCarouselBlock,
   ResumeMatcherBlock,
+  FeaturedProductBlock,
+  TrustBarBlock,
 } from './blocks';
 import type { ChatLauncherBlockData } from './blocks/ChatLauncherBlock';
 import type { KbHubBlockData } from './blocks/KbHubBlock';
@@ -98,6 +100,8 @@ import type { ParallaxSectionBlockData } from './blocks/ParallaxSectionBlock';
 import type { BentoGridBlockData } from './blocks/BentoGridBlock';
 import type { SectionDividerBlockData } from './blocks/SectionDividerBlock';
 import type { FeaturedCarouselBlockData } from './blocks/FeaturedCarouselBlock';
+import type { FeaturedProductBlockData } from './blocks/FeaturedProductBlock';
+import type { TrustBarBlockData } from './blocks/TrustBarBlock';
 
 interface BlockRendererProps {
   block: ContentBlock;
@@ -258,6 +262,10 @@ export function BlockRenderer({ block, pageId, index = 0 }: BlockRendererProps) 
         return <FeaturedCarouselBlock data={block.data as unknown as FeaturedCarouselBlockData} />;
       case 'resume-matcher':
         return <ResumeMatcherBlock data={block.data as Record<string, unknown>} />;
+      case 'featured-product':
+        return <FeaturedProductBlock data={block.data as unknown as FeaturedProductBlockData} />;
+      case 'trust-bar':
+        return <TrustBarBlock data={block.data as unknown as TrustBarBlockData} />;
       default:
         return null;
     }

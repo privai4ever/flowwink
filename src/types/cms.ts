@@ -126,7 +126,9 @@ export type ContentBlockType =
   | 'bento-grid'
   | 'section-divider'
   | 'featured-carousel'
-  | 'resume-matcher';
+  | 'resume-matcher'
+  | 'featured-product'
+  | 'trust-bar';
 
 // Form field types
 export type FormFieldType = 'text' | 'email' | 'phone' | 'textarea' | 'checkbox';

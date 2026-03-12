@@ -72,6 +72,8 @@ import { ParallaxSectionBlockEditor } from './ParallaxSectionBlockEditor';
 import { BentoGridBlockEditor } from './BentoGridBlockEditor';
 import { SectionDividerBlockEditor } from './SectionDividerBlockEditor';
 import { FeaturedCarouselBlockEditor } from './FeaturedCarouselBlockEditor';
+import { FeaturedProductBlockEditor } from './FeaturedProductBlockEditor';
+import { TrustBarBlockEditor } from './TrustBarBlockEditor';
 import type { ProductsBlockData } from '@/components/public/blocks/ProductsBlock';
 import type { CartBlockData } from '@/components/public/blocks/CartBlock';
 import type { KbFeaturedBlockData } from '@/components/public/blocks/KbFeaturedBlock';
@@ -94,6 +96,8 @@ import type { ParallaxSectionBlockData } from '@/components/public/blocks/Parall
 import type { BentoGridBlockData } from '@/components/public/blocks/BentoGridBlock';
 import type { SectionDividerBlockData } from '@/components/public/blocks/SectionDividerBlock';
 import type { FeaturedCarouselBlockData } from '@/components/public/blocks/FeaturedCarouselBlock';
+import type { FeaturedProductBlockData } from '@/components/public/blocks/FeaturedProductBlock';
+import type { TrustBarBlockData } from '@/components/public/blocks/TrustBarBlock';
 
 interface NewsletterBlockData {
   title?: string;
@@ -1091,6 +1095,22 @@ export function BlockEditor({ blocks, onChange, canEdit }: BlockEditorProps) {
               </div>
             </div>
           </div>
+        );
+      case 'featured-product':
+        return (
+          <FeaturedProductBlockEditor
+            data={block.data as unknown as FeaturedProductBlockData}
+            onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
+            isEditing={isEditing}
+          />
+        );
+      case 'trust-bar':
+        return (
+          <TrustBarBlockEditor
+            data={block.data as unknown as TrustBarBlockData}
+            onChange={(data) => handleUpdateBlock(block.id, data as unknown as Record<string, unknown>)}
+            isEditing={isEditing}
+          />
         );
       default:
         return <div className="p-4 text-muted-foreground">Unknown block type</div>;

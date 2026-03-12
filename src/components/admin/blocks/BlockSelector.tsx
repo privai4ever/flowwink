@@ -69,6 +69,7 @@ import {
   Clipboard,
   AlertTriangle,
   FileUser,
+  ShieldCheck,
 } from 'lucide-react';
 import { ContentBlockType } from '@/types/cms';
 import { useAllBlockModuleStatus } from '@/hooks/useBlockModuleStatus';
@@ -392,10 +393,22 @@ const BLOCK_GROUPS: BlockGroup[] = [
         description: 'Display products with add-to-cart',
       },
       {
+        type: 'featured-product',
+        label: 'Featured Product',
+        icon: <ShoppingBag className="h-5 w-5" />,
+        description: 'Hero spotlight for a single product',
+      },
+      {
         type: 'cart',
         label: 'Cart',
         icon: <ShoppingCart className="h-5 w-5" />,
         description: 'Shopping cart with checkout link',
+      },
+      {
+        type: 'trust-bar',
+        label: 'Trust Bar',
+        icon: <ShieldCheck className="h-5 w-5" />,
+        description: 'Free shipping, returns, secure payment badges',
       },
       {
         type: 'kb-featured',
