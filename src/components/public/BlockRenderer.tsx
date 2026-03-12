@@ -104,6 +104,8 @@ import type { SectionDividerBlockData } from './blocks/SectionDividerBlock';
 import type { FeaturedCarouselBlockData } from './blocks/FeaturedCarouselBlock';
 import type { FeaturedProductBlockData } from './blocks/FeaturedProductBlock';
 import type { TrustBarBlockData } from './blocks/TrustBarBlock';
+import type { CategoryNavBlockData } from './blocks/CategoryNavBlock';
+import type { ShippingInfoBlockData } from './blocks/ShippingInfoBlock';
 
 interface BlockRendererProps {
   block: ContentBlock;
