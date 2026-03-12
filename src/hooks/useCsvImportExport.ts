@@ -9,11 +9,15 @@ import {
   leadCsvColumns,
   companyCsvHeaderMap,
   companyCsvColumns,
+  productCsvHeaderMap,
+  productCsvColumns,
   type LeadCsvRow,
   type CompanyCsvRow,
+  type ProductCsvRow,
 } from '@/lib/csv-utils';
 import type { LeadWithCompany } from '@/hooks/useLeads';
 import type { Company } from '@/hooks/useCompanies';
+import type { Product } from '@/hooks/useProducts';
 
 export function useExportLeads() {
   return async (leads: LeadWithCompany[]) => {
@@ -172,4 +176,102 @@ export function useImportCompanies() {
 
 function validateLeadStatus(status: string | null): status is 'lead' | 'opportunity' | 'customer' | 'lost' {
   return status !== null && ['lead', 'opportunity', 'customer', 'lost'].includes(status);
+}
+
+function validateProductType(type: string | null): type is 'one_time' | 'recurring' {
+  return type !== null && ['one_time', 'recurring', 'one-time'].includes(type);
+}
+
+function parsePriceToCents(price: string | null): number {
+  if (!price) return 0;
+  // Remove currency symbols and whitespace
+  const cleaned = price.replace(/[^0-9.,\-]/g, '').trim();
+  if (!cleaned) return 0;
+  // Handle comma as decimal separator (European format)
+  const normalized = cleaned.includes(',') && !cleaned.includes('.')
+    ? cleaned.replace(',', '.')
+    : cleaned.replace(',', '');
+  const num = parseFloat(normalized);
+  if (isNaN(num)) return 0;
+  // If the number looks like it's already in cents (no decimal), return as-is
+  // Otherwise multiply by 100
+  return Number.isInteger(num) && num > 1000 ? num : Math.round(num * 100);
+}
+
+export function useExportProducts() {
+  return async (products: Product[]) => {
+    const exportData = products.map((p) => ({
+      name: p.name,
+      description: p.description || '',
+      price: (p.price_cents / 100).toString(),
+      currency: p.currency || 'SEK',
+      type: p.type || 'one_time',
+      image_url: p.image_url || '',
+    }));
+    
+    const csv = generateCSV(exportData, productCsvColumns);
+    const date = new Date().toISOString().split('T')[0];
+    downloadCSV(csv, `products-export-${date}.csv`);
+    toast.success(`Exported ${products.length} products`);
+  };
+}
+
+export function useImportProducts() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (file: File): Promise<{ success: number; errors: string[] }> => {
+      const text = await file.text();
+      const { data, errors: parseErrors } = parseCSV<ProductCsvRow>(
+        text,
+        productCsvHeaderMap,
+        ['name']
+      );
+      
+      if (parseErrors.length > 0 && data.length === 0) {
+        return { success: 0, errors: parseErrors };
+      }
+      
+      const allErrors = [...parseErrors];
+      let successCount = 0;
+      
+      const batchSize = 50;
+      for (let i = 0; i < data.length; i += batchSize) {
+        const batch = data.slice(i, i + batchSize);
+        const insertData = batch.map((row) => ({
+          name: row.name.trim(),
+          description: row.description || null,
+          price_cents: parsePriceToCents(row.price),
+          currency: row.currency?.toUpperCase()?.trim() || 'SEK',
+          type: (validateProductType(row.type?.toLowerCase()?.replace('-', '_')?.trim() ?? null)
+            ? row.type!.toLowerCase().replace('-', '_').trim()
+            : 'one_time') as 'one_time' | 'recurring',
+          image_url: row.image_url || null,
+          is_active: true,
+        }));
+        
+        const { data: inserted, error } = await supabase
+          .from('products')
+          .insert(insertData)
+          .select();
+        
+        if (error) {
+          allErrors.push(`Batch ${Math.floor(i / batchSize) + 1}: ${error.message}`);
+        } else {
+          successCount += inserted?.length || 0;
+        }
+      }
+      
+      return { success: successCount, errors: allErrors };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      if (result.success > 0) {
+        toast.success(`Imported ${result.success} products`);
+      }
+    },
+    onError: (error) => {
+      toast.error('Import failed: ' + error.message);
+    },
+  });
 }
