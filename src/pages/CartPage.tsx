@@ -16,7 +16,7 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <>
-        <Helmet><title>Cart</title></Helmet>
+        <Helmet><title>{'Cart'}</title></Helmet>
         <PublicNavigation />
         <main className="min-h-screen bg-background flex items-center justify-center p-4">
           <div className="text-center space-y-4">
@@ -38,7 +38,7 @@ export default function CartPage() {
 
   return (
     <>
-      <Helmet><title>Cart ({totalItems})</title></Helmet>
+      <Helmet><title>{`Cart (${totalItems})`}</title></Helmet>
       <PublicNavigation />
 
       <main className="min-h-screen bg-background">
