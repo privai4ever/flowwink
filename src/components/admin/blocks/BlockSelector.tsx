@@ -411,6 +411,18 @@ const BLOCK_GROUPS: BlockGroup[] = [
         description: 'Free shipping, returns, secure payment badges',
       },
       {
+        type: 'category-nav',
+        label: 'Category Nav',
+        icon: <LayoutGrid className="h-5 w-5" />,
+        description: 'Visual tiles for product categories',
+      },
+      {
+        type: 'shipping-info',
+        label: 'Shipping Info',
+        icon: <Truck className="h-5 w-5" />,
+        description: 'Shipping, delivery, and returns info',
+      },
+      {
         type: 'kb-featured',
         label: 'KB Featured',
         icon: <HelpCircle className="h-5 w-5" />,
