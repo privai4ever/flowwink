@@ -50,7 +50,8 @@ const VALID_BLOCK_TYPES: ContentBlockType[] = [
   // Module-specific
   'resume-matcher',
   // AI / Conversational commerce
-  'ai-assistant'
+  'ai-assistant',
+  'quick-links'
 ];
 
 // Required fields per block type
