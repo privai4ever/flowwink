@@ -228,14 +228,99 @@ if [[ "$configure_hunter" =~ ^[Yy]$ ]]; then
     fi
 fi
 
+# Anthropic (Claude AI)
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}  AI Features (Anthropic / Claude)${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo "Required for: Claude AI models (alternative to OpenAI/Gemini)"
+echo "Get your key from: https://console.anthropic.com/settings/keys"
+echo ""
+read -p "Configure Anthropic? [y/N]: " configure_anthropic
+
+if [[ "$configure_anthropic" =~ ^[Yy]$ ]]; then
+    read -p "Anthropic API Key: " ANTHROPIC_API_KEY
+    if [ -n "$ANTHROPIC_API_KEY" ]; then
+        supabase secrets set ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY"
+        echo -e "${GREEN}✓ Anthropic configured${NC}"
+    fi
+fi
+
+echo ""
+
+# Google OAuth (Gmail)
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}  Gmail Integration (Google OAuth)${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo "Required for: Gmail inbox scanning, email signal ingestion"
+echo "Get your credentials from: https://console.cloud.google.com/apis/credentials"
+echo ""
+read -p "Configure Google OAuth? [y/N]: " configure_google
+
+if [[ "$configure_google" =~ ^[Yy]$ ]]; then
+    read -p "Google Client ID: " GOOGLE_CLIENT_ID
+    if [ -n "$GOOGLE_CLIENT_ID" ]; then
+        supabase secrets set GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID"
+        echo -e "${GREEN}✓ Google Client ID configured${NC}"
+    fi
+
+    read -p "Google Client Secret: " GOOGLE_CLIENT_SECRET
+    if [ -n "$GOOGLE_CLIENT_SECRET" ]; then
+        supabase secrets set GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+        echo -e "${GREEN}✓ Google Client Secret configured${NC}"
+    fi
+fi
+
+echo ""
+
+# Jina AI (web search/scrape)
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}  Web Search / Scraping (Jina AI)${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo "Optional: Alternative to Firecrawl for web search and scraping"
+echo "Get your key from: https://jina.ai/api-key"
+echo ""
+read -p "Configure Jina AI? [y/N]: " configure_jina
+
+if [[ "$configure_jina" =~ ^[Yy]$ ]]; then
+    read -p "Jina API Key: " JINA_API_KEY
+    if [ -n "$JINA_API_KEY" ]; then
+        supabase secrets set JINA_API_KEY="$JINA_API_KEY"
+        echo -e "${GREEN}✓ Jina AI configured${NC}"
+    fi
+fi
+
+echo ""
+
+# Site URL (OAuth callbacks)
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}  Site URL${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo "Required for: OAuth redirect URLs (e.g. Gmail integration)"
+echo "Example: https://yoursite.com"
+echo ""
+read -p "Configure SITE_URL? [y/N]: " configure_site_url
+
+if [[ "$configure_site_url" =~ ^[Yy]$ ]]; then
+    read -p "Site URL (e.g. https://yoursite.com): " SITE_URL
+    if [ -n "$SITE_URL" ]; then
+        supabase secrets set SITE_URL="$SITE_URL"
+        echo -e "${GREEN}✓ Site URL configured${NC}"
+    fi
+fi
+
 echo ""
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║   Configuration Complete!                                  ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo "Secrets configured! You can:"
+echo "Secrets configured! You can also manage secrets later:"
 echo ""
-echo "  • View secrets: supabase secrets list"
-echo "  • Update secrets: supabase secrets set SECRET_NAME=value"
+echo "  • Supabase Dashboard → Project → Settings → Edge Functions → Secrets"
+echo "  • CLI: supabase secrets list --project-ref <ref>"
+echo "  • CLI: supabase secrets set SECRET_NAME=value --project-ref <ref>"
 echo "  • Check status in Admin → Settings → Integrations"
 echo ""
