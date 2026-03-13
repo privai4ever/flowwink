@@ -83,7 +83,6 @@ export const navigationGroups: NavGroup[] = [
     items: [
       { name: "Quick Start", href: "/admin/quick-start", icon: Rocket },
       { name: "Templates", href: "/admin/templates", icon: Puzzle },
-      { name: "New Site", href: "/admin/new-site", icon: Rocket },
       { name: "Template Export", href: "/admin/template-export", icon: Puzzle },
       { name: "Branding", href: "/admin/branding", icon: Palette },
       { name: "Global Elements", href: "/admin/global-blocks", icon: LayoutGrid, moduleId: "globalElements" },

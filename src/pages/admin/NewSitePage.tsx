@@ -43,8 +43,18 @@ import { createDocumentFromText } from '@/lib/tiptap-utils';
 
 export default function NewSitePage() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const templateFromState = (location.state as any)?.selectedTemplate || null;
+  
+  // Redirect to templates page if no template selected
+  useEffect(() => {
+    if (!templateFromState) {
+      navigate('/admin/templates', { replace: true });
+    }
+  }, [templateFromState, navigate]);
+
   const [selectedTemplate, setSelectedTemplate] = useState<StarterTemplate | null>(
-    (location.state as any)?.selectedTemplate || null
+    templateFromState
   );
   const [step, setStep] = useState<CreationStep>('select');
   const [progress, setProgress] = useState<CreationProgress>({ currentPage: 0, totalPages: 0, currentStep: '' });
