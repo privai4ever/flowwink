@@ -559,60 +559,59 @@ FW_COMMANDS=(
 )
 
 _fw_draw_menu() {
-    local selected="$1"
-    shift
+    local selected="$1"; shift
     local items=("$@")
     for i in "${!items[@]}"; do
         if [ "$i" -eq "$selected" ]; then
-            printf "  \033[0;36m▶ %-22s\033[0m\n" "${items[$i]}"
+            printf "  \033[0;36m▶ %-22s\033[0m\n" "${items[$i]}" >/dev/tty
         else
-            printf "  \033[2m  %-22s\033[0m\n" "${items[$i]}"
+            printf "  \033[2m  %-22s\033[0m\n" "${items[$i]}" >/dev/tty
         fi
     done
 }
 
+# Called directly (never in a subshell) so it can set READLINE_LINE/POINT
 _fw_menu() {
-    local cur="$1"
-    shift
     local items=("$@")
     local count=${#items[@]}
-    local selected=0
+    local selected=0 cancelled=0
 
-    printf '\n'
-    printf '\033[?25l'          # hide cursor
+    printf '\n' >/dev/tty
+    printf '\033[?25l' >/dev/tty       # hide cursor
     _fw_draw_menu "$selected" "${items[@]}"
 
     local key seq
     while true; do
-        IFS= read -rsn1 key
+        IFS= read -rsn1 key </dev/tty
         case "$key" in
             $'\033')
-                IFS= read -rsn2 -t 0.1 seq
+                IFS= read -rsn2 -t 0.1 seq </dev/tty
                 case "$seq" in
-                    '[A') selected=$(( (selected - 1 + count) % count )) ;;  # up
-                    '[B') selected=$(( (selected + 1) % count )) ;;          # down
+                    '[A') selected=$(( (selected - 1 + count) % count )) ;;
+                    '[B') selected=$(( (selected + 1) % count )) ;;
                 esac
                 ;;
             $'\t')
-                selected=$(( (selected + 1) % count ))  # tab cycles forward
+                selected=$(( (selected + 1) % count ))
                 ;;
             ''|$'\r')
-                # Enter — confirm selection
-                printf "\033[${count}A\033[J"
-                printf '\033[?25h'
-                echo "${items[$selected]}"
-                return 0
+                break
                 ;;
             $'\x03'|$'\x1b')
-                # Ctrl-C or plain Escape — cancel
-                printf "\033[${count}A\033[J"
-                printf '\033[?25h'
-                return 1
+                cancelled=1; break
                 ;;
         esac
-        printf "\033[${count}A"
+        printf "\033[${count}A" >/dev/tty
         _fw_draw_menu "$selected" "${items[@]}"
     done
+
+    printf "\033[${count}A\033[J" >/dev/tty   # clear menu
+    printf '\033[?25h' >/dev/tty               # show cursor
+
+    if [ "$cancelled" -eq 0 ]; then
+        READLINE_LINE="${items[$selected]}"
+        READLINE_POINT=${#READLINE_LINE}
+    fi
 }
 
 _fw_complete() {
@@ -632,26 +631,15 @@ _fw_complete() {
         return
     fi
 
-    local chosen
-    chosen=$(_fw_menu "$cur" "${matches[@]}")
-    if [ $? -eq 0 ] && [ -n "$chosen" ]; then
-        READLINE_LINE="$chosen"
-        READLINE_POINT=${#READLINE_LINE}
-    fi
+    _fw_menu "${matches[@]}"
 }
 
 _fw_slash_hint() {
-    # Insert / at cursor
     READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}/${READLINE_LINE:$READLINE_POINT}"
     READLINE_POINT=$((READLINE_POINT + 1))
-    # On first character, open the full command menu
+    # On first /, open the full command menu
     if [ "$READLINE_POINT" -eq 1 ]; then
-        local chosen
-        chosen=$(_fw_menu "/" "${FW_COMMANDS[@]}")
-        if [ $? -eq 0 ] && [ -n "$chosen" ]; then
-            READLINE_LINE="$chosen"
-            READLINE_POINT=${#READLINE_LINE}
-        fi
+        _fw_menu "${FW_COMMANDS[@]}"
     fi
 }
 
