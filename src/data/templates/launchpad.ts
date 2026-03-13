@@ -390,7 +390,7 @@ const launchpadPages: StarterTemplate['pages'] = [
     showInMenu: true,
     meta: {
       description: 'Simple, transparent pricing that scales with you',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
