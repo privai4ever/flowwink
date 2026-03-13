@@ -1171,6 +1171,7 @@ export function BlockEditor({ blocks, onChange, canEdit }: BlockEditorProps) {
               onAnimationChange={(animation) => handleUpdateBlockAnimation(block.id, animation)}
               onAnchorChange={(anchorId) => handleUpdateBlockAnchor(block.id, anchorId)}
               onToggleHidden={(hidden) => handleToggleHidden(block.id, hidden)}
+              onBackgroundChange={(bg) => handleUpdateBlockBackground(block.id, bg)}
               canEdit={canEdit}
             >
               {renderBlockContent(block, editingBlockId === block.id)}
