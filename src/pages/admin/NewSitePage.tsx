@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { StarterTemplateSelector } from '@/components/admin/StarterTemplateSelector';
+// StarterTemplateSelector removed — template selection now happens on /admin/templates
 import { TemplatePreviewDialog, TemplateOverwriteOptions } from '@/components/admin/templates/TemplatePreviewDialog';
 import { StarterTemplate } from '@/data/templates';
 import { validateTemplate, ValidationResult } from '@/lib/template-validator';
@@ -43,8 +43,18 @@ import { createDocumentFromText } from '@/lib/tiptap-utils';
 
 export default function NewSitePage() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const templateFromState = (location.state as any)?.selectedTemplate || null;
+  
+  // Redirect to templates page if no template selected
+  useEffect(() => {
+    if (!templateFromState) {
+      navigate('/admin/templates', { replace: true });
+    }
+  }, [templateFromState, navigate]);
+
   const [selectedTemplate, setSelectedTemplate] = useState<StarterTemplate | null>(
-    (location.state as any)?.selectedTemplate || null
+    templateFromState
   );
   const [step, setStep] = useState<CreationStep>('select');
   const [progress, setProgress] = useState<CreationProgress>({ currentPage: 0, totalPages: 0, currentStep: '' });
@@ -64,7 +74,7 @@ export default function NewSitePage() {
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [overwriteOptions, setOverwriteOptions] = useState<TemplateOverwriteOptions | null>(null);
   
-  const navigate = useNavigate();
+  // navigate already declared above
   const { data: existingPages } = usePages();
   const { data: deletedPages } = useDeletedPages();
   const { data: existingBlogPostsData } = useBlogPosts();
@@ -748,15 +758,10 @@ export default function NewSitePage() {
                   <p className="text-sm text-muted-foreground mb-6">
                     Browse our professionally designed templates to get started.
                   </p>
-                  <StarterTemplateSelector 
-                    onSelectTemplate={handleTemplateSelect}
-                    trigger={
-                      <Button className="gap-2">
-                        <Sparkles className="h-4 w-4" />
-                        Browse Templates
-                      </Button>
-                    }
-                  />
+                  <Button className="gap-2" onClick={() => navigate('/admin/templates')}>
+                    <Sparkles className="h-4 w-4" />
+                    Browse Templates
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -770,10 +775,9 @@ export default function NewSitePage() {
                       </CardTitle>
                       <CardDescription>{selectedTemplate.tagline}</CardDescription>
                     </div>
-                    <StarterTemplateSelector 
-                      onSelectTemplate={handleTemplateSelect}
-                      trigger={<Button variant="outline" size="sm">Change</Button>}
-                    />
+                    <Button variant="outline" size="sm" onClick={() => navigate('/admin/templates')}>
+                      Change
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">

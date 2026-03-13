@@ -145,7 +145,7 @@ export default function PagesListPage() {
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link to="/admin/new-site">
+            <Link to="/admin/templates">
               <LayoutTemplate className="h-4 w-4 mr-2" />
               Create Site from Template
             </Link>
