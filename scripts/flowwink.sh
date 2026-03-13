@@ -244,6 +244,9 @@ cmd_update_funcs() {
     echo ""
 
     local count=0 failed=0
+    local failed_names=()
+    local failed_errors=()
+
     for func in $functions; do
         count=$((count + 1))
         printf "  [%${#total}d/%d] %-42s" "$count" "$total" "$func"
@@ -253,11 +256,14 @@ cmd_update_funcs() {
         verify_jwt=$(grep -A1 "\[functions.$func\]" supabase/config.toml 2>/dev/null | grep "verify_jwt" | cut -d= -f2 | tr -d ' ' || echo "true")
         [ "$verify_jwt" = "false" ] && jwt_flag="--no-verify-jwt"
 
-        if supabase functions deploy "$func" $jwt_flag 2>/dev/null; then
+        local err
+        if err=$(supabase functions deploy "$func" $jwt_flag 2>&1); then
             echo -e "${GREEN}✓${NC}"
         else
             echo -e "${RED}✗${NC}"
             failed=$((failed + 1))
+            failed_names+=("$func")
+            failed_errors+=("$err")
         fi
     done
 
@@ -265,7 +271,13 @@ cmd_update_funcs() {
     if [ "$failed" -eq 0 ]; then
         echo -e "  ${GREEN}✓ All ${total} functions deployed${NC}"
     else
-        echo -e "  ${RED}✗ ${failed}/${total} failed — check Supabase Dashboard → Functions${NC}"
+        echo -e "  ${RED}✗ ${failed}/${total} failed:${NC}"
+        echo ""
+        for i in "${!failed_names[@]}"; do
+            echo -e "  ${RED}▶ ${failed_names[$i]}${NC}"
+            echo "${failed_errors[$i]}" | grep -i "error\|failed\|invalid" | head -3 | sed 's/^/    /'
+            echo ""
+        done
     fi
     echo ""
 }
