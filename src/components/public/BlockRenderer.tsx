@@ -309,7 +309,7 @@ export function BlockRenderer({ block, pageId, index = 0, resolvedBackground }: 
   };
 
   const content = renderBlock();
-  const anchorId = block.anchorId;
+  const anchorId = block.anchorId || block.id;
   const isFullBleed = FULL_BLEED_TYPES.has(block.type);
   
   // Determine background: explicit on block, or resolved from parent (auto-alternate)

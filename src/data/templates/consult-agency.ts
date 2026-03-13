@@ -69,7 +69,7 @@ export const consultAgencyTemplate: StarterTemplate = {
             overlayColor: 'dark',
             titleAnimation: 'slide-up',
             showScrollIndicator: true,
-            primaryButton: { text: 'Find a Consultant', url: '/consultants' },
+            primaryButton: { text: 'Find a Consultant', url: '#resume-matcher-consultants' },
             secondaryButton: { text: 'Join Our Network', url: '/join' },
             eyebrow: 'Digital Consulting Agency',
             heroStats: [

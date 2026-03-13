@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,9 +31,159 @@ interface ResumeMatcherBlockProps {
   data: ResumeMatcherBlockData;
 }
 
-// System prompt that instructs FlowPilot to call match_consultant and return raw JSON only.
-// The block is the renderer — FlowPilot is the intelligence.
 const MATCH_SYSTEM_PROMPT = `You are a consultant matching assistant. When given a job description or assignment brief, ALWAYS call the match_consultant tool to find the best matching consultants from this organization's roster. After calling the tool, respond with ONLY the raw JSON object returned by the tool — no prose, no explanation, no markdown. Output only valid JSON.`;
+
+/** Parse SSE stream into accumulated text content */
+async function consumeSSEStream(response: Response): Promise<string> {
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  const chunks: string[] = [];
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const chunk = decoder.decode(value, { stream: true });
+    for (const line of chunk.split('\n')) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6).trim();
+      if (payload === '[DONE]') continue;
+      try {
+        const parsed = JSON.parse(payload);
+        const delta = parsed.choices?.[0]?.delta?.content;
+        if (delta) chunks.push(delta);
+      } catch { /* skip malformed frames */ }
+    }
+  }
+
+  return chunks.join('');
+}
+
+const getScoreColor = (score: number) => {
+  if (score >= 80) return 'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800';
+  if (score >= 60) return 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800';
+  return 'text-muted-foreground bg-muted border-border';
+};
+
+// Memoized match card to avoid re-renders when selecting a different card
+const MatchCard = memo(function MatchCard({
+  match,
+  index,
+  isSelected,
+  onSelect,
+}: {
+  match: ConsultantMatch;
+  index: number;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <Card
+      className={`cursor-pointer transition-all hover:shadow-md ${
+        isSelected ? 'ring-2 ring-primary shadow-md' : ''
+      }`}
+      onClick={onSelect}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <div className="flex items-center gap-1.5">
+              {index === 0 && <Star className="w-4 h-4 text-amber-500 fill-amber-500" />}
+              <span className="font-semibold text-foreground">{match.name}</span>
+            </div>
+            {match.title && (
+              <p className="text-sm text-muted-foreground">{match.title}</p>
+            )}
+          </div>
+          <Badge variant="outline" className={`text-sm font-bold ${getScoreColor(match.score)}`}>
+            {match.score}%
+          </Badge>
+        </div>
+        <div className="flex flex-wrap gap-1 mt-2">
+          {match.matching_skills.slice(0, 4).map(skill => (
+            <Badge key={skill} variant="secondary" className="text-xs">
+              {skill}
+            </Badge>
+          ))}
+          {match.matching_skills.length > 4 && (
+            <Badge variant="outline" className="text-xs">
+              +{match.matching_skills.length - 4}
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+// Memoized detail panel
+const MatchDetail = memo(function MatchDetail({ match }: { match: ConsultantMatch }) {
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-muted/50 border-b">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-xl">{match.name}</CardTitle>
+            {match.title && (
+              <p className="text-muted-foreground mt-1">{match.title}</p>
+            )}
+          </div>
+          <Badge className={`text-lg px-3 py-1 ${getScoreColor(match.score)}`}>
+            {match.score}% Match
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-6 space-y-6">
+        <div>
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Why This Match</h4>
+          <p className="text-foreground">{match.reasoning}</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-green-600" /> Matching Skills
+            </h4>
+            <div className="flex flex-wrap gap-1.5">
+              {match.matching_skills.map(s => (
+                <Badge key={s} variant="secondary">{s}</Badge>
+              ))}
+            </div>
+          </div>
+          {match.missing_skills.length > 0 && (
+            <div>
+              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <XCircle className="w-3.5 h-3.5 text-muted-foreground" /> Gaps
+              </h4>
+              <div className="flex flex-wrap gap-1.5">
+                {match.missing_skills.map(s => (
+                  <Badge key={s} variant="outline" className="text-muted-foreground">{s}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {match.tailored_summary && (
+          <div>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Tailored Summary</h4>
+            <div className="bg-muted/30 rounded-lg p-4 text-foreground whitespace-pre-wrap">
+              {match.tailored_summary}
+            </div>
+          </div>
+        )}
+
+        {match.cover_letter && (
+          <div>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Cover Letter</h4>
+            <div className="bg-background border rounded-lg p-6 text-foreground whitespace-pre-wrap leading-relaxed">
+              {match.cover_letter}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+});
 
 export function ResumeMatcherBlock({ data }: ResumeMatcherBlockProps) {
   const [jobDescription, setJobDescription] = useState('');
@@ -48,7 +198,7 @@ export function ResumeMatcherBlock({ data }: ResumeMatcherBlockProps) {
   const placeholder = data.placeholder || 'Paste the job description or assignment brief here...';
   const buttonText = data.buttonText || 'Find Match';
 
-  const handleMatch = async () => {
+  const handleMatch = useCallback(async () => {
     if (!jobDescription.trim() || jobDescription.trim().length < 10) {
       toast({ title: 'Too short', description: 'Please provide a more detailed job description.', variant: 'destructive' });
       return;
@@ -58,9 +208,6 @@ export function ResumeMatcherBlock({ data }: ResumeMatcherBlockProps) {
     setSelectedMatch(null);
 
     try {
-      // Route through FlowPilot (chat-completion) — FlowPilot calls the match_consultant skill,
-      // which routes through agent-execute → module:resume → resume-match edge function.
-      // The block only captures intent and renders the structured response.
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-completion`,
         {
@@ -84,28 +231,7 @@ export function ResumeMatcherBlock({ data }: ResumeMatcherBlockProps) {
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-      // Accumulate the SSE stream into full response text
-      const reader = response.body!.getReader();
-      const decoder = new TextDecoder();
-      let fullContent = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split('\n')) {
-          if (!line.startsWith('data: ')) continue;
-          const data = line.slice(6).trim();
-          if (data === '[DONE]') continue;
-          try {
-            const parsed = JSON.parse(data);
-            const delta = parsed.choices?.[0]?.delta?.content;
-            if (delta) fullContent += delta;
-          } catch { /* ignore parse errors on SSE frames */ }
-        }
-      }
-
-      // FlowPilot returns raw JSON from the match_consultant tool result
+      const fullContent = await consumeSSEStream(response);
       const jsonStr = fullContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       const result = JSON.parse(jsonStr);
 
@@ -122,13 +248,7 @@ export function ResumeMatcherBlock({ data }: ResumeMatcherBlockProps) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 bg-green-50 border-green-200';
-    if (score >= 60) return 'text-amber-600 bg-amber-50 border-amber-200';
-    return 'text-muted-foreground bg-muted border-border';
-  };
+  }, [jobDescription, chatSettings?.aiProvider, toast]);
 
   return (
     <section className="w-full py-16 md:py-24">
@@ -178,121 +298,19 @@ export function ResumeMatcherBlock({ data }: ResumeMatcherBlockProps) {
         {/* Results */}
         {matches.length > 0 && (
           <div className="space-y-6">
-            {/* Match cards */}
             <div className="grid gap-3 md:grid-cols-3">
               {matches.map((match, i) => (
-                <Card
+                <MatchCard
                   key={match.consultant_id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    selectedMatch?.consultant_id === match.consultant_id
-                      ? 'ring-2 ring-primary shadow-md'
-                      : ''
-                  }`}
-                  onClick={() => setSelectedMatch(match)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          {i === 0 && <Star className="w-4 h-4 text-amber-500 fill-amber-500" />}
-                          <span className="font-semibold text-foreground">{match.name}</span>
-                        </div>
-                        {match.title && (
-                          <p className="text-sm text-muted-foreground">{match.title}</p>
-                        )}
-                      </div>
-                      <Badge variant="outline" className={`text-sm font-bold ${getScoreColor(match.score)}`}>
-                        {match.score}%
-                      </Badge>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {match.matching_skills.slice(0, 4).map(skill => (
-                        <Badge key={skill} variant="secondary" className="text-xs">
-                          {skill}
-                        </Badge>
-                      ))}
-                      {match.matching_skills.length > 4 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{match.matching_skills.length - 4}
-                        </Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                  match={match}
+                  index={i}
+                  isSelected={selectedMatch?.consultant_id === match.consultant_id}
+                  onSelect={() => setSelectedMatch(match)}
+                />
               ))}
             </div>
 
-            {/* Selected match detail */}
-            {selectedMatch && (
-              <Card className="overflow-hidden">
-                <CardHeader className="bg-muted/50 border-b">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl">{selectedMatch.name}</CardTitle>
-                      {selectedMatch.title && (
-                        <p className="text-muted-foreground mt-1">{selectedMatch.title}</p>
-                      )}
-                    </div>
-                    <Badge className={`text-lg px-3 py-1 ${getScoreColor(selectedMatch.score)}`}>
-                      {selectedMatch.score}% Match
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  {/* Reasoning */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Why This Match</h4>
-                    <p className="text-foreground">{selectedMatch.reasoning}</p>
-                  </div>
-
-                  {/* Skills overview */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-green-600" /> Matching Skills
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selectedMatch.matching_skills.map(s => (
-                          <Badge key={s} variant="secondary">{s}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                    {selectedMatch.missing_skills.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                          <XCircle className="w-3.5 h-3.5 text-muted-foreground" /> Gaps
-                        </h4>
-                        <div className="flex flex-wrap gap-1.5">
-                          {selectedMatch.missing_skills.map(s => (
-                            <Badge key={s} variant="outline" className="text-muted-foreground">{s}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tailored summary */}
-                  {selectedMatch.tailored_summary && (
-                    <div>
-                      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Tailored Summary</h4>
-                      <div className="bg-muted/30 rounded-lg p-4 text-foreground whitespace-pre-wrap">
-                        {selectedMatch.tailored_summary}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cover letter */}
-                  {selectedMatch.cover_letter && (
-                    <div>
-                      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Cover Letter</h4>
-                      <div className="bg-background border rounded-lg p-6 text-foreground whitespace-pre-wrap leading-relaxed">
-                        {selectedMatch.cover_letter}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+            {selectedMatch && <MatchDetail match={selectedMatch} />}
           </div>
         )}
       </div>
