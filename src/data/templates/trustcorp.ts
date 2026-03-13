@@ -187,7 +187,7 @@ const trustcorpPages: StarterTemplate['pages'] = [
     showInMenu: true,
     meta: {
       description: 'Comprehensive enterprise services tailored to your needs',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
