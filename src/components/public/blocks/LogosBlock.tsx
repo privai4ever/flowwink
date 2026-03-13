@@ -156,8 +156,7 @@ export function LogosBlock({ data }: LogosBlockProps) {
   };
 
   return (
-    <section className="py-12 md:py-16">
-      <div className="container max-w-6xl mx-auto px-4">
+    <div>
         {(title || subtitle) && (
           <div className="text-center mb-8 md:mb-10">
             {title && (
