@@ -30,7 +30,7 @@ interface TimelineBlockEditorProps {
 }
 
 export function TimelineBlockEditor({ data, onChange, isEditing }: TimelineBlockEditorProps) {
-  const steps = data.steps || [];
+  const steps = data.steps || (data as any).items || [];
   const variant = data.variant || 'vertical';
 
   // Preview mode
