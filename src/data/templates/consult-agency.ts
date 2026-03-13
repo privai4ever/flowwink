@@ -918,12 +918,12 @@ export const consultAgencyTemplate: StarterTemplate = {
   },
 
   headerSettings: {
-    variant: 'centered',
+    variant: 'clean',
     stickyHeader: true,
-    backgroundStyle: 'white',
+    backgroundStyle: 'solid',
     headerShadow: 'sm',
     showBorder: false,
-    headerHeight: 'normal',
+    headerHeight: 'default',
     linkColorScheme: 'default',
   },
 
