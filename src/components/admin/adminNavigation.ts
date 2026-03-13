@@ -27,6 +27,7 @@ export const navigationGroups: NavGroup[] = [
       { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { name: "FlowPilot", href: "/admin/copilot", icon: Zap },
       { name: "Skill Hub", href: "/admin/skills", icon: Bot },
+      { name: "Federation", href: "/admin/federation", icon: Network, moduleId: "federation" },
       { name: "Analytics", href: "/admin/analytics", icon: BarChart3, moduleId: "analytics" },
     ],
   },
