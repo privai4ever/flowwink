@@ -45,6 +45,7 @@ export interface ModulesSettings {
   salesIntelligence: ModuleConfig;
   resume: ModuleConfig;
   browserControl: ModuleConfig;
+  federation: ModuleConfig;
 }
 
 export const defaultModulesSettings: ModulesSettings = {
@@ -239,6 +240,15 @@ export const defaultModulesSettings: ModulesSettings = {
     autonomy: 'config-required',
     adminUI: true,
   },
+  federation: {
+    enabled: false,
+    name: 'Federation',
+    description: 'Agent-to-Agent protocol — connect with other FlowWink instances and external agents',
+    icon: 'Network',
+    category: 'system',
+    autonomy: 'agent-capable',
+    adminUI: true,
+  },
 };
 
 // Map sidebar items to module IDs
@@ -263,7 +273,7 @@ export const SIDEBAR_TO_MODULE: Record<string, keyof ModulesSettings> = {
   '/admin/webinars': 'webinars',
   '/admin/sales-intelligence': 'salesIntelligence',
   '/admin/resume': 'resume',
-  
+  '/admin/federation': 'federation',
 };
 
 export function useModules() {

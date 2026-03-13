@@ -3,6 +3,7 @@ import {
   Puzzle, Webhook, UserCheck, Briefcase, Building2, Package, Library, ShoppingCart,
   CalendarDays, Plug, Bot, Zap, MessageSquare, Headphones, Megaphone, Code2,
   Video, Target, Rocket, LayoutGrid, Inbox, Menu, UserCircle, Palette, FileUser,
+  Network,
 } from 'lucide-react';
 
 export type NavItem = {
@@ -26,6 +27,7 @@ export const navigationGroups: NavGroup[] = [
       { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { name: "FlowPilot", href: "/admin/copilot", icon: Zap },
       { name: "Skill Hub", href: "/admin/skills", icon: Bot },
+      { name: "Federation", href: "/admin/federation", icon: Network, moduleId: "federation" },
       { name: "Analytics", href: "/admin/analytics", icon: BarChart3, moduleId: "analytics" },
     ],
   },
