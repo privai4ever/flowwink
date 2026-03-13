@@ -908,8 +908,8 @@ export const consultAgencyTemplate: StarterTemplate = {
     enabled: true,
     widgetEnabled: true,
     widgetPosition: 'bottom-right',
-    initialMessage: 'Hi! I\'m FlowPilot, your always-on consultant. Tell me about your assignment — tech stack, duration, timeline — and I\'ll find the right match from our network.',
-    suggestedQuestions: [
+    welcomeMessage: 'Hi! I\'m FlowPilot, your always-on consultant. Tell me about your assignment — tech stack, duration, timeline — and I\'ll find the right match from our network.',
+    suggestedPrompts: [
       'Do you have senior React developers available this month?',
       'What cloud architects do you have with AWS expertise?',
       'How does the matching process work?',
@@ -918,17 +918,17 @@ export const consultAgencyTemplate: StarterTemplate = {
   },
 
   headerSettings: {
-    variant: 'centered',
+    variant: 'clean',
     stickyHeader: true,
-    backgroundStyle: 'white',
+    backgroundStyle: 'solid',
     headerShadow: 'sm',
     showBorder: false,
-    headerHeight: 'normal',
+    headerHeight: 'default',
     linkColorScheme: 'default',
   },
 
   footerSettings: {
-    variant: 'columns',
+    variant: 'full',
     email: 'hello@consultagency.se',
     phone: '+46 8 123 456 78',
     address: 'Stureplan 4, Stockholm',

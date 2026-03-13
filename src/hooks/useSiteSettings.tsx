@@ -508,6 +508,7 @@ export function useUpdateBlogSettings() {
 export type SchemaOrgType = 
   | 'Organization'
   | 'LocalBusiness'
+  | 'ProfessionalService'
   | 'MedicalOrganization'
   | 'EducationalOrganization'
   | 'GovernmentOrganization'
