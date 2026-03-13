@@ -12,6 +12,7 @@ import { Bold, Italic, List, ListOrdered, ArrowLeftRight, Pin, Heading1, Heading
 import { ImageUploader } from '../ImageUploader';
 import { AITiptapToolbar } from '../AITiptapToolbar';
 import { renderToHtml, getEditorContent as getEditorContentFromUtils } from '@/lib/tiptap-utils';
+import { TwoColumnBlock } from '@/components/public/blocks/TwoColumnBlock';
 
 interface TwoColumnBlockEditorProps {
   data: TwoColumnBlockData;
