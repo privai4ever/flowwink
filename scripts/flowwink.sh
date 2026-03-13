@@ -661,9 +661,9 @@ echo ""
 
 while true; do
     if [ -n "$PROJECT_REF" ]; then
-        prompt="$(printf "\033[0;36mflowwink\033[0m \033[2m[${PROJECT_NAME}]\033[0m > ")"
+        prompt=$'\001\033[0;36m\002flowwink\001\033[0m\002 \001\033[2m\002['"${PROJECT_NAME}"$']\001\033[0m\002 > '
     else
-        prompt="$(printf "\033[0;36mflowwink\033[0m > ")"
+        prompt=$'\001\033[0;36m\002flowwink\001\033[0m\002 > '
     fi
 
     read -e -p "$prompt" input
