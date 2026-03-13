@@ -166,7 +166,7 @@ const router = createBrowserRouter([
       { path: "/admin/content-api", element: <ContentApiPage /> },
       { path: "/admin/campaigns", element: <ContentCampaignsPage /> },
       { path: "/admin/quick-start", element: <QuickStartPage /> },
-      { path: "/admin/new-site", element: <NewSitePage /> },
+      
       { path: "/admin/templates", element: withPageFallback(<TemplateGalleryPage />) },
       { path: "/admin/global-blocks", element: <GlobalBlocksPage /> },
       { path: "/admin/forms", element: <FormSubmissionsPage /> },
