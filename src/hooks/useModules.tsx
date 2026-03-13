@@ -240,6 +240,15 @@ export const defaultModulesSettings: ModulesSettings = {
     autonomy: 'config-required',
     adminUI: true,
   },
+  federation: {
+    enabled: false,
+    name: 'Federation',
+    description: 'Agent-to-Agent protocol — connect with other FlowWink instances and external agents',
+    icon: 'Network',
+    category: 'system',
+    autonomy: 'agent-capable',
+    adminUI: true,
+  },
 };
 
 // Map sidebar items to module IDs
