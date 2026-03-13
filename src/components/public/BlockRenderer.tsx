@@ -115,6 +115,7 @@ interface BlockRendererProps {
   block: ContentBlock;
   pageId?: string;
   index?: number;
+  resolvedBackground?: SectionBackground;
 }
 
 // Utility function to convert spacing to Tailwind classes for public rendering
