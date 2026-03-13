@@ -329,7 +329,7 @@ const trustcorpPages: StarterTemplate['pages'] = [
     slug: 'about',
     menu_order: 4,
     showInMenu: true,
-    meta: { description: 'Learn about our company and mission', showTitle: true, titleAlignment: 'center' },
+    meta: { description: 'Learn about our company and mission', showTitle: false, titleAlignment: 'center' },
     blocks: [
       { id: 'hero-1', type: 'hero', data: { title: 'About TrustCorp', subtitle: '25 years of delivering excellence', backgroundType: 'image', backgroundImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920', heightMode: '60vh', contentAlignment: 'center', overlayOpacity: 60 } },
       {
