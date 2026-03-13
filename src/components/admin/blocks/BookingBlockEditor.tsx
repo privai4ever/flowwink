@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { BookingBlockData, BookingService } from '@/types/cms';
 import { Calendar, ExternalLink, Code, Plus, Trash2, Webhook, Sparkles, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { BookingBlock } from '@/components/public/blocks/BookingBlock';
 
 interface BookingBlockEditorProps {
   data: BookingBlockData;
