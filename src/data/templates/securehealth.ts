@@ -105,7 +105,7 @@ const securehealthPages: StarterTemplate['pages'] = [
     slug: 'about',
     menu_order: 3,
     showInMenu: true,
-    meta: { description: 'Learn about our practice and our commitment to privacy', showTitle: true, titleAlignment: 'center' },
+    meta: { description: 'Learn about our practice and our commitment to privacy', showTitle: false, titleAlignment: 'center' },
     blocks: [
       { id: 'hero-1', type: 'hero', data: { title: 'About Our Practice', subtitle: '20+ years of compassionate, patient-centered care', backgroundType: 'image', backgroundImage: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1920', heightMode: '60vh', contentAlignment: 'center', overlayOpacity: 60 } },
       { id: 'two-col-1', type: 'two-column', data: { eyebrow: 'OUR PRACTICE', title: 'Our Story', titleSize: 'large', content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'For over 20 years, we\'ve been providing compassionate, patient-centered care to our community. Our team of board-certified specialists is committed to your health and well-being.' }] }, { type: 'paragraph', content: [{ type: 'text', text: 'We believe that quality healthcare should come with complete privacy. That\'s why we\'ve invested in state-of-the-art, on-premise technology that keeps your data exactly where it belongs.' }] }] }, imageSrc: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800', imageAlt: 'Medical team', imagePosition: 'right' } },
