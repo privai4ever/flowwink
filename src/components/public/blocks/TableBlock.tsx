@@ -18,7 +18,7 @@ export interface TableBlockData {
   title?: string;
   caption?: string;
   columns: TableColumn[];
-  rows: Record<string, string>[];
+  rows: (Record<string, string> | string[])[];
   variant: 'default' | 'striped' | 'bordered' | 'minimal';
   size: 'sm' | 'md' | 'lg';
   stickyHeader?: boolean;
@@ -121,28 +121,32 @@ export function TableBlock({ data }: TableBlockProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((row, rowIndex) => (
-                <TableRow
-                  key={rowIndex}
-                  className={cn(
-                    highlightOnHover && 'hover:bg-muted/50',
-                    variant === 'striped' && rowIndex % 2 === 1 && 'bg-muted/30',
-                    variant === 'bordered' && 'border-b'
-                  )}
-                >
-                  {columns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      className={cn(
-                        cellPaddingClasses[size],
-                        getAlignClass(column.align)
-                      )}
-                    >
-                      {row[column.id] || ''}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              {rows.map((row, rowIndex) => {
+                // Support both array and object row formats
+                const isArrayRow = Array.isArray(row);
+                return (
+                  <TableRow
+                    key={rowIndex}
+                    className={cn(
+                      highlightOnHover && 'hover:bg-muted/50',
+                      variant === 'striped' && rowIndex % 2 === 1 && 'bg-muted/30',
+                      variant === 'bordered' && 'border-b'
+                    )}
+                  >
+                    {columns.map((column, colIndex) => (
+                      <TableCell
+                        key={column.id}
+                        className={cn(
+                          cellPaddingClasses[size],
+                          getAlignClass(column.align)
+                        )}
+                      >
+                        {isArrayRow ? (row as string[])[colIndex] || '' : (row as Record<string, string>)[column.id] || ''}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
               {rows.length === 0 && (
                 <TableRow>
                   <TableCell
