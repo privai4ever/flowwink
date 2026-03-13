@@ -91,7 +91,7 @@ const securehealthPages: StarterTemplate['pages'] = [
     slug: 'services',
     menu_order: 2,
     showInMenu: true,
-    meta: { description: 'Comprehensive healthcare services for you and your family', showTitle: true, titleAlignment: 'center' },
+    meta: { description: 'Comprehensive healthcare services for you and your family', showTitle: false, titleAlignment: 'center' },
     blocks: [
       { id: 'hero-1', type: 'hero', data: { title: 'Our Medical Services', subtitle: 'Comprehensive care for every stage of life', backgroundType: 'color', heightMode: 'auto', contentAlignment: 'center', overlayOpacity: 0 } },
       { id: 'link-grid-1', type: 'link-grid', data: { columns: 3, links: [{ icon: 'HeartPulse', title: 'Primary Care', description: 'General health checkups and preventive care', url: '/services' }, { icon: 'Stethoscope', title: 'Specialists', description: 'Expert care across all medical fields', url: '/services' }, { icon: 'Baby', title: 'Pediatrics', description: 'Caring for children of all ages', url: '/services' }, { icon: 'Brain', title: 'Mental Health', description: 'Private counseling and therapy', url: '/services' }, { icon: 'Activity', title: 'Diagnostics', description: 'Advanced testing and imaging', url: '/services' }, { icon: 'Pill', title: 'Pharmacy', description: 'On-site prescription services', url: '/contact' }] } },
