@@ -788,7 +788,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             contentAlignment: 'center',
             overlayOpacity: 0,
             primaryButton: { text: 'Try It Live', url: '/demo' },
-            secondaryButton: { text: 'Self-Host', url: 'https://github.com/flowwink/flowwink' },
+            secondaryButton: { text: 'Self-Host', url: 'https://github.com/magnusfroste/flowwink' },
           },
         },
         // TABS — For Founders / Marketing / Compliance
