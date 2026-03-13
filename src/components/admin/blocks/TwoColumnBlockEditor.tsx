@@ -421,7 +421,12 @@ export function TwoColumnBlockEditor({ data, isEditing, onChange }: TwoColumnBlo
     );
   }
 
-  // Preview mode - match public TwoColumnBlock layout
+  // Preview mode — use the public block for text-text layouts, custom preview for image+text
+  const isTextTextLayout = !!(data.leftColumn || data.rightColumn);
+  if (isTextTextLayout) {
+    return <TwoColumnBlock data={data} />;
+  }
+
   const imageFirst = data.imagePosition === 'left';
   const htmlContent = renderToHtml(data.content);
   const hasHeader = data.eyebrow || data.title;
