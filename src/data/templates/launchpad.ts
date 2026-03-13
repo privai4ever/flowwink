@@ -276,7 +276,7 @@ const launchpadPages: StarterTemplate['pages'] = [
     showInMenu: true,
     meta: {
       description: 'Explore our powerful features designed for modern teams',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -390,7 +390,7 @@ const launchpadPages: StarterTemplate['pages'] = [
     showInMenu: true,
     meta: {
       description: 'Simple, transparent pricing that scales with you',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -522,7 +522,7 @@ const launchpadPages: StarterTemplate['pages'] = [
     showInMenu: true,
     meta: {
       description: 'Get in touch with our team',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -712,7 +712,7 @@ const launchpadPages: StarterTemplate['pages'] = [
     showInMenu: false,
     meta: {
       description: 'Get answers to frequently asked questions about LaunchPad',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [

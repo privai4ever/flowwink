@@ -47,7 +47,7 @@ export const BLANK_TEMPLATE: StarterTemplate = {
     },
     {
       title: 'Contact', slug: 'contact', menu_order: 2, showInMenu: true,
-      meta: { description: 'Get in touch with us', showTitle: true, titleAlignment: 'center' },
+      meta: { description: 'Get in touch with us', showTitle: false, titleAlignment: 'center' },
       blocks: [
         { id: 'hero-1', type: 'hero', data: { title: 'Contact Us', subtitle: 'We\'d love to hear from you.', backgroundType: 'color', heightMode: 'auto', contentAlignment: 'center' } },
         { id: 'form-1', type: 'form', data: { title: 'Send us a message', submitButtonText: 'Send', successMessage: 'Thanks! We\'ll be in touch soon.', fields: [

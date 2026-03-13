@@ -275,7 +275,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
     showInMenu: true,
     meta: {
       description: 'Calculate how much your agency can save by switching to FlowWink. Compare costs vs Webflow, Squarespace, and other platforms.',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -391,7 +391,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
     showInMenu: true,
     meta: {
       description: 'Learn how FlowWink works for agencies. From deployment to client handoff in 5 minutes.',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -499,7 +499,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
     showInMenu: true,
     meta: {
       description: 'FlowWink features for agencies - Visual editor, Content API, autonomous AI agent, blog, forms, CRM, and more.',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -597,7 +597,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
     showInMenu: true,
     meta: {
       description: 'FlowWink pricing for agencies - Self-host free forever, or choose managed hosting with priority support.',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -690,7 +690,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
     showInMenu: true,
     meta: {
       description: 'Contact the FlowWink team - demos, partnerships, and support for agencies.',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [

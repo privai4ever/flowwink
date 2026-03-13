@@ -187,7 +187,7 @@ const trustcorpPages: StarterTemplate['pages'] = [
     showInMenu: true,
     meta: {
       description: 'Comprehensive enterprise services tailored to your needs',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -282,7 +282,7 @@ const trustcorpPages: StarterTemplate['pages'] = [
     slug: 'case-studies',
     menu_order: 3,
     showInMenu: true,
-    meta: { description: 'Real results from real clients', showTitle: true, titleAlignment: 'center' },
+    meta: { description: 'Real results from real clients', showTitle: false, titleAlignment: 'center' },
     blocks: [
       { id: 'hero-1', type: 'hero', data: { title: 'Client Success Stories', subtitle: 'Real results from industry leaders', backgroundType: 'color', heightMode: 'auto', contentAlignment: 'center', overlayOpacity: 0 } },
       {
@@ -329,7 +329,7 @@ const trustcorpPages: StarterTemplate['pages'] = [
     slug: 'about',
     menu_order: 4,
     showInMenu: true,
-    meta: { description: 'Learn about our company and mission', showTitle: true, titleAlignment: 'center' },
+    meta: { description: 'Learn about our company and mission', showTitle: false, titleAlignment: 'center' },
     blocks: [
       { id: 'hero-1', type: 'hero', data: { title: 'About TrustCorp', subtitle: '25 years of delivering excellence', backgroundType: 'image', backgroundImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920', heightMode: '60vh', contentAlignment: 'center', overlayOpacity: 60 } },
       {
@@ -391,7 +391,7 @@ const trustcorpPages: StarterTemplate['pages'] = [
     slug: 'contact',
     menu_order: 5,
     showInMenu: true,
-    meta: { description: 'Connect with our enterprise team', showTitle: true, titleAlignment: 'center' },
+    meta: { description: 'Connect with our enterprise team', showTitle: false, titleAlignment: 'center' },
     blocks: [
       { id: 'hero-1', type: 'hero', data: { title: 'Contact Our Team', subtitle: 'Let\'s discuss how we can help your organization', backgroundType: 'color', heightMode: 'auto', contentAlignment: 'center', overlayOpacity: 0 } },
       { id: 'chat-1', type: 'chat-launcher', data: { title: 'Private Enterprise Assistant', subtitle: 'All conversations are processed on your infrastructure', placeholder: 'Ask about our enterprise solutions...', showQuickActions: true, quickActionCount: 4, variant: 'card' } },
@@ -515,7 +515,7 @@ const trustcorpPages: StarterTemplate['pages'] = [
     slug: 'support',
     menu_order: 6,
     showInMenu: true,
-    meta: { description: 'Enterprise support center - Get help with our solutions and services', showTitle: true, titleAlignment: 'center' },
+    meta: { description: 'Enterprise support center - Get help with our solutions and services', showTitle: false, titleAlignment: 'center' },
     blocks: [
       { id: 'hero-support', type: 'hero', data: { title: 'Enterprise Support Center', subtitle: 'Get the help you need from our dedicated enterprise team', backgroundType: 'color', heightMode: 'auto', contentAlignment: 'center', overlayOpacity: 0 } },
       {

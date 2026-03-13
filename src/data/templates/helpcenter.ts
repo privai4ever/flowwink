@@ -152,7 +152,7 @@ const hybridHelpPages: TemplatePage[] = [
     showInMenu: true,
     meta: {
       description: 'Get in touch with our support team.',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [

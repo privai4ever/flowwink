@@ -370,7 +370,7 @@ const serviceProPages: TemplatePage[] = [
     showInMenu: true,
     meta: {
       description: 'Explore our range of professional services',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -497,7 +497,7 @@ const serviceProPages: TemplatePage[] = [
     showInMenu: true,
     meta: {
       description: 'Learn about our team and mission',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
@@ -559,7 +559,7 @@ const serviceProPages: TemplatePage[] = [
     showInMenu: true,
     meta: {
       description: 'Get in touch with our team',
-      showTitle: true,
+      showTitle: false,
       titleAlignment: 'center',
     },
     blocks: [
