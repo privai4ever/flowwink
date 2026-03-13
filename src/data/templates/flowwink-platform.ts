@@ -1180,7 +1180,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             buttonText: 'See It Live',
             buttonUrl: '/demo',
             secondaryButtonText: 'Self-Host Free',
-            secondaryButtonUrl: 'https://github.com/flowwink/flowwink',
+            secondaryButtonUrl: 'https://github.com/magnusfroste/flowwink',
             gradient: true,
           },
         },
