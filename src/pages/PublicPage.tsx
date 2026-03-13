@@ -360,13 +360,17 @@ export default function PublicPage() {
             (() => {
               // Auto-alternate backgrounds for non-full-bleed blocks
               const FULL_BLEED = new Set(['hero', 'parallax-section', 'announcement-bar', 'map', 'marquee', 'header', 'footer', 'popup', 'notification-toast', 'floating-cta', 'chat-launcher', 'section-divider', 'featured-carousel']);
+              // Blocks that have their own visual background/styling — skip auto-bg to avoid "box on box"
+              const SELF_STYLED = new Set(['cta', 'newsletter', 'pricing', 'form', 'booking', 'smart-booking', 'comparison', 'bento-grid', 'social-proof', 'badge']);
               let contentIndex = 0;
               return pageData.content_json.map((block, index) => {
                 try {
                   const isFullBleed = FULL_BLEED.has(block.type);
+                  const isSelfStyled = SELF_STYLED.has(block.type);
                   let resolvedBg: SectionBackground | undefined;
                   if (!isFullBleed && !block.sectionBackground) {
-                    resolvedBg = contentIndex % 2 === 1 ? 'muted' : 'none';
+                    // Self-styled blocks participate in the alternation count but don't get a bg applied
+                    resolvedBg = isSelfStyled ? undefined : (contentIndex % 2 === 1 ? 'muted' : 'none');
                     contentIndex++;
                   } else if (!isFullBleed) {
                     contentIndex++;
