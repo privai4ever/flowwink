@@ -31,9 +31,7 @@ import {
   X,
   Home
 } from "lucide-react";
-import { TemplateBlockPreview } from "./TemplateBlockPreview";
 import { ContentBlock } from "@/types/cms";
-import { TemplateBrandingProvider } from "./TemplateBrandingProvider";
 
 interface TemplatePreviewProps {
   template: StarterTemplate | null;
