@@ -602,7 +602,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
               { id: 'ch-email', icon: 'Mail', title: 'Email Campaigns', description: 'Creates newsletters, writes subject lines, segments audiences, sends at optimal times. Full GDPR compliance.' },
               { id: 'ch-booking', icon: 'Calendar', title: 'Bookings', description: 'Schedules meetings, sends confirmations and reminders, handles rescheduling. Connects calendar to CRM.' },
               { id: 'ch-ecommerce', icon: 'ShoppingCart', title: 'E-commerce', description: 'Manages products, processes orders, handles Stripe checkout. Tracks revenue and conversion.' },
-              { id: 'ch-analytics', icon: 'BarChart3', title: 'Analytics & Reflection', description: 'Monitors traffic, analyzes trends, identifies opportunities. Generates reports and suggests improvements.' },
+              { id: 'ch-analytics', icon: 'Activity', title: 'Analytics & Reflection', description: 'Monitors traffic, analyzes trends, identifies opportunities. Generates reports and suggests improvements.' },
             ],
             columns: 3,
             layout: 'grid',
