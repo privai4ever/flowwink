@@ -91,7 +91,7 @@ export default function TemplateExportPage() {
     toast.success(`Template "${template.name}" imported successfully!`);
     // Store template in sessionStorage for the new site page to pick up
     sessionStorage.setItem('pendingTemplate', JSON.stringify(template));
-    navigate('/admin/new-site');
+    navigate('/admin/templates');
   };
 
   const getCategoryIcon = (category: string) => {
