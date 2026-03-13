@@ -368,7 +368,7 @@ export default function PublicPage() {
                 // Card/container blocks that render their own framing
                 'features', 'stats', 'testimonials', 'team', 'tabs', 'accordion',
                 'timeline', 'resume-matcher', 'quick-links', 'two-column', 'logos',
-                'table', 'countdown',
+                'table', 'countdown', 'products', 'cart', 'webinar', 'article-grid',
               ]);
               let contentIndex = 0;
               return pageData.content_json.map((block, index) => {
