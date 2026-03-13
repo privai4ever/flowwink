@@ -589,18 +589,6 @@ export const consultAgencyTemplate: StarterTemplate = {
           },
         },
 
-        // RESUME MATCHER — AI-powered consultant search
-        {
-          id: 'resume-matcher-consultants',
-          type: 'resume-matcher',
-          data: {
-            title: 'Paste Your Assignment Brief',
-            subtitle: 'Describe the role, tech stack, and context. FlowPilot reads it and presents the consultants from our network who match best — with a score, reasoning, and gap analysis.',
-            placeholder: 'E.g. "We need a senior backend developer with Java and Spring Boot experience for a 6-month fintech project in Stockholm. Team of 8, agile, some on-site required..."',
-            buttonText: 'Find My Match',
-          },
-        },
-
         // CHAT — find the right match
         {
           id: 'chat-consultant-finder',
