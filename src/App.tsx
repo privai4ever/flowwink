@@ -194,6 +194,7 @@ const router = createBrowserRouter([
       { path: "/admin/live-support", element: <LiveSupportPage /> },
       { path: "/admin/template-export", element: <TemplateExportPage /> },
       { path: "/admin/developer-tools", element: <DeveloperToolsPage /> },
+      { path: "/admin/template-live-preview", element: <TemplateLivePreviewPage /> },
       { path: "/admin/webinars", element: <WebinarsPage /> },
       { path: "/admin/sales-intelligence", element: <SalesIntelligencePage /> },
       { path: "/admin/resume", element: <ConsultantProfilesPage /> },
