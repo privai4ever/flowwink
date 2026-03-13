@@ -303,6 +303,8 @@ export interface BlockAnimation {
   staggerIndex?: number; // 2026: For staggered children animations
 }
 
+export type SectionBackground = 'none' | 'muted' | 'accent' | 'dark';
+
 export interface ContentBlock {
   id: string;
   type: ContentBlockType;
@@ -313,6 +315,8 @@ export interface ContentBlock {
   anchorId?: string;
   /** Hide block from public site without deleting it */
   hidden?: boolean;
+  /** Full-width section background style */
+  sectionBackground?: SectionBackground;
 }
 
 export type HeroLayout = 'centered' | 'split-left' | 'split-right';

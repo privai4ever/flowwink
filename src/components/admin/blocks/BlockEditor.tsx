@@ -649,6 +649,17 @@ export function BlockEditor({ blocks, onChange, canEdit }: BlockEditorProps) {
     [blocks, onChange]
   );
 
+  const handleUpdateBlockBackground = useCallback(
+    (blockId: string, sectionBackground: import('@/types/cms').SectionBackground) => {
+      onChange(
+        blocks.map((block) =>
+          block.id === blockId ? { ...block, sectionBackground } : block
+        )
+      );
+    },
+    [blocks, onChange]
+  );
+
   const handleDeleteBlock = (blockId: string) => {
     onChange(blocks.filter((block) => block.id !== blockId));
     if (editingBlockId === blockId) {
@@ -1160,6 +1171,7 @@ export function BlockEditor({ blocks, onChange, canEdit }: BlockEditorProps) {
               onAnimationChange={(animation) => handleUpdateBlockAnimation(block.id, animation)}
               onAnchorChange={(anchorId) => handleUpdateBlockAnchor(block.id, anchorId)}
               onToggleHidden={(hidden) => handleToggleHidden(block.id, hidden)}
+              onBackgroundChange={(bg) => handleUpdateBlockBackground(block.id, bg)}
               canEdit={canEdit}
             >
               {renderBlockContent(block, editingBlockId === block.id)}

@@ -1,4 +1,4 @@
-import { ContentBlock, BlockSpacing, SpacingSize, AnimationType, PopupBlockData, BookingBlockData, PricingBlockData, TestimonialsBlockData, TeamBlockData, LogosBlockData, ComparisonBlockData, FeaturesBlockData } from '@/types/cms';
+import { ContentBlock, BlockSpacing, SpacingSize, AnimationType, SectionBackground, PopupBlockData, BookingBlockData, PricingBlockData, TestimonialsBlockData, TeamBlockData, LogosBlockData, ComparisonBlockData, FeaturesBlockData } from '@/types/cms';
 import { AnimatedBlock } from './AnimatedBlock';
 import { cn } from '@/lib/utils';
 import {
@@ -115,6 +115,7 @@ interface BlockRendererProps {
   block: ContentBlock;
   pageId?: string;
   index?: number;
+  resolvedBackground?: SectionBackground;
 }
 
 // Utility function to convert spacing to Tailwind classes for public rendering
@@ -148,7 +149,27 @@ function getSpacingClasses(spacing?: BlockSpacing): string {
   return classes.join(' ');
 }
 
-export function BlockRenderer({ block, pageId, index = 0 }: BlockRendererProps) {
+// Full-bleed block types that should NOT get container wrapping
+const FULL_BLEED_TYPES = new Set([
+  'hero', 'parallax-section', 'announcement-bar', 'map', 'marquee',
+  'header', 'footer', 'popup', 'notification-toast', 'floating-cta',
+  'chat-launcher', 'section-divider', 'featured-carousel',
+]);
+
+function getSectionBackgroundClasses(bg?: SectionBackground): { section: string; text: string } {
+  switch (bg) {
+    case 'muted':
+      return { section: 'bg-muted/40', text: '' };
+    case 'accent':
+      return { section: 'bg-accent/10', text: '' };
+    case 'dark':
+      return { section: 'bg-foreground', text: 'text-background' };
+    default:
+      return { section: '', text: '' };
+  }
+}
+
+export function BlockRenderer({ block, pageId, index = 0, resolvedBackground }: BlockRendererProps) {
   // Skip hidden blocks on public site
   if (block.hidden) return null;
 
@@ -288,18 +309,45 @@ export function BlockRenderer({ block, pageId, index = 0 }: BlockRendererProps) 
   };
 
   const content = renderBlock();
-  
-  // Get anchor ID if set
   const anchorId = block.anchorId;
+  const isFullBleed = FULL_BLEED_TYPES.has(block.type);
   
-  // Wrap with spacing and anchor ID if any is applied
-  const wrappedContent = (spacingClasses || anchorId) ? (
-    <div id={anchorId} className={spacingClasses}>{content}</div>
-  ) : content;
+  // Determine background: explicit on block, or resolved from parent (auto-alternate)
+  const effectiveBg = block.sectionBackground || resolvedBackground || 'none';
+  const { section: bgClass, text: textClass } = getSectionBackgroundClasses(effectiveBg);
+  const hasSectionWrapper = bgClass || !isFullBleed;
+
+  // Build the inner content with optional container
+  const innerContent = isFullBleed ? (
+    <>{content}</>
+  ) : (
+    <div className={cn('container mx-auto max-w-6xl px-4 md:px-6', spacingClasses)}>
+      {content}
+    </div>
+  );
+
+  // Wrap in section with background and generous padding
+  const sectionContent = hasSectionWrapper ? (
+    <section
+      id={anchorId}
+      className={cn(
+        'w-full',
+        bgClass,
+        textClass,
+        !isFullBleed && 'py-12 md:py-16 lg:py-20',
+      )}
+    >
+      {innerContent}
+    </section>
+  ) : (
+    <div id={anchorId} className={spacingClasses}>
+      {content}
+    </div>
+  );
 
   // Skip animation for hero/separator unless explicitly configured
   if (skipAnimation || animationType === 'none') {
-    return wrappedContent;
+    return sectionContent;
   }
 
   return (
@@ -308,7 +356,7 @@ export function BlockRenderer({ block, pageId, index = 0 }: BlockRendererProps) 
       speed={animationSpeed}
       delay={animationDelay}
     >
-      {wrappedContent}
+      {sectionContent}
     </AnimatedBlock>
   );
 }
