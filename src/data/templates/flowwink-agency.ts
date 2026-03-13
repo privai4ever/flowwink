@@ -486,7 +486,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
           buttonText: 'Try Product Demo',
           buttonUrl: 'https://demo.flowwink.com',
           secondaryButtonText: 'View on GitHub',
-          secondaryButtonUrl: 'https://github.com/flowwink/flowwink',
+          secondaryButtonUrl: 'https://github.com/magnusfroste/flowwink',
           gradient: true,
         },
       },
