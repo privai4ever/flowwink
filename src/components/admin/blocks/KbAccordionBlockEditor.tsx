@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { HelpCircle } from 'lucide-react';
+import { KbAccordionBlock } from '@/components/public/blocks/KbAccordionBlock';
 import type { KbAccordionBlockData } from '@/components/public/blocks/KbAccordionBlock';
 
 interface KbAccordionBlockEditorProps {
@@ -30,21 +30,7 @@ export function KbAccordionBlockEditor({ data, onChange, isEditing }: KbAccordio
 
   // Preview mode
   if (!isEditing) {
-    return (
-      <div className="p-6 text-center border-2 border-dashed rounded-lg bg-muted/30">
-        <HelpCircle className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-        <h3 className="font-medium text-lg">{data.title || "FAQ Accordion"}</h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          {data.maxItems || 10} items • {data.variant || 'default'} style
-          {data.categorySlug && ` • filtered`}
-        </p>
-        <div className="mt-4 max-w-xs mx-auto space-y-1">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 rounded border bg-background" />
-          ))}
-        </div>
-      </div>
-    );
+    return <KbAccordionBlock data={data} />;
   }
 
   const handleChange = (field: keyof KbAccordionBlockData, value: unknown) => {
