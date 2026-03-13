@@ -31,7 +31,7 @@ import {
   X,
   Home
 } from "lucide-react";
-import { ContentBlock } from "@/types/cms";
+
 
 interface TemplatePreviewProps {
   template: StarterTemplate | null;
