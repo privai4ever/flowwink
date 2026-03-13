@@ -571,7 +571,7 @@ export function TemplatePreviewDialog({
               />
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         <Separator />
 
