@@ -29,6 +29,7 @@ function LogoImage({
   variant: string;
 }) {
   const [failed, setFailed] = useState(false);
+  const showText = !logo || failed;
 
   const sizeClasses = {
     sm: 'h-12 max-w-[160px]',
@@ -36,11 +37,17 @@ function LogoImage({
     lg: 'h-24 max-w-[300px]',
   };
 
-  const content = failed ? (
+  const textSizeClasses = {
+    sm: 'text-sm',
+    md: 'text-base',
+    lg: 'text-xl',
+  };
+
+  const content = showText ? (
     <span
       className={cn(
-        'font-semibold tracking-tight text-foreground/60 transition-all duration-300',
-        size === 'sm' ? 'text-sm' : size === 'lg' ? 'text-lg' : 'text-base',
+        'font-semibold tracking-tight text-foreground/60 transition-all duration-300 whitespace-nowrap',
+        textSizeClasses[size as keyof typeof textSizeClasses] || textSizeClasses.md,
         variant === 'grayscale' && 'opacity-50 hover:opacity-100',
         url && 'hover:scale-105 inline-block'
       )}
