@@ -11,6 +11,7 @@ import { CartIndicator } from './CartIndicator';
 import { AccountIndicator } from './AccountIndicator';
 import { useHeaderBlock, defaultHeaderData } from '@/hooks/useGlobalBlocks';
 import { useBlogSettings } from '@/hooks/useSiteSettings';
+import { useIsModuleEnabled } from '@/hooks/useModules';
 import type { HeaderNavItem } from '@/types/cms';
 
 interface NavPage {
