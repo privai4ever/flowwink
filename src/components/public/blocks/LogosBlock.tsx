@@ -31,9 +31,9 @@ function LogoImage({
   const [failed, setFailed] = useState(false);
 
   const sizeClasses = {
-    sm: 'h-10 max-w-[140px]',
-    md: 'h-14 max-w-[200px]',
-    lg: 'h-20 max-w-[260px]',
+    sm: 'h-12 max-w-[160px]',
+    md: 'h-16 max-w-[220px]',
+    lg: 'h-24 max-w-[300px]',
   };
 
   const content = failed ? (
