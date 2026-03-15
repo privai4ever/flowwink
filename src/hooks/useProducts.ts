@@ -85,7 +85,7 @@ export function useCreateProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (product: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'category_id' | 'stock_quantity' | 'track_inventory' | 'low_stock_threshold' | 'allow_backorder'> & Partial<Pick<Product, 'category_id' | 'stock_quantity' | 'track_inventory' | 'low_stock_threshold' | 'allow_backorder'>>) => {
       const { data, error } = await supabase
         .from('products')
         .insert(product)
