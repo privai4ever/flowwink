@@ -551,6 +551,7 @@ export function useTemplateInstaller() {
     createdPageIds,
     existingContent,
     hasExistingContent,
+    installedTemplate,
     install,
     reset,
   };
