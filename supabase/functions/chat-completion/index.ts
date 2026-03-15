@@ -672,18 +672,20 @@ serve(async (req) => {
     // Check-in mode: fetch consultant profile and build interview system prompt
     const isCheckinMode = mode === 'checkin' && !!checkinId;
     if (isCheckinMode) {
-      const { data: kbArticle } = await supabase
-        .from('kb_articles')
-        .select('title, question, answer_text')
+      const { data: consultant } = await supabase
+        .from('consultant_profiles')
+        .select('name, title, skills, summary, availability, experience_years, bio')
         .eq('id', checkinId)
         .maybeSingle();
 
-      const consultantName = kbArticle?.title || 'consultant';
-      const existingProfile = kbArticle?.answer_text || 'No existing profile information.';
+      const consultantName = consultant?.name || 'consultant';
+      const existingProfile = consultant
+        ? `Name: ${consultant.name}\nTitle: ${consultant.title || 'N/A'}\nSkills: ${(consultant.skills || []).join(', ')}\nExperience: ${consultant.experience_years || 0} years\nAvailability: ${consultant.availability || 'unknown'}\nSummary: ${consultant.summary || 'No summary yet.'}\nBio: ${consultant.bio || 'N/A'}`
+        : 'No existing profile found.';
 
       systemPrompt = `You are FlowPilot, conducting a friendly professional check-in interview with ${consultantName}.
 
-Your goal is to update their knowledge base profile by asking conversational questions. Keep it natural and brief — this is a quick check-in, not a formal interview.
+Your goal is to update their consultant profile by asking conversational questions. Keep it natural and brief — this is a quick check-in, not a formal interview.
 
 Current profile:
 ${existingProfile}
@@ -692,9 +694,9 @@ Ask about (one at a time, conversationally):
 1. Their most recent project or assignment (what, where, duration, tech stack)
 2. What went particularly well
 3. Any interesting challenges
-4. Current availability
+4. Current availability and preferred next role
 
-After 3–5 exchanges when you have enough information, call the save_kb_article tool with a comprehensive updated profile summary. Then confirm to the consultant that their profile has been updated.
+After 3–5 exchanges when you have enough information, call the save_consultant_profile tool with the updated summary, skills array, availability, and title. Then confirm to the consultant that their profile has been updated.
 
 IMPORTANT: Always respond in the same language the consultant writes in.`;
     }
@@ -715,9 +717,9 @@ IMPORTANT: Always respond in the same language the consultant writes in.`;
       firecrawlIntegrationEnabled: aiIntegrations?.firecrawl?.enabled,
     });
     
-    // Always add save_kb_article in check-in mode (requires tool calling support)
+    // Always add save_consultant_profile in check-in mode (requires tool calling support)
     if (isCheckinMode && toolCallingSupported) {
-      tools.push(AVAILABLE_TOOLS.save_kb_article);
+      tools.push(AVAILABLE_TOOLS.save_consultant_profile);
     }
 
     if (settings?.toolCallingEnabled && toolCallingSupported) {
