@@ -417,17 +417,13 @@ export async function saveHeartbeatState(supabase: any, state: HeartbeatState): 
 // ─── Atomic Task Checkout ─────────────────────────────────────────────────────
 
 export async function checkoutObjective(supabase: any, objectiveId: string): Promise<boolean> {
-  // Atomic: only succeeds if not locked or lock is stale (>30 min)
-  const staleThreshold = new Date(Date.now() - 30 * 60_000).toISOString();
-  const { data, error } = await supabase
-    .from('agent_objectives')
-    .update({ locked_by: 'heartbeat', locked_at: new Date().toISOString() })
-    .eq('id', objectiveId)
-    .or(`locked_by.is.null,locked_at.lt.${staleThreshold}`)
-    .select('id')
-    .maybeSingle();
+  // Atomic checkout via database function — prevents race conditions
+  const { data, error } = await supabase.rpc('checkout_objective', {
+    p_objective_id: objectiveId,
+    p_locked_by: 'heartbeat',
+  });
 
-  return !error && !!data;
+  return !error && data === true;
 }
 
 export async function releaseObjective(supabase: any, objectiveId: string): Promise<void> {
