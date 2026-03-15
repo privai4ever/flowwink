@@ -2506,6 +2506,9 @@ async function logActivity(
 const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   // Content & Pages
   write_blog_post: ['blog', 'content', 'publish', 'article'],
+  manage_blog_posts: ['blog', 'content', 'publish', 'article', 'post'],
+  manage_blog_categories: ['blog', 'category', 'tag', 'content'],
+  browse_blog: ['blog', 'content'],
   manage_page: ['page', 'content', 'website', 'publish', 'landing'],
   manage_page_blocks: ['page', 'block', 'content', 'website', 'design', 'layout'],
   manage_global_blocks: ['header', 'footer', 'navigation', 'branding', 'global'],
@@ -2513,9 +2516,11 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   // Communication
   send_newsletter: ['newsletter', 'email', 'subscriber', 'engagement'],
   execute_newsletter_send: ['newsletter', 'email', 'campaign', 'engagement'],
+  manage_newsletter_subscribers: ['newsletter', 'subscriber', 'email', 'list'],
   manage_webinar: ['webinar', 'event', 'presentation', 'training'],
   // CRM & Sales
   add_lead: ['lead', 'crm', 'sales', 'pipeline'],
+  manage_leads: ['lead', 'crm', 'sales', 'pipeline', 'score'],
   qualify_lead: ['lead', 'qualify', 'score', 'crm', 'sales'],
   enrich_company: ['company', 'enrich', 'crm', 'data'],
   manage_company: ['company', 'crm', 'account', 'client'],
@@ -2523,12 +2528,20 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   prospect_research: ['prospect', 'research', 'sales', 'lead'],
   prospect_fit_analysis: ['prospect', 'fit', 'sales', 'pipeline'],
   // Commerce
+  browse_products: ['product', 'commerce', 'shop', 'catalog'],
   manage_product: ['product', 'commerce', 'pricing', 'catalog', 'shop'],
+  manage_inventory: ['inventory', 'stock', 'product', 'commerce'],
+  manage_orders: ['order', 'commerce', 'revenue', 'fulfillment'],
   manage_form_submissions: ['form', 'submission', 'lead', 'feedback'],
-  create_campaign: ['campaign', 'marketing', 'engagement'],
+  // Booking
   book_appointment: ['booking', 'appointment', 'calendar'],
+  check_availability: ['booking', 'availability', 'calendar'],
+  browse_services: ['booking', 'service', 'catalog'],
+  manage_booking_availability: ['booking', 'availability', 'schedule'],
+  manage_bookings: ['booking', 'appointment', 'calendar', 'schedule'],
   // Analytics & Research
   analyze_analytics: ['analytics', 'traffic', 'performance', 'growth'],
+  analyze_chat_feedback: ['chat', 'feedback', 'satisfaction', 'support'],
   weekly_business_digest: ['digest', 'report', 'overview'],
   search_web: ['research', 'content'],
   research_content: ['content', 'research', 'blog', 'topic'],
@@ -2541,6 +2554,10 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   // Resume & Talent
   manage_consultant_profile: ['resume', 'consultant', 'profile', 'talent'],
   match_consultant: ['resume', 'consultant', 'match', 'talent', 'recruitment'],
+  // Media & System
+  media_browse: ['media', 'image', 'file', 'storage', 'cleanup'],
+  manage_site_settings: ['settings', 'config', 'module', 'system'],
+  manage_automations: ['automation', 'cron', 'trigger', 'workflow'],
   // Utilities
   extract_pdf_text: ['pdf', 'document', 'extract', 'content', 'resume', 'report', 'contract'],
   competitor_monitor: ['competitor', 'market', 'positioning', 'content', 'intelligence'],
