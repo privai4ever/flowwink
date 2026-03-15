@@ -1381,12 +1381,87 @@ async function executeBlogAction(
     excerpt = plainText.substring(0, 160) + (plainText.length > 160 ? '...' : '');
   }
 
-  const { data, error } = await supabase.from('blog_posts').insert({
+  // --- Auto-fetch featured image ---
+  let featuredImage: string | null = null;
+  let featuredImageAlt: string | null = null;
+  const imageQuery = topic || title;
+
+  // Strategy 1: Unsplash (free, fast, high quality photos)
+  const unsplashKey = Deno.env.get('UNSPLASH_ACCESS_KEY');
+  if (!featuredImage && unsplashKey) {
+    try {
+      const searchUrl = new URL('https://api.unsplash.com/search/photos');
+      searchUrl.searchParams.set('query', imageQuery);
+      searchUrl.searchParams.set('per_page', '1');
+      searchUrl.searchParams.set('orientation', 'landscape');
+      const uResp = await fetch(searchUrl.toString(), {
+        headers: { 'Authorization': `Client-ID ${unsplashKey}`, 'Accept-Version': 'v1' },
+      });
+      if (uResp.ok) {
+        const uData = await uResp.json();
+        const photo = uData.results?.[0];
+        if (photo) {
+          featuredImage = photo.urls?.regular;
+          featuredImageAlt = photo.alt_description || photo.description || `Photo by ${photo.user?.name} on Unsplash`;
+          console.log(`[write_blog_post] Unsplash image found: ${featuredImage}`);
+        }
+      }
+    } catch (e) {
+      console.error('[write_blog_post] Unsplash fetch failed:', e);
+    }
+  }
+
+  // Strategy 2: Gemini image generation via Lovable AI gateway
+  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+  if (!featuredImage && lovableApiKey) {
+    try {
+      const imgResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${lovableApiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-image',
+          messages: [{ role: 'user', content: `Generate a professional, modern blog header image for an article titled "${title}" about "${topic}". The image should be visually striking, landscape oriented, suitable as a blog featured image. No text in the image.` }],
+          modalities: ['image', 'text'],
+        }),
+      });
+      if (imgResp.ok) {
+        const imgData = await imgResp.json();
+        const base64Url = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        if (base64Url) {
+          // Upload base64 image to Supabase storage
+          const base64Data = base64Url.replace(/^data:image\/\w+;base64,/, '');
+          const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+          const fileName = `blog/${slug}-${Date.now()}.png`;
+          const { error: uploadErr } = await supabase.storage
+            .from('cms-images')
+            .upload(fileName, imageBytes, { contentType: 'image/png', upsert: true });
+          if (!uploadErr) {
+            const { data: urlData } = supabase.storage.from('cms-images').getPublicUrl(fileName);
+            featuredImage = urlData.publicUrl;
+            featuredImageAlt = `Featured image for ${title}`;
+            console.log(`[write_blog_post] Gemini image generated and uploaded: ${featuredImage}`);
+          } else {
+            console.error('[write_blog_post] Image upload failed:', uploadErr.message);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[write_blog_post] Gemini image generation failed:', e);
+    }
+  }
+
+  const insertData: Record<string, unknown> = {
     title, slug, status: 'draft', excerpt, content_json: tiptapDoc,
     meta_json: { tone, language, generated_by: 'flowpilot', topic },
-  }).select().single();
+  };
+  if (featuredImage) {
+    insertData.featured_image = featuredImage;
+    insertData.featured_image_alt = featuredImageAlt;
+  }
+
+  const { data, error } = await supabase.from('blog_posts').insert(insertData).select().single();
   if (error) throw new Error(`Blog insert failed: ${error.message}`);
-  return { blog_post_id: data.id, slug: data.slug, title: data.title, status: 'draft', has_content: !!markdownContent };
+  return { blog_post_id: data.id, slug: data.slug, title: data.title, status: 'draft', has_content: !!markdownContent, has_featured_image: !!featuredImage };
 }
 
 // =============================================================================
