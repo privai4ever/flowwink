@@ -1,6 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ShoppingCart, ArrowLeft, Check, Heart, ChevronRight } from 'lucide-react';
+import { StockStatusBadge, BackInStockForm } from '@/components/public/StockStatus';
+import { getStockStatus, isProductPurchasable } from '@/hooks/useProducts';
 import { PublicNavigation } from '@/components/public/PublicNavigation';
 import { PublicFooter } from '@/components/public/PublicFooter';
 import { Button } from '@/components/ui/button';
@@ -79,8 +81,11 @@ export default function ProductDetailPage() {
   const isInCart = product ? items.some((i) => i.productId === product.id) : false;
   const isInWishlist = product ? wishlistItems.some((w) => w.product_id === product.id) : false;
 
+  const canPurchase = product ? isProductPurchasable(product) : false;
+  const stockStatus = product ? getStockStatus(product) : 'untracked';
+
   const handleAdd = () => {
-    if (!product || isInCart) return;
+    if (!product || isInCart || !canPurchase) return;
     addItem({
       productId: product.id,
       productName: product.name,
@@ -164,13 +169,16 @@ export default function ProductDetailPage() {
             {/* Details — clean hierarchy */}
             <div className="flex flex-col justify-center py-4 md:py-8">
               <div className="space-y-6">
-                {/* Type badge */}
-                <Badge
-                  variant="secondary"
-                  className="rounded-full text-xs px-3 py-1 font-medium"
-                >
-                  {product.type === 'recurring' ? 'Subscription' : 'One-time purchase'}
-                </Badge>
+                {/* Type + Stock badges */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full text-xs px-3 py-1 font-medium"
+                  >
+                    {product.type === 'recurring' ? 'Subscription' : 'One-time purchase'}
+                  </Badge>
+                  <StockStatusBadge product={product} />
+                </div>
 
                 {/* Title */}
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold tracking-tight leading-tight">
@@ -198,57 +206,68 @@ export default function ProductDetailPage() {
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-3 pt-4">
-                  <Button
-                    size="lg"
-                    className={cn(
-                      'flex-1 h-12 rounded-xl text-base font-medium transition-all',
-                      isInCart && 'bg-muted text-foreground hover:bg-muted/80'
-                    )}
-                    variant={isInCart ? 'secondary' : 'default'}
-                    onClick={handleAdd}
-                    disabled={isInCart}
-                  >
-                    {isInCart ? (
-                      <>
-                        <Check className="h-5 w-5 mr-2" />
-                        Added to cart
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingCart className="h-5 w-5 mr-2" />
-                        Add to cart
-                      </>
-                    )}
-                  </Button>
+                {stockStatus === 'out_of_stock' && !product.allow_backorder ? (
+                  <BackInStockForm productId={product.id} productName={product.name} className="pt-4" />
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3 pt-4">
+                      <Button
+                        size="lg"
+                        className={cn(
+                          'flex-1 h-12 rounded-xl text-base font-medium transition-all',
+                          isInCart && 'bg-muted text-foreground hover:bg-muted/80'
+                        )}
+                        variant={isInCart ? 'secondary' : 'default'}
+                        onClick={handleAdd}
+                        disabled={isInCart || !canPurchase}
+                      >
+                        {isInCart ? (
+                          <>
+                            <Check className="h-5 w-5 mr-2" />
+                            Added to cart
+                          </>
+                        ) : stockStatus === 'out_of_stock' && product.allow_backorder ? (
+                          <>
+                            <ShoppingCart className="h-5 w-5 mr-2" />
+                            Pre-order
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart className="h-5 w-5 mr-2" />
+                            Add to cart
+                          </>
+                        )}
+                      </Button>
 
-                  {user && (
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className={cn(
-                        'h-12 w-12 rounded-xl shrink-0 transition-all',
-                        isInWishlist && 'border-destructive/40 text-destructive hover:text-destructive'
+                      {user && (
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          className={cn(
+                            'h-12 w-12 rounded-xl shrink-0 transition-all',
+                            isInWishlist && 'border-destructive/40 text-destructive hover:text-destructive'
+                          )}
+                          onClick={() => toggleWishlist.mutate(product.id)}
+                        >
+                          <Heart className={cn('h-5 w-5', isInWishlist && 'fill-current')} />
+                        </Button>
                       )}
-                      onClick={() => toggleWishlist.mutate(product.id)}
-                    >
-                      <Heart className={cn('h-5 w-5', isInWishlist && 'fill-current')} />
-                    </Button>
-                  )}
-                </div>
+                    </div>
 
-                {/* View cart link */}
-                {isInCart && (
-                  <Button
-                    variant="link"
-                    asChild
-                    className="px-0 text-primary"
-                  >
-                    <Link to="/cart">
-                      View cart
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
+                    {/* View cart link */}
+                    {isInCart && (
+                      <Button
+                        variant="link"
+                        asChild
+                        className="px-0 text-primary"
+                      >
+                        <Link to="/cart">
+                          View cart
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Link>
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </div>

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -32,6 +33,10 @@ interface FormData {
   price: string;
   currency: string;
   image_url: string;
+  track_inventory: boolean;
+  stock_quantity: string;
+  low_stock_threshold: string;
+  allow_backorder: boolean;
 }
 
 export function ProductDialog({ open, onOpenChange, product }: ProductDialogProps) {
@@ -46,10 +51,15 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
       price: '',
       currency: 'USD',
       image_url: '',
+      track_inventory: false,
+      stock_quantity: '',
+      low_stock_threshold: '5',
+      allow_backorder: false,
     },
   });
 
   const productType = watch('type');
+  const trackInventory = watch('track_inventory');
 
   useEffect(() => {
     if (product) {
@@ -60,6 +70,10 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
         price: (product.price_cents / 100).toString(),
         currency: product.currency,
         image_url: product.image_url || '',
+        track_inventory: product.track_inventory,
+        stock_quantity: product.stock_quantity?.toString() ?? '',
+        low_stock_threshold: product.low_stock_threshold.toString(),
+        allow_backorder: product.allow_backorder,
       });
     } else {
       reset({
@@ -69,6 +83,10 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
         price: '',
         currency: 'USD',
         image_url: '',
+        track_inventory: false,
+        stock_quantity: '',
+        low_stock_threshold: '5',
+        allow_backorder: false,
       });
     }
   }, [product, reset]);
@@ -84,6 +102,10 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
       sort_order: 0,
       image_url: data.image_url?.trim() || null,
       stripe_price_id: product?.stripe_price_id ?? null,
+      track_inventory: data.track_inventory,
+      stock_quantity: data.track_inventory ? (data.stock_quantity ? parseInt(data.stock_quantity) : 0) : null,
+      low_stock_threshold: parseInt(data.low_stock_threshold) || 5,
+      allow_backorder: data.allow_backorder,
     };
 
     if (product) {
@@ -193,6 +215,55 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Inventory */}
+          <div className="space-y-3 rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium">Track inventory</Label>
+                <p className="text-xs text-muted-foreground">Enable stock management for this product</p>
+              </div>
+              <Switch
+                checked={trackInventory}
+                onCheckedChange={(v) => setValue('track_inventory', v)}
+              />
+            </div>
+
+            {trackInventory && (
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="stock_quantity">Stock quantity</Label>
+                  <Input
+                    id="stock_quantity"
+                    type="number"
+                    min="0"
+                    {...register('stock_quantity')}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="low_stock_threshold">Low stock threshold</Label>
+                  <Input
+                    id="low_stock_threshold"
+                    type="number"
+                    min="0"
+                    {...register('low_stock_threshold')}
+                    placeholder="5"
+                  />
+                </div>
+                <div className="col-span-2 flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm">Allow backorders</Label>
+                    <p className="text-xs text-muted-foreground">Continue selling when out of stock</p>
+                  </div>
+                  <Switch
+                    checked={watch('allow_backorder')}
+                    onCheckedChange={(v) => setValue('allow_backorder', v)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

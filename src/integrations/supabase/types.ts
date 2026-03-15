@@ -482,6 +482,38 @@ export type Database = {
         }
         Relationships: []
       }
+      back_in_stock_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          notified_at: string | null
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          notified_at?: string | null
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          notified_at?: string | null
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "back_in_stock_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_categories: {
         Row: {
           created_at: string
@@ -2235,6 +2267,7 @@ export type Database = {
       }
       products: {
         Row: {
+          allow_backorder: boolean
           category_id: string | null
           created_at: string
           currency: string
@@ -2242,14 +2275,18 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          low_stock_threshold: number
           name: string
           price_cents: number
           sort_order: number | null
+          stock_quantity: number | null
           stripe_price_id: string | null
+          track_inventory: boolean
           type: Database["public"]["Enums"]["product_type"]
           updated_at: string
         }
         Insert: {
+          allow_backorder?: boolean
           category_id?: string | null
           created_at?: string
           currency?: string
@@ -2257,14 +2294,18 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          low_stock_threshold?: number
           name: string
           price_cents?: number
           sort_order?: number | null
+          stock_quantity?: number | null
           stripe_price_id?: string | null
+          track_inventory?: boolean
           type?: Database["public"]["Enums"]["product_type"]
           updated_at?: string
         }
         Update: {
+          allow_backorder?: boolean
           category_id?: string | null
           created_at?: string
           currency?: string
@@ -2272,10 +2313,13 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          low_stock_threshold?: number
           name?: string
           price_cents?: number
           sort_order?: number | null
+          stock_quantity?: number | null
           stripe_price_id?: string | null
+          track_inventory?: boolean
           type?: Database["public"]["Enums"]["product_type"]
           updated_at?: string
         }
