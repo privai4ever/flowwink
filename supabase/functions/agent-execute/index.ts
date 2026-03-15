@@ -345,6 +345,9 @@ async function executeModuleAction(
     }
 
     case 'booking': {
+      if (skillName === 'manage_bookings') {
+        return await executeBookingsManagement(supabase, args);
+      }
       return await executeBookingAction(supabase, skillName, args);
     }
 
