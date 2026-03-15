@@ -1637,6 +1637,7 @@ function groupBy(items: any[], key: string): Record<string, number> {
   }
   return result;
 }
+async function executeDbAction(
   supabase: any,
   table: string,
   skillName: string,
