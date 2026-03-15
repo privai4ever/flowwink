@@ -467,7 +467,7 @@ export async function loadMemories(supabase: any): Promise<string> {
   const { data } = await supabase
     .from('agent_memory')
     .select('key, value, category')
-    .not('key', 'in', '("soul","identity")')
+    .not('key', 'in', '("soul","identity","heartbeat_state")')
     .order('updated_at', { ascending: false })
     .limit(30);
 
@@ -694,8 +694,9 @@ async function summarizeMessages(messages: any[], supabase: any): Promise<string
 export async function loadObjectives(supabase: any): Promise<string> {
   const { data } = await supabase
     .from('agent_objectives')
-    .select('id, goal, status, constraints, success_criteria, progress, created_at, updated_at')
+    .select('id, goal, status, constraints, success_criteria, progress, created_at, updated_at, locked_by, locked_at')
     .eq('status', 'active')
+    .is('locked_by', null)
     .order('created_at', { ascending: false })
     .limit(10);
 
@@ -855,6 +856,12 @@ async function handleAdvancePlan(supabase: any, supabaseUrl: string, serviceKey:
   const maxSteps = chain ? MAX_CHAIN_DEPTH : 1;
   const chainResults: any[] = [];
 
+  // Atomic checkout — prevent concurrent heartbeat instances from advancing the same objective
+  const locked = await checkoutObjective(supabase, objective_id);
+  if (!locked) {
+    return { status: 'locked', message: 'Objective is currently being worked on by another process.' };
+  }
+
   for (let depth = 0; depth < maxSteps; depth++) {
     const { data: obj, error } = await supabase.from('agent_objectives')
       .select('id, goal, progress')
@@ -930,6 +937,9 @@ async function handleAdvancePlan(supabase: any, supabaseUrl: string, serviceKey:
 
     if (!success || !nextStep.skill_name || allDone) break;
   }
+
+  // Release the lock
+  await releaseObjective(supabase, objective_id);
 
   const lastResult = chainResults[chainResults.length - 1];
   return {

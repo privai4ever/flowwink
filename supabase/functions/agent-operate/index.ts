@@ -13,6 +13,7 @@ import {
   getBuiltInTools,
   executeBuiltInTool,
   isBuiltInTool,
+  loadCMSSchema,
 } from "../_shared/agent-reason.ts";
 
 /**
@@ -47,10 +48,11 @@ serve(async (req) => {
     const { apiKey, apiUrl, model } = await resolveAiConfig(supabase);
 
     // Load context in parallel
-    const [{ soul, identity }, memoryContext, objectiveContext] = await Promise.all([
+    const [{ soul, identity }, memoryContext, objectiveContext, cmsSchemaCtx] = await Promise.all([
       loadSoulIdentity(supabase),
       loadMemories(supabase),
       loadObjectives(supabase),
+      loadCMSSchema(supabase),
     ]);
 
     // Use prompt compiler (OpenClaw Layer 1)
@@ -59,6 +61,7 @@ serve(async (req) => {
       soulPrompt: buildSoulPrompt(soul, identity),
       memoryContext,
       objectiveContext,
+      cmsSchemaContext: cmsSchemaCtx,
     });
 
     // Build tools
