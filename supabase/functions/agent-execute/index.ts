@@ -1152,17 +1152,31 @@ async function executeFormsAction(
 
 async function executeWebinarsAction(
   supabase: SupabaseClient,
-  _skillName: string,
+  skillName: string,
   args: Record<string, unknown>,
 ): Promise<unknown> {
   const { action = 'list' } = args as any;
 
-  if (action === 'list') {
-    const { data, error } = await supabase.from('webinars')
+  if (action === 'list' || action === 'list_upcoming') {
+    let query = supabase.from('webinars')
       .select('id, title, description, scheduled_at, platform, meeting_url, status, max_attendees, created_at')
       .order('scheduled_at', { ascending: false }).limit(50);
+    if (action === 'list_upcoming') {
+      query = query.eq('status', 'upcoming').gte('scheduled_at', new Date().toISOString()).order('scheduled_at', { ascending: true });
+    }
+    const { data, error } = await query;
     if (error) throw new Error(`List webinars failed: ${error.message}`);
     return { webinars: data || [] };
+  }
+
+  if (action === 'register') {
+    const { webinar_id, name, email, phone } = args as any;
+    if (!webinar_id || !name || !email) throw new Error('webinar_id, name, and email required');
+    const { data, error } = await supabase.from('webinar_registrations').insert({
+      webinar_id, name, email, phone: phone || null,
+    }).select('id, name, email').single();
+    if (error) throw new Error(`Registration failed: ${error.message}`);
+    return { registration_id: data.id, name: data.name, email: data.email, status: 'registered' };
   }
 
   if (action === 'create') {
@@ -1190,7 +1204,373 @@ async function executeWebinarsAction(
   return { error: `Unknown webinars action: ${action}` };
 }
 
-async function executeDbAction(
+// =============================================================================
+// Blog module — full handler with browse, categories, write
+// =============================================================================
+
+async function executeBlogAction(
+  supabase: SupabaseClient,
+  skillName: string,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  // browse_blog — list published posts for visitors
+  if (skillName === 'browse_blog') {
+    const { search, limit = 5 } = args as any;
+    let query = supabase.from('blog_posts')
+      .select('id, title, slug, excerpt, featured_image, published_at, reading_time_minutes')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(limit);
+    if (search) query = query.ilike('title', `%${search}%`);
+    const { data, error } = await query;
+    if (error) throw new Error(`Browse blog failed: ${error.message}`);
+    return { posts: data || [] };
+  }
+
+  // manage_blog_categories
+  if (skillName === 'manage_blog_categories') {
+    const { action = 'list_categories' } = args as any;
+
+    if (action === 'list_categories') {
+      const { data, error } = await supabase.from('blog_categories')
+        .select('id, name, slug, description, sort_order').order('sort_order');
+      if (error) throw new Error(`List categories failed: ${error.message}`);
+      return { categories: data || [] };
+    }
+    if (action === 'create_category') {
+      const { name, slug, description } = args as any;
+      if (!name) throw new Error('name is required');
+      const catSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const { data, error } = await supabase.from('blog_categories').insert({ name, slug: catSlug, description }).select('id, name, slug').single();
+      if (error) throw new Error(`Create category failed: ${error.message}`);
+      return { category_id: data.id, name: data.name, slug: data.slug };
+    }
+    if (action === 'list_tags') {
+      const { data, error } = await supabase.from('blog_tags').select('id, name, slug').order('name');
+      if (error) throw new Error(`List tags failed: ${error.message}`);
+      return { tags: data || [] };
+    }
+    if (action === 'create_tag') {
+      const { name, slug } = args as any;
+      if (!name) throw new Error('name is required');
+      const tagSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const { data, error } = await supabase.from('blog_tags').insert({ name, slug: tagSlug }).select('id, name, slug').single();
+      if (error) throw new Error(`Create tag failed: ${error.message}`);
+      return { tag_id: data.id, name: data.name, slug: data.slug };
+    }
+    return { error: `Unknown blog categories action: ${action}` };
+  }
+
+  // write_blog_post — original handler
+  const { title, topic, tone = 'professional', language = 'en', content } = args as any;
+  const slug = (title as string).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  let tiptapDoc: any = { type: 'doc', content: [{ type: 'paragraph' }] };
+  let excerpt = `Blog post about: ${topic}`;
+  let markdownContent = content as string | undefined;
+
+  if (!markdownContent) {
+    const geminiKey = Deno.env.get('GEMINI_API_KEY');
+    const openaiKey = Deno.env.get('OPENAI_API_KEY');
+    if (geminiKey) {
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
+        const genPrompt = `Write a comprehensive blog post about: "${topic}"\nTitle: "${title}"\nTone: ${tone}\nLanguage: ${language}\n\nWrite 600-1200 words. Use markdown with ## headings, paragraphs, and bullet points where appropriate. Do NOT include the title as an H1 — start with the first section. Output ONLY the markdown content, no preamble.`;
+        const genResp = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: genPrompt }] }],
+            generationConfig: { maxOutputTokens: 8192, temperature: 0.7 },
+          }),
+        });
+        const genData = await genResp.json();
+        markdownContent = genData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      } catch (e) {
+        console.error('[write_blog_post] Gemini generation failed:', e);
+      }
+    } else if (openaiKey) {
+      try {
+        const genResp = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${openaiKey}` },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini', max_tokens: 4096,
+            messages: [
+              { role: 'system', content: `You are a blog writer. Tone: ${tone}. Language: ${language}.` },
+              { role: 'user', content: `Write a blog post about "${topic}" titled "${title}". 600-1200 words. Use markdown with ## headings. Do NOT include the title. Output ONLY markdown.` }
+            ],
+          }),
+        });
+        const genData = await genResp.json();
+        markdownContent = genData.choices?.[0]?.message?.content || '';
+      } catch (e) {
+        console.error('[write_blog_post] OpenAI generation failed:', e);
+      }
+    }
+  }
+
+  if (markdownContent && markdownContent.trim()) {
+    tiptapDoc = markdownToTiptap(markdownContent);
+    const plainText = markdownContent.replace(/[#*_\[\]()>`-]/g, '').replace(/\n+/g, ' ').trim();
+    excerpt = plainText.substring(0, 160) + (plainText.length > 160 ? '...' : '');
+  }
+
+  const { data, error } = await supabase.from('blog_posts').insert({
+    title, slug, status: 'draft', excerpt, content_json: tiptapDoc,
+    meta_json: { tone, language, generated_by: 'flowpilot', topic },
+  }).select().single();
+  if (error) throw new Error(`Blog insert failed: ${error.message}`);
+  return { blog_post_id: data.id, slug: data.slug, title: data.title, status: 'draft', has_content: !!markdownContent };
+}
+
+// =============================================================================
+// Booking module — full handler with availability checking
+// =============================================================================
+
+async function executeBookingAction(
+  supabase: SupabaseClient,
+  skillName: string,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  // check_availability — check available slots
+  if (skillName === 'check_availability') {
+    const { date, service_id } = args as any;
+    if (!date) throw new Error('date is required');
+
+    const dayOfWeek = new Date(date).getDay();
+    let availQuery = supabase.from('booking_availability')
+      .select('start_time, end_time, service_id')
+      .eq('day_of_week', dayOfWeek)
+      .eq('is_active', true);
+    if (service_id) availQuery = availQuery.eq('service_id', service_id);
+    const { data: availability } = await availQuery;
+
+    // Check blocked dates
+    const { data: blocked } = await supabase.from('booking_blocked_dates')
+      .select('id, reason, is_all_day, start_time, end_time')
+      .eq('date', date);
+
+    // Check existing bookings
+    const dayStart = `${date}T00:00:00`;
+    const dayEnd = `${date}T23:59:59`;
+    const { data: bookings } = await supabase.from('bookings')
+      .select('start_time, end_time, service_id')
+      .gte('start_time', dayStart).lte('start_time', dayEnd)
+      .neq('status', 'cancelled');
+
+    const isFullyBlocked = blocked?.some((b: any) => b.is_all_day);
+
+    return {
+      date,
+      day_of_week: dayOfWeek,
+      is_blocked: isFullyBlocked || false,
+      blocked_reasons: blocked?.map((b: any) => b.reason).filter(Boolean) || [],
+      available_windows: isFullyBlocked ? [] : (availability || []).map((a: any) => ({
+        start: a.start_time, end: a.end_time, service_id: a.service_id,
+      })),
+      existing_bookings: (bookings || []).length,
+    };
+  }
+
+  // browse_services — list services
+  if (skillName === 'browse_services') {
+    const { data, error } = await supabase.from('booking_services')
+      .select('id, name, description, duration_minutes, price_cents, currency, color')
+      .eq('is_active', true).order('sort_order');
+    if (error) throw new Error(`List services failed: ${error.message}`);
+    return { services: data || [] };
+  }
+
+  // manage_booking_availability
+  if (skillName === 'manage_booking_availability') {
+    const { action = 'list_hours' } = args as any;
+    if (action === 'list_hours') {
+      const { data } = await supabase.from('booking_availability')
+        .select('id, day_of_week, start_time, end_time, is_active, service_id')
+        .order('day_of_week').order('start_time');
+      return { hours: data || [] };
+    }
+    if (action === 'set_hours') {
+      const { day_of_week, start_time, end_time } = args as any;
+      if (day_of_week === undefined || !start_time || !end_time) throw new Error('day_of_week, start_time, end_time required');
+      const { data, error } = await supabase.from('booking_availability').insert({
+        day_of_week, start_time, end_time, is_active: true,
+      }).select('id').single();
+      if (error) throw new Error(`Set hours failed: ${error.message}`);
+      return { availability_id: data.id, status: 'created' };
+    }
+    if (action === 'block_date') {
+      const { date, reason } = args as any;
+      if (!date) throw new Error('date is required');
+      const { data, error } = await supabase.from('booking_blocked_dates').insert({
+        date, reason: reason || null, is_all_day: true,
+      }).select('id').single();
+      if (error) throw new Error(`Block date failed: ${error.message}`);
+      return { blocked_date_id: data.id, status: 'blocked' };
+    }
+    if (action === 'unblock_date') {
+      const { date } = args as any;
+      if (!date) throw new Error('date is required');
+      const { error } = await supabase.from('booking_blocked_dates').delete().eq('date', date);
+      if (error) throw new Error(`Unblock failed: ${error.message}`);
+      return { date, status: 'unblocked' };
+    }
+    if (action === 'list_blocked') {
+      const { data } = await supabase.from('booking_blocked_dates')
+        .select('id, date, reason, is_all_day').order('date');
+      return { blocked_dates: data || [] };
+    }
+    return { error: `Unknown availability action: ${action}` };
+  }
+
+  // book_appointment — original handler
+  const { service_id, customer_name, customer_email, date, time } = args as any;
+  let svcId = service_id;
+  if (!svcId) {
+    const { data: services } = await supabase
+      .from('booking_services').select('id, duration_minutes')
+      .eq('is_active', true).order('sort_order').limit(1);
+    if (services?.length) svcId = services[0].id;
+  }
+  const startTime = new Date(`${date}T${time}:00`);
+  const { data: svc } = await supabase.from('booking_services')
+    .select('duration_minutes').eq('id', svcId).single();
+  const duration = svc?.duration_minutes || 60;
+  const endTime = new Date(startTime.getTime() + duration * 60000);
+
+  const { data, error } = await supabase.from('bookings').insert({
+    service_id: svcId, customer_name, customer_email,
+    start_time: startTime.toISOString(), end_time: endTime.toISOString(),
+    status: 'pending',
+  }).select().single();
+  if (error) throw new Error(`Booking failed: ${error.message}`);
+  return { booking_id: data.id, start_time: data.start_time, status: 'pending' };
+}
+
+// =============================================================================
+// Newsletter module — with subscriber management
+// =============================================================================
+
+async function executeNewsletterAction(
+  supabase: SupabaseClient,
+  skillName: string,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  if (skillName === 'manage_newsletter_subscribers') {
+    const { action = 'list', search, status, email, limit = 50 } = args as any;
+    if (action === 'list' || action === 'search') {
+      let query = supabase.from('newsletter_subscribers')
+        .select('id, email, name, status, created_at, confirmed_at')
+        .order('created_at', { ascending: false }).limit(limit);
+      if (status) query = query.eq('status', status);
+      if (search) query = query.or(`email.ilike.%${search}%,name.ilike.%${search}%`);
+      const { data, error } = await query;
+      if (error) throw new Error(`List subscribers failed: ${error.message}`);
+      return { subscribers: data || [] };
+    }
+    if (action === 'count') {
+      const { count, error } = await supabase.from('newsletter_subscribers')
+        .select('*', { count: 'exact', head: true }).eq('status', 'active');
+      if (error) throw new Error(`Count failed: ${error.message}`);
+      return { active_subscribers: count || 0 };
+    }
+    if (action === 'remove' && email) {
+      const { error } = await supabase.from('newsletter_subscribers')
+        .update({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString() })
+        .eq('email', email);
+      if (error) throw new Error(`Remove failed: ${error.message}`);
+      return { email, status: 'unsubscribed' };
+    }
+    return { error: `Unknown subscriber action: ${action}` };
+  }
+
+  // send_newsletter — create draft
+  const { subject, content, schedule_at } = args as any;
+  const { data, error } = await supabase.from('newsletters').insert({
+    subject, content_html: content,
+    status: schedule_at ? 'scheduled' : 'draft',
+    scheduled_at: schedule_at || null,
+  }).select().single();
+  if (error) throw new Error(`Newsletter failed: ${error.message}`);
+  return { newsletter_id: data.id, subject: data.subject, status: data.status };
+}
+
+// =============================================================================
+// Orders module — with management and stats
+// =============================================================================
+
+async function executeOrdersAction(
+  supabase: SupabaseClient,
+  skillName: string,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  if (skillName === 'manage_orders') {
+    const { action = 'list', order_id, status, period = 'month', limit = 20 } = args as any;
+
+    if (action === 'list') {
+      let query = supabase.from('orders')
+        .select('id, status, total_cents, currency, customer_email, customer_name, created_at')
+        .order('created_at', { ascending: false }).limit(limit);
+      if (status) query = query.eq('status', status);
+      const { data, error } = await query;
+      if (error) throw new Error(`List orders failed: ${error.message}`);
+      return { orders: data || [] };
+    }
+
+    if (action === 'get' && order_id) {
+      const { data: order, error } = await supabase.from('orders')
+        .select('*').eq('id', order_id).single();
+      if (error) throw new Error(`Get order failed: ${error.message}`);
+      const { data: items } = await supabase.from('order_items')
+        .select('id, product_name, quantity, price_cents').eq('order_id', order_id);
+      return { ...order, items: items || [] };
+    }
+
+    if (action === 'update_status' && order_id && status) {
+      const { data, error } = await supabase.from('orders')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', order_id).select('id, status').single();
+      if (error) throw new Error(`Update order failed: ${error.message}`);
+      return { order_id: data.id, status: data.status };
+    }
+
+    if (action === 'stats') {
+      const since = new Date();
+      if (period === 'week') since.setDate(since.getDate() - 7);
+      else if (period === 'month') since.setMonth(since.getMonth() - 1);
+      else if (period === 'quarter') since.setMonth(since.getMonth() - 3);
+      else since.setHours(0, 0, 0, 0);
+
+      const { data } = await supabase.from('orders')
+        .select('id, total_cents, currency, status, created_at')
+        .gte('created_at', since.toISOString());
+      const orders = data || [];
+      const totalRevenue = orders.filter((o: any) => o.status === 'paid' || o.status === 'delivered')
+        .reduce((sum: number, o: any) => sum + o.total_cents, 0);
+      return { period, total_orders: orders.length, total_revenue_cents: totalRevenue, by_status: groupBy(orders, 'status') };
+    }
+
+    return { error: `Unknown orders action: ${action}` };
+  }
+
+  // check_order / lookup_order — original handler
+  const { order_id, email } = args as any;
+  let query = supabase.from('orders').select('id, status, total_cents, currency, created_at, customer_email');
+  if (order_id) query = query.eq('id', order_id);
+  else if (email) query = query.eq('customer_email', email);
+  const { data, error } = await query.order('created_at', { ascending: false }).limit(5);
+  if (error) throw new Error(`Order lookup failed: ${error.message}`);
+  return { orders: data || [] };
+}
+
+function groupBy(items: any[], key: string): Record<string, number> {
+  const result: Record<string, number> = {};
+  for (const item of items) {
+    const val = item[key] || 'unknown';
+    result[val] = (result[val] || 0) + 1;
+  }
+  return result;
+}
   supabase: any,
   table: string,
   skillName: string,
