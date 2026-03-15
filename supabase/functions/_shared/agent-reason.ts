@@ -74,8 +74,9 @@ export interface HeartbeatState {
 
 const SELF_HEAL_THRESHOLD = 3;
 const MAX_CHAIN_DEPTH = 4;
-const MAX_CONTEXT_TOKENS = 80_000; // Approximate token budget for conversation history
-const SUMMARY_THRESHOLD = 60_000;  // Start pruning when history exceeds this
+const MAX_CONTEXT_TOKENS = 80_000;
+const SUMMARY_THRESHOLD = 60_000;
+const DEFAULT_TOKEN_BUDGET = 50_000; // Max tokens per heartbeat session
 
 const BUILT_IN_TOOL_NAMES = new Set([
   'memory_write', 'memory_read',
