@@ -325,10 +325,17 @@ async function executeModuleAction(
 ): Promise<unknown> {
   switch (moduleName) {
     case 'blog': {
+      if (skillName === 'manage_blog_posts') {
+        return await executeBlogPostsManagement(supabase, args);
+      }
       return await executeBlogAction(supabase, skillName, args);
     }
 
     case 'crm': {
+      if (skillName === 'manage_leads') {
+        return await executeLeadsAction(supabase, args);
+      }
+      // add_lead — original handler
       const { email, name, source = 'chat', phone } = args as any;
       const { data, error } = await supabase.from('leads').insert({
         email, name, source, phone,
@@ -338,6 +345,9 @@ async function executeModuleAction(
     }
 
     case 'booking': {
+      if (skillName === 'manage_bookings') {
+        return await executeBookingsManagement(supabase, args);
+      }
       return await executeBookingAction(supabase, skillName, args);
     }
 
@@ -441,6 +451,26 @@ async function executeModuleAction(
         return { deleted: file_path };
       }
 
+      if (action === 'clear_all') {
+        const targetFolders = ['pages', 'imports', 'templates', 'uploads', 'blog'];
+        let totalDeleted = 0;
+        for (const f of targetFolders) {
+          const { data: files } = await supabase.storage
+            .from('cms-images')
+            .list(f, { limit: 1000 });
+          if (files?.length) {
+            const paths = files
+              .filter((file: any) => file.name !== '.emptyFolderPlaceholder')
+              .map((file: any) => `${f}/${file.name}`);
+            if (paths.length > 0) {
+              const { error } = await supabase.storage.from('cms-images').remove(paths);
+              if (!error) totalDeleted += paths.length;
+            }
+          }
+        }
+        return { action: 'clear_all', total_deleted: totalDeleted, folders_cleaned: targetFolders };
+      }
+
       return { error: `Unknown media action: ${action}` };
     }
 
@@ -517,10 +547,45 @@ async function executeResumeAction(
       }
 
       if (action === 'update' && profile_id) {
+        delete profileData.action;
         const { data, error } = await supabase.from('consultant_profiles')
           .update(profileData).eq('id', profile_id).select('id, name').single();
         if (error) throw new Error(`Update failed: ${error.message}`);
         return { profile_id: data.id, status: 'updated' };
+      }
+
+      if (action === 'delete' && profile_id) {
+        const { error } = await supabase.from('consultant_profiles')
+          .delete().eq('id', profile_id);
+        if (error) throw new Error(`Delete failed: ${error.message}`);
+        return { profile_id, status: 'deleted' };
+      }
+
+      if (action === 'find_duplicates') {
+        const { data: all, error } = await supabase.from('consultant_profiles')
+          .select('id, name, email, title, skills')
+          .order('created_at', { ascending: true });
+        if (error) throw new Error(`List failed: ${error.message}`);
+        const profiles = all || [];
+        const duplicates: Array<{ ids: string[]; name: string; reason: string }> = [];
+        const seen = new Map<string, any>();
+        for (const p of profiles) {
+          const key = p.name?.toLowerCase().trim();
+          if (key && seen.has(key)) {
+            duplicates.push({ ids: [seen.get(key).id, p.id], name: p.name, reason: 'Same name' });
+          } else if (key) {
+            seen.set(key, p);
+          }
+          if (p.email) {
+            const emailKey = p.email.toLowerCase();
+            if (seen.has(`email:${emailKey}`)) {
+              duplicates.push({ ids: [seen.get(`email:${emailKey}`).id, p.id], name: p.name, reason: 'Same email' });
+            } else {
+              seen.set(`email:${emailKey}`, p);
+            }
+          }
+        }
+        return { total_profiles: profiles.length, duplicates, duplicate_count: duplicates.length };
       }
 
       return { error: `Unknown resume action: ${action}` };
@@ -1718,6 +1783,182 @@ function groupBy(items: any[], key: string): Record<string, number> {
   }
   return result;
 }
+
+// =============================================================================
+// Leads management handler
+// =============================================================================
+
+async function executeLeadsAction(
+  supabase: any,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  const { action = 'list', lead_id, status, score, search, limit = 50 } = args as any;
+
+  if (action === 'list') {
+    let query = supabase.from('leads')
+      .select('id, email, name, phone, status, score, source, ai_summary, created_at, updated_at')
+      .order('updated_at', { ascending: false }).limit(limit);
+    if (status) query = query.eq('status', status);
+    if (search) query = query.or(`email.ilike.%${search}%,name.ilike.%${search}%`);
+    const { data, error } = await query;
+    if (error) throw new Error(`List leads failed: ${error.message}`);
+    return { leads: data || [] };
+  }
+
+  if (action === 'get' && lead_id) {
+    const { data, error } = await supabase.from('leads')
+      .select('*').eq('id', lead_id).single();
+    if (error) throw new Error(`Get lead failed: ${error.message}`);
+    // Get activities
+    const { data: activities } = await supabase.from('lead_activities')
+      .select('id, type, metadata, points, created_at')
+      .eq('lead_id', lead_id).order('created_at', { ascending: false }).limit(20);
+    return { ...data, activities: activities || [] };
+  }
+
+  if (action === 'update' && lead_id) {
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (status !== undefined) updates.status = status;
+    if (score !== undefined) updates.score = score;
+    const { data, error } = await supabase.from('leads')
+      .update(updates).eq('id', lead_id).select('id, email, status, score').single();
+    if (error) throw new Error(`Update lead failed: ${error.message}`);
+    return { lead_id: data.id, status: data.status, score: data.score };
+  }
+
+  if (action === 'delete' && lead_id) {
+    const { error } = await supabase.from('leads').delete().eq('id', lead_id);
+    if (error) throw new Error(`Delete lead failed: ${error.message}`);
+    return { lead_id, status: 'deleted' };
+  }
+
+  return { error: `Unknown leads action: ${action}` };
+}
+
+// =============================================================================
+// Blog posts management (update/publish/delete existing)
+// =============================================================================
+
+async function executeBlogPostsManagement(
+  supabase: any,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  const { action = 'list', post_id, slug, status, title, excerpt, featured_image, limit = 20 } = args as any;
+
+  if (action === 'list') {
+    let query = supabase.from('blog_posts')
+      .select('id, title, slug, status, excerpt, featured_image, created_at, updated_at, published_at')
+      .order('updated_at', { ascending: false }).limit(limit);
+    if (status) query = query.eq('status', status);
+    const { data, error } = await query;
+    if (error) throw new Error(`List posts failed: ${error.message}`);
+    return { posts: data || [] };
+  }
+
+  if (action === 'get') {
+    let query = supabase.from('blog_posts').select('*');
+    if (post_id) query = query.eq('id', post_id);
+    else if (slug) query = query.eq('slug', slug);
+    else throw new Error('post_id or slug required');
+    const { data, error } = await query.single();
+    if (error) throw new Error(`Get post failed: ${error.message}`);
+    return data;
+  }
+
+  if (action === 'update' && post_id) {
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (title !== undefined) updates.title = title;
+    if (excerpt !== undefined) updates.excerpt = excerpt;
+    if (featured_image !== undefined) updates.featured_image = featured_image;
+    const { data, error } = await supabase.from('blog_posts')
+      .update(updates).eq('id', post_id).select('id, title, status').single();
+    if (error) throw new Error(`Update post failed: ${error.message}`);
+    return { post_id: data.id, status: 'updated' };
+  }
+
+  if (action === 'publish' && post_id) {
+    const { data, error } = await supabase.from('blog_posts')
+      .update({ status: 'published', published_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq('id', post_id).select('id, title, slug, status').single();
+    if (error) throw new Error(`Publish failed: ${error.message}`);
+    return { post_id: data.id, slug: data.slug, status: 'published' };
+  }
+
+  if (action === 'unpublish' && post_id) {
+    const { data, error } = await supabase.from('blog_posts')
+      .update({ status: 'draft', updated_at: new Date().toISOString() })
+      .eq('id', post_id).select('id, title, status').single();
+    if (error) throw new Error(`Unpublish failed: ${error.message}`);
+    return { post_id: data.id, status: 'draft' };
+  }
+
+  if (action === 'delete' && post_id) {
+    const { error } = await supabase.from('blog_posts').delete().eq('id', post_id);
+    if (error) throw new Error(`Delete post failed: ${error.message}`);
+    return { post_id, status: 'deleted' };
+  }
+
+  return { error: `Unknown blog posts action: ${action}` };
+}
+
+// =============================================================================
+// Bookings management handler
+// =============================================================================
+
+async function executeBookingsManagement(
+  supabase: any,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  const { action = 'list', booking_id, status, period = 'month', limit = 50 } = args as any;
+
+  if (action === 'list') {
+    const since = new Date();
+    if (period === 'today') since.setHours(0, 0, 0, 0);
+    else if (period === 'week') since.setDate(since.getDate() - 7);
+    else since.setMonth(since.getMonth() - 1);
+
+    let query = supabase.from('bookings')
+      .select('id, customer_name, customer_email, start_time, end_time, status, service_id, created_at')
+      .gte('start_time', since.toISOString())
+      .order('start_time', { ascending: true }).limit(limit);
+    if (status) query = query.eq('status', status);
+    const { data, error } = await query;
+    if (error) throw new Error(`List bookings failed: ${error.message}`);
+    return { bookings: data || [] };
+  }
+
+  if (action === 'get' && booking_id) {
+    const { data, error } = await supabase.from('bookings')
+      .select('*').eq('id', booking_id).single();
+    if (error) throw new Error(`Get booking failed: ${error.message}`);
+    return data;
+  }
+
+  if (action === 'update_status' && booking_id && status) {
+    const updates: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
+    if (status === 'cancelled') updates.cancelled_at = new Date().toISOString();
+    const { data, error } = await supabase.from('bookings')
+      .update(updates).eq('id', booking_id).select('id, status').single();
+    if (error) throw new Error(`Update booking failed: ${error.message}`);
+    return { booking_id: data.id, status: data.status };
+  }
+
+  if (action === 'cancel' && booking_id) {
+    const { cancelled_reason } = args as any;
+    const { data, error } = await supabase.from('bookings')
+      .update({
+        status: 'cancelled',
+        cancelled_at: new Date().toISOString(),
+        cancelled_reason: cancelled_reason || null,
+        updated_at: new Date().toISOString(),
+      }).eq('id', booking_id).select('id, status').single();
+    if (error) throw new Error(`Cancel booking failed: ${error.message}`);
+    return { booking_id: data.id, status: 'cancelled' };
+  }
+
+  return { error: `Unknown bookings action: ${action}` };
+}
+
 async function executeDbAction(
   supabase: any,
   table: string,
@@ -1726,7 +1967,26 @@ async function executeDbAction(
 ): Promise<unknown> {
   switch (table) {
     case 'site_settings': {
-      const { key, value } = args as any;
+      const { action = 'update', key, value } = args as any;
+
+      if (action === 'get_all') {
+        const { data, error } = await supabase.from('site_settings').select('key, value');
+        if (error) throw new Error(`Get settings failed: ${error.message}`);
+        const settings: Record<string, unknown> = {};
+        for (const row of (data || [])) settings[row.key] = row.value;
+        return { settings };
+      }
+
+      if (action === 'get') {
+        if (!key) throw new Error('key is required');
+        const { data, error } = await supabase.from('site_settings')
+          .select('key, value').eq('key', key).maybeSingle();
+        if (error) throw new Error(`Get setting failed: ${error.message}`);
+        return data || { key, value: null, exists: false };
+      }
+
+      // update (default)
+      if (!key) throw new Error('key is required for update');
       const { data, error } = await supabase.from('site_settings')
         .upsert({ key, value }, { onConflict: 'key' })
         .select().single();
@@ -2246,6 +2506,9 @@ async function logActivity(
 const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   // Content & Pages
   write_blog_post: ['blog', 'content', 'publish', 'article'],
+  manage_blog_posts: ['blog', 'content', 'publish', 'article', 'post'],
+  manage_blog_categories: ['blog', 'category', 'tag', 'content'],
+  browse_blog: ['blog', 'content'],
   manage_page: ['page', 'content', 'website', 'publish', 'landing'],
   manage_page_blocks: ['page', 'block', 'content', 'website', 'design', 'layout'],
   manage_global_blocks: ['header', 'footer', 'navigation', 'branding', 'global'],
@@ -2253,9 +2516,11 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   // Communication
   send_newsletter: ['newsletter', 'email', 'subscriber', 'engagement'],
   execute_newsletter_send: ['newsletter', 'email', 'campaign', 'engagement'],
+  manage_newsletter_subscribers: ['newsletter', 'subscriber', 'email', 'list'],
   manage_webinar: ['webinar', 'event', 'presentation', 'training'],
   // CRM & Sales
   add_lead: ['lead', 'crm', 'sales', 'pipeline'],
+  manage_leads: ['lead', 'crm', 'sales', 'pipeline', 'score'],
   qualify_lead: ['lead', 'qualify', 'score', 'crm', 'sales'],
   enrich_company: ['company', 'enrich', 'crm', 'data'],
   manage_company: ['company', 'crm', 'account', 'client'],
@@ -2263,12 +2528,20 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   prospect_research: ['prospect', 'research', 'sales', 'lead'],
   prospect_fit_analysis: ['prospect', 'fit', 'sales', 'pipeline'],
   // Commerce
+  browse_products: ['product', 'commerce', 'shop', 'catalog'],
   manage_product: ['product', 'commerce', 'pricing', 'catalog', 'shop'],
+  manage_inventory: ['inventory', 'stock', 'product', 'commerce'],
+  manage_orders: ['order', 'commerce', 'revenue', 'fulfillment'],
   manage_form_submissions: ['form', 'submission', 'lead', 'feedback'],
-  create_campaign: ['campaign', 'marketing', 'engagement'],
+  // Booking
   book_appointment: ['booking', 'appointment', 'calendar'],
+  check_availability: ['booking', 'availability', 'calendar'],
+  browse_services: ['booking', 'service', 'catalog'],
+  manage_booking_availability: ['booking', 'availability', 'schedule'],
+  manage_bookings: ['booking', 'appointment', 'calendar', 'schedule'],
   // Analytics & Research
   analyze_analytics: ['analytics', 'traffic', 'performance', 'growth'],
+  analyze_chat_feedback: ['chat', 'feedback', 'satisfaction', 'support'],
   weekly_business_digest: ['digest', 'report', 'overview'],
   search_web: ['research', 'content'],
   research_content: ['content', 'research', 'blog', 'topic'],
@@ -2281,6 +2554,10 @@ const SKILL_OBJECTIVE_MAP: Record<string, string[]> = {
   // Resume & Talent
   manage_consultant_profile: ['resume', 'consultant', 'profile', 'talent'],
   match_consultant: ['resume', 'consultant', 'match', 'talent', 'recruitment'],
+  // Media & System
+  media_browse: ['media', 'image', 'file', 'storage', 'cleanup'],
+  manage_site_settings: ['settings', 'config', 'module', 'system'],
+  manage_automations: ['automation', 'cron', 'trigger', 'workflow'],
   // Utilities
   extract_pdf_text: ['pdf', 'document', 'extract', 'content', 'resume', 'report', 'contract'],
   competitor_monitor: ['competitor', 'market', 'positioning', 'content', 'intelligence'],
