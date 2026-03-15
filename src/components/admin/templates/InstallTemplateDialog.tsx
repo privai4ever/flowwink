@@ -71,6 +71,15 @@ export function InstallTemplateDialog({ template, open, onOpenChange }: InstallT
               </DialogHeader>
 
               <div className="space-y-4">
+                {installer.installedTemplate && (
+                  <div className="flex items-center gap-2 text-sm bg-muted/60 rounded-md px-3 py-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                    <span>
+                      Currently installed: <strong>{installer.installedTemplate.template_name}</strong> — will be automatically replaced.
+                    </span>
+                  </div>
+                )}
+
                 <div>
                   <h3 className="font-semibold text-lg">{template.name}</h3>
                   <p className="text-sm text-muted-foreground">{template.tagline}</p>

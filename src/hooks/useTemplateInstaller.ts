@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { StarterTemplate } from '@/data/templates';
 import { TemplateOverwriteOptions } from '@/components/admin/templates/TemplatePreviewDialog';
@@ -25,10 +25,33 @@ export interface InstallProgress {
   currentStep: string;
 }
 
+export interface TemplateManifest {
+  pageIds: string[];
+  blogPostIds: string[];
+  kbCategoryIds: string[];
+  productIds: string[];
+  consultantIds: string[];
+}
+
 export function useTemplateInstaller() {
   const [step, setStep] = useState<InstallStep>('idle');
   const [progress, setProgress] = useState<InstallProgress>({ currentPage: 0, totalPages: 0, currentStep: '' });
   const [createdPageIds, setCreatedPageIds] = useState<string[]>([]);
+  const [installedTemplate, setInstalledTemplate] = useState<{ template_id: string; template_name: string; manifest: TemplateManifest } | null>(null);
+
+  // Fetch currently installed template on mount
+  useEffect(() => {
+    supabase.from('installed_template').select('*').order('installed_at', { ascending: false }).limit(1)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setInstalledTemplate({
+            template_id: data[0].template_id,
+            template_name: data[0].template_name,
+            manifest: data[0].manifest as unknown as TemplateManifest,
+          });
+        }
+      });
+  }, []);
 
   const { data: existingPages } = usePages();
   const { data: deletedPages } = useDeletedPages();
@@ -244,12 +267,71 @@ export function useTemplateInstaller() {
         await updateModules.mutateAsync(updatedModules);
       }
 
-      // Delete existing pages
-      if (opts.pages && existingPages && existingPages.length > 0) {
-        setProgress({ currentPage: 0, totalPages: existingPages.length, currentStep: 'Clearing existing pages...' });
-        for (let i = 0; i < existingPages.length; i++) {
-          setProgress({ currentPage: i + 1, totalPages: existingPages.length, currentStep: `Removing page "${existingPages[i].title}"...` });
-          await permanentDeletePage.mutateAsync(existingPages[i].id);
+      // Auto-cleanup previous template using manifest
+      if (installedTemplate?.manifest) {
+        const m = installedTemplate.manifest;
+        const totalCleanup = (m.pageIds?.length || 0) + (m.blogPostIds?.length || 0) + (m.kbCategoryIds?.length || 0) + (m.productIds?.length || 0) + (m.consultantIds?.length || 0);
+        if (totalCleanup > 0) {
+          setProgress({ currentPage: 0, totalPages: totalCleanup, currentStep: `Uninstalling "${installedTemplate.template_name}"...` });
+          let cleaned = 0;
+
+          // Remove pages created by previous template
+          for (const pageId of (m.pageIds || [])) {
+            setProgress({ currentPage: ++cleaned, totalPages: totalCleanup, currentStep: 'Removing previous template pages...' });
+            try { await permanentDeletePage.mutateAsync(pageId); } catch { /* already deleted */ }
+          }
+
+          // Remove blog posts
+          for (const postId of (m.blogPostIds || [])) {
+            setProgress({ currentPage: ++cleaned, totalPages: totalCleanup, currentStep: 'Removing previous template blog posts...' });
+            try { await deleteBlogPost.mutateAsync(postId); } catch { /* already deleted */ }
+          }
+
+          // Remove KB categories
+          for (const catId of (m.kbCategoryIds || [])) {
+            setProgress({ currentPage: ++cleaned, totalPages: totalCleanup, currentStep: 'Removing previous template KB content...' });
+            try { await deleteKbCategory.mutateAsync(catId); } catch { /* already deleted */ }
+          }
+
+          // Remove products
+          for (const prodId of (m.productIds || [])) {
+            setProgress({ currentPage: ++cleaned, totalPages: totalCleanup, currentStep: 'Removing previous template products...' });
+            try { await deleteProduct.mutateAsync(prodId); } catch { /* already deleted */ }
+          }
+
+          // Remove consultants
+          for (const conId of (m.consultantIds || [])) {
+            setProgress({ currentPage: ++cleaned, totalPages: totalCleanup, currentStep: 'Removing previous template consultants...' });
+            try { await supabase.from('consultant_profiles').delete().eq('id', conId); } catch { /* already deleted */ }
+          }
+
+          // Remove old manifest record
+          await supabase.from('installed_template').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          logger.log(`[TemplateInstaller] Uninstalled previous template "${installedTemplate.template_name}" (${totalCleanup} resources)`);
+        }
+      } else {
+        // No manifest — fall back to clearing all existing content (first install or legacy)
+        if (opts.pages && existingPages && existingPages.length > 0) {
+          setProgress({ currentPage: 0, totalPages: existingPages.length, currentStep: 'Clearing existing pages...' });
+          for (let i = 0; i < existingPages.length; i++) {
+            setProgress({ currentPage: i + 1, totalPages: existingPages.length, currentStep: `Removing page "${existingPages[i].title}"...` });
+            await permanentDeletePage.mutateAsync(existingPages[i].id);
+          }
+        }
+        if (opts.blogPosts && existingBlogPosts && existingBlogPosts.length > 0) {
+          for (let i = 0; i < existingBlogPosts.length; i++) {
+            await deleteBlogPost.mutateAsync(existingBlogPosts[i].id);
+          }
+        }
+        if (opts.kbContent && existingKbCategories && existingKbCategories.length > 0) {
+          for (let i = 0; i < existingKbCategories.length; i++) {
+            await deleteKbCategory.mutateAsync(existingKbCategories[i].id);
+          }
+        }
+        if (opts.products && existingProducts && existingProducts.length > 0) {
+          for (let i = 0; i < existingProducts.length; i++) {
+            await deleteProduct.mutateAsync(existingProducts[i].id);
+          }
         }
       }
 
@@ -258,58 +340,10 @@ export function useTemplateInstaller() {
         const templateSlugs = new Set(template.pages.map(p => p.slug));
         const conflicting = deletedPages.filter(p => templateSlugs.has(p.slug));
         for (const page of conflicting) {
-          setProgress({ currentPage: 0, totalPages: conflicting.length, currentStep: `Cleaning up trashed page "${page.title}"...` });
-          await permanentDeletePage.mutateAsync(page.id);
+          try { await permanentDeletePage.mutateAsync(page.id); } catch { /* already deleted */ }
         }
       }
 
-      // Create pages
-      if (opts.pages) {
-        setProgress({ currentPage: 0, totalPages: templatePages.length, currentStep: 'Creating pages...' });
-        for (let i = 0; i < templatePages.length; i++) {
-          const templatePage = templatePages[i];
-          setProgress({ currentPage: i + 1, totalPages: templatePages.length, currentStep: `Creating "${templatePage.title}"...` });
-          const page = await createPage.mutateAsync({
-            title: templatePage.title,
-            slug: templatePage.slug,
-            content: templatePage.blocks,
-            meta: templatePage.meta,
-            menu_order: templatePage.menu_order,
-            show_in_menu: templatePage.showInMenu,
-            status: opts.publishPages ? 'published' : 'draft',
-          });
-          pageIds.push(page.id);
-        }
-      }
-
-      // Delete existing blog posts
-      if (opts.blogPosts && existingBlogPosts && existingBlogPosts.length > 0) {
-        setProgress({ currentPage: 0, totalPages: existingBlogPosts.length, currentStep: 'Clearing existing blog posts...' });
-        for (let i = 0; i < existingBlogPosts.length; i++) {
-          setProgress({ currentPage: i + 1, totalPages: existingBlogPosts.length, currentStep: `Removing blog post "${existingBlogPosts[i].title}"...` });
-          await deleteBlogPost.mutateAsync(existingBlogPosts[i].id);
-        }
-      }
-
-      // Delete existing KB categories
-      if (opts.kbContent && existingKbCategories && existingKbCategories.length > 0) {
-        setProgress({ currentPage: 0, totalPages: existingKbCategories.length, currentStep: 'Clearing existing KB content...' });
-        for (let i = 0; i < existingKbCategories.length; i++) {
-          setProgress({ currentPage: i + 1, totalPages: existingKbCategories.length, currentStep: `Removing KB category "${existingKbCategories[i].name}"...` });
-          await deleteKbCategory.mutateAsync(existingKbCategories[i].id);
-        }
-      }
-
-      // Delete existing products
-      if (opts.products && existingProducts && existingProducts.length > 0) {
-        setProgress({ currentPage: 0, totalPages: existingProducts.length, currentStep: 'Clearing existing products...' });
-        for (let i = 0; i < existingProducts.length; i++) {
-          setProgress({ currentPage: i + 1, totalPages: existingProducts.length, currentStep: `Removing product "${existingProducts[i].name}"...` });
-          await deleteProduct.mutateAsync(existingProducts[i].id);
-        }
-      }
-
-      // Apply branding
       if (opts.branding) {
         setProgress({ currentPage: 0, totalPages: 1, currentStep: 'Applying branding...' });
         await updateBranding.mutateAsync(template.branding);
@@ -361,12 +395,13 @@ export function useTemplateInstaller() {
       }
 
       // Create products
+      const createdProductIds: string[] = [];
       if (opts.products) {
         const productsToCreate = templateProducts || [];
         for (let i = 0; i < productsToCreate.length; i++) {
           const product = productsToCreate[i];
           setProgress({ currentPage: i + 1, totalPages: productsToCreate.length, currentStep: `Creating product "${product.name}"...` });
-          await createProduct.mutateAsync({
+          const created = await createProduct.mutateAsync({
             name: product.name,
             description: product.description,
             price_cents: product.price_cents,
@@ -377,42 +412,48 @@ export function useTemplateInstaller() {
             sort_order: i,
             stripe_price_id: null,
           });
+          if (created?.id) createdProductIds.push(created.id);
         }
       }
 
       // Seed consultant profiles
+      const createdConsultantIds: string[] = [];
       if (template.consultants?.length) {
         const consultants = template.consultants;
         setProgress({ currentPage: 0, totalPages: consultants.length, currentStep: 'Seeding consultant profiles...' });
         for (let i = 0; i < consultants.length; i++) {
           const c = consultants[i];
           setProgress({ currentPage: i + 1, totalPages: consultants.length, currentStep: `Adding consultant "${c.name}"...` });
-          await supabase.from('consultant_profiles').insert({
+          const { data } = await supabase.from('consultant_profiles').insert({
             name: c.name, title: c.title, summary: c.summary, bio: c.bio || null,
             skills: c.skills, experience_years: c.experience_years,
             certifications: c.certifications || [], languages: c.languages || ['English'],
             availability: c.availability, hourly_rate_cents: c.hourly_rate_cents || null,
             currency: c.currency || 'USD', avatar_url: c.avatar_url || null,
             linkedin_url: c.linkedin_url || null, is_active: c.is_active ?? true,
-          });
+          }).select('id').single();
+          if (data?.id) createdConsultantIds.push(data.id);
         }
       }
 
       // Create blog posts
+      const createdBlogPostIds: string[] = [];
       if (opts.blogPosts) {
         const postsToCreate = templateBlogPosts || [];
         for (let i = 0; i < postsToCreate.length; i++) {
           const post = postsToCreate[i];
           setProgress({ currentPage: i + 1, totalPages: postsToCreate.length, currentStep: `Creating blog post "${post.title}"...` });
-          await createBlogPost.mutateAsync({
+          const created = await createBlogPost.mutateAsync({
             title: post.title, slug: post.slug, excerpt: post.excerpt,
             featured_image: post.featured_image, content: post.content,
             meta: post.meta, status: opts.publishBlogPosts ? 'published' : 'draft',
           });
+          if (created?.id) createdBlogPostIds.push(created.id);
         }
       }
 
       // Create KB categories and articles
+      const createdKbCategoryIds: string[] = [];
       let totalKbArticles = 0;
       if (opts.kbContent) {
         const kbCategories = template.kbCategories || [];
@@ -423,6 +464,7 @@ export function useTemplateInstaller() {
             name: category.name, slug: category.slug, description: category.description,
             icon: category.icon, is_active: true,
           });
+          createdKbCategoryIds.push(createdCategory.id);
           for (const article of category.articles) {
             const answerJson = createDocumentFromText(article.answer_text);
             await createKbArticle.mutateAsync({
@@ -454,6 +496,23 @@ export function useTemplateInstaller() {
         logger.warn('[TemplateInstaller] FlowPilot bootstrap failed (non-fatal):', fpError);
       }
 
+      // Save installation manifest for future cleanup
+      const manifest: TemplateManifest = {
+        pageIds,
+        blogPostIds: createdBlogPostIds,
+        kbCategoryIds: createdKbCategoryIds,
+        productIds: createdProductIds,
+        consultantIds: createdConsultantIds,
+      };
+      await supabase.from('installed_template').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('installed_template').insert({
+        template_id: template.id,
+        template_name: template.name,
+        manifest: manifest as any,
+      });
+      setInstalledTemplate({ template_id: template.id, template_name: template.name, manifest });
+      logger.log('[TemplateInstaller] Saved manifest:', manifest);
+
       setCreatedPageIds(pageIds);
       setStep('done');
 
@@ -481,7 +540,7 @@ export function useTemplateInstaller() {
       toast({ title: 'Error', description: 'Failed to apply template. Some changes may have been applied.', variant: 'destructive' });
       setStep('idle');
     }
-  }, [existingPages, deletedPages, existingBlogPosts, existingKbCategories, existingProducts, mediaCount, currentModules]);
+  }, [existingPages, deletedPages, existingBlogPosts, existingKbCategories, existingProducts, mediaCount, currentModules, installedTemplate]);
 
   const reset = useCallback(() => {
     setStep('idle');
@@ -500,6 +559,7 @@ export function useTemplateInstaller() {
     createdPageIds,
     existingContent,
     hasExistingContent,
+    installedTemplate,
     install,
     reset,
   };
