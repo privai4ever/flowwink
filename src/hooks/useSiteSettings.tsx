@@ -171,6 +171,8 @@ const defaultMaintenanceSettings: MaintenanceSettings = {
 
 // Chat settings
 export type ChatAiProvider = 'openai' | 'gemini' | 'local' | 'n8n';
+export type ChatSttProvider = 'browser' | 'openai' | 'gemini' | 'local';
+export type ChatTtsProvider = 'none' | 'openai' | 'gemini' | 'local';
 export type ChatWidgetStyle = 'floating' | 'pill' | 'expanded';
 export type ChatWidgetSize = 'sm' | 'md' | 'lg';
 
