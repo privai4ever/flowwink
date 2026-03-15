@@ -153,6 +153,11 @@ export interface AgentExecuteRequest {
   arguments: Record<string, unknown>;
   agent_type: AgentType;
   conversation_id?: string;
+  objective_context?: {
+    goal: string;
+    step: string;
+    why: string;
+  };
 }
 
 export interface AgentExecuteResponse {
