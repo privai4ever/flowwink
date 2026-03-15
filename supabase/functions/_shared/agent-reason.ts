@@ -694,8 +694,9 @@ async function summarizeMessages(messages: any[], supabase: any): Promise<string
 export async function loadObjectives(supabase: any): Promise<string> {
   const { data } = await supabase
     .from('agent_objectives')
-    .select('id, goal, status, constraints, success_criteria, progress, created_at, updated_at')
+    .select('id, goal, status, constraints, success_criteria, progress, created_at, updated_at, locked_by, locked_at')
     .eq('status', 'active')
+    .is('locked_by', null)
     .order('created_at', { ascending: false })
     .limit(10);
 
