@@ -206,57 +206,68 @@ export default function ProductDetailPage() {
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-3 pt-4">
-                  <Button
-                    size="lg"
-                    className={cn(
-                      'flex-1 h-12 rounded-xl text-base font-medium transition-all',
-                      isInCart && 'bg-muted text-foreground hover:bg-muted/80'
-                    )}
-                    variant={isInCart ? 'secondary' : 'default'}
-                    onClick={handleAdd}
-                    disabled={isInCart}
-                  >
-                    {isInCart ? (
-                      <>
-                        <Check className="h-5 w-5 mr-2" />
-                        Added to cart
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingCart className="h-5 w-5 mr-2" />
-                        Add to cart
-                      </>
-                    )}
-                  </Button>
+                {stockStatus === 'out_of_stock' && !product.allow_backorder ? (
+                  <BackInStockForm productId={product.id} productName={product.name} className="pt-4" />
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3 pt-4">
+                      <Button
+                        size="lg"
+                        className={cn(
+                          'flex-1 h-12 rounded-xl text-base font-medium transition-all',
+                          isInCart && 'bg-muted text-foreground hover:bg-muted/80'
+                        )}
+                        variant={isInCart ? 'secondary' : 'default'}
+                        onClick={handleAdd}
+                        disabled={isInCart || !canPurchase}
+                      >
+                        {isInCart ? (
+                          <>
+                            <Check className="h-5 w-5 mr-2" />
+                            Added to cart
+                          </>
+                        ) : stockStatus === 'out_of_stock' && product.allow_backorder ? (
+                          <>
+                            <ShoppingCart className="h-5 w-5 mr-2" />
+                            Pre-order
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart className="h-5 w-5 mr-2" />
+                            Add to cart
+                          </>
+                        )}
+                      </Button>
 
-                  {user && (
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className={cn(
-                        'h-12 w-12 rounded-xl shrink-0 transition-all',
-                        isInWishlist && 'border-destructive/40 text-destructive hover:text-destructive'
+                      {user && (
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          className={cn(
+                            'h-12 w-12 rounded-xl shrink-0 transition-all',
+                            isInWishlist && 'border-destructive/40 text-destructive hover:text-destructive'
+                          )}
+                          onClick={() => toggleWishlist.mutate(product.id)}
+                        >
+                          <Heart className={cn('h-5 w-5', isInWishlist && 'fill-current')} />
+                        </Button>
                       )}
-                      onClick={() => toggleWishlist.mutate(product.id)}
-                    >
-                      <Heart className={cn('h-5 w-5', isInWishlist && 'fill-current')} />
-                    </Button>
-                  )}
-                </div>
+                    </div>
 
-                {/* View cart link */}
-                {isInCart && (
-                  <Button
-                    variant="link"
-                    asChild
-                    className="px-0 text-primary"
-                  >
-                    <Link to="/cart">
-                      View cart
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
+                    {/* View cart link */}
+                    {isInCart && (
+                      <Button
+                        variant="link"
+                        asChild
+                        className="px-0 text-primary"
+                      >
+                        <Link to="/cart">
+                          View cart
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Link>
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
