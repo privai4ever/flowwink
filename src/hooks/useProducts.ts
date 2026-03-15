@@ -16,8 +16,29 @@ export interface Product {
   sort_order: number;
   image_url: string | null;
   stripe_price_id: string | null;
+  category_id: string | null;
+  stock_quantity: number | null;
+  track_inventory: boolean;
+  low_stock_threshold: number;
+  allow_backorder: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock' | 'untracked';
+
+export function getStockStatus(product: Product): StockStatus {
+  if (!product.track_inventory) return 'untracked';
+  if (product.stock_quantity === null || product.stock_quantity === undefined) return 'untracked';
+  if (product.stock_quantity <= 0) return 'out_of_stock';
+  if (product.stock_quantity <= product.low_stock_threshold) return 'low_stock';
+  return 'in_stock';
+}
+
+export function isProductPurchasable(product: Product): boolean {
+  const status = getStockStatus(product);
+  if (status === 'out_of_stock') return product.allow_backorder;
+  return true;
 }
 
 export function useProducts(options?: { activeOnly?: boolean }) {
