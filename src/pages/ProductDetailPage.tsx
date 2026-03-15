@@ -166,13 +166,16 @@ export default function ProductDetailPage() {
             {/* Details — clean hierarchy */}
             <div className="flex flex-col justify-center py-4 md:py-8">
               <div className="space-y-6">
-                {/* Type badge */}
-                <Badge
-                  variant="secondary"
-                  className="rounded-full text-xs px-3 py-1 font-medium"
-                >
-                  {product.type === 'recurring' ? 'Subscription' : 'One-time purchase'}
-                </Badge>
+                {/* Type + Stock badges */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full text-xs px-3 py-1 font-medium"
+                  >
+                    {product.type === 'recurring' ? 'Subscription' : 'One-time purchase'}
+                  </Badge>
+                  <StockStatusBadge product={product} />
+                </div>
 
                 {/* Title */}
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold tracking-tight leading-tight">
