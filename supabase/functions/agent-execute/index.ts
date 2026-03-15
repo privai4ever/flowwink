@@ -1411,30 +1411,36 @@ async function executeBlogAction(
     }
   }
 
-  // Strategy 2: Gemini image generation via Lovable AI gateway
-  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-  if (!featuredImage && lovableApiKey) {
+  // Strategy 2: Gemini image generation (direct API, self-hosted)
+  const geminiKeyImg = Deno.env.get('GEMINI_API_KEY');
+  if (!featuredImage && geminiKeyImg) {
     try {
-      const imgResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${lovableApiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash-image',
-          messages: [{ role: 'user', content: `Generate a professional, modern blog header image for an article titled "${title}" about "${topic}". The image should be visually striking, landscape oriented, suitable as a blog featured image. No text in the image.` }],
-          modalities: ['image', 'text'],
-        }),
-      });
+      const imgPrompt = `Generate a professional, modern blog header image for an article titled "${title}" about "${topic}". The image should be visually striking, landscape oriented, suitable as a blog featured image. No text in the image.`;
+      const imgResp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiKeyImg}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: imgPrompt }] }],
+            generationConfig: {
+              responseModalities: ['IMAGE', 'TEXT'],
+            },
+          }),
+        }
+      );
       if (imgResp.ok) {
         const imgData = await imgResp.json();
-        const base64Url = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-        if (base64Url) {
-          // Upload base64 image to Supabase storage
-          const base64Data = base64Url.replace(/^data:image\/\w+;base64,/, '');
-          const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-          const fileName = `blog/${slug}-${Date.now()}.png`;
+        const parts = imgData.candidates?.[0]?.content?.parts || [];
+        const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image/'));
+        if (imagePart?.inlineData?.data) {
+          const mimeType = imagePart.inlineData.mimeType || 'image/png';
+          const ext = mimeType.includes('jpeg') ? 'jpg' : 'png';
+          const imageBytes = Uint8Array.from(atob(imagePart.inlineData.data), c => c.charCodeAt(0));
+          const fileName = `blog/${slug}-${Date.now()}.${ext}`;
           const { error: uploadErr } = await supabase.storage
             .from('cms-images')
-            .upload(fileName, imageBytes, { contentType: 'image/png', upsert: true });
+            .upload(fileName, imageBytes, { contentType: mimeType, upsert: true });
           if (!uploadErr) {
             const { data: urlData } = supabase.storage.from('cms-images').getPublicUrl(fileName);
             featuredImage = urlData.publicUrl;
