@@ -830,6 +830,732 @@ This skill is primarily triggered by automations, not directly by users.
       },
     },
   },
+  // ─── Module Administration Skills ──────────────────────────────────────────
+  {
+    name: 'manage_page',
+    description: 'Full page lifecycle: list, get, create, update, publish, archive, delete, rollback.',
+    handler: 'module:pages',
+    category: 'content',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_page',
+        description: 'Manage CMS pages. Actions: list, get, create, update, publish, archive, delete, rollback.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'create', 'update', 'publish', 'archive', 'delete', 'rollback'] },
+            page_id: { type: 'string', description: 'Page UUID (for get/update/publish/archive/delete/rollback)' },
+            slug: { type: 'string', description: 'Page slug (for get or create)' },
+            title: { type: 'string', description: 'Page title (for create/update)' },
+            status: { type: 'string', description: 'Filter by status (for list)' },
+            meta: { type: 'object', description: 'Page meta JSON (for create/update)' },
+            blocks: { type: 'array', description: 'Content blocks array (for create/update)' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_page_blocks',
+    description: 'Manipulate blocks on a page: list, add, update, remove, reorder, duplicate, toggle visibility.',
+    handler: 'module:pages',
+    category: 'content',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_page_blocks',
+        description: 'Manage blocks on a specific page.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'add', 'update', 'remove', 'reorder', 'duplicate', 'toggle_visibility'] },
+            page_id: { type: 'string', description: 'Page UUID' },
+            block_id: { type: 'string', description: 'Block UUID (for update/remove/duplicate/toggle)' },
+            block_type: { type: 'string', description: 'Block type (for add)' },
+            block_data: { type: 'object', description: 'Block data (for add/update)' },
+            position: { type: 'number', description: 'Insert position (for add)' },
+            block_ids: { type: 'array', items: { type: 'string' }, description: 'Ordered block IDs (for reorder)' },
+          },
+          required: ['action', 'page_id'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_blog_posts',
+    description: 'Manage existing blog posts: list, get, update, publish, unpublish, delete.',
+    handler: 'module:blog',
+    category: 'content',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_blog_posts',
+        description: 'Manage blog posts. Actions: list, get, update, publish, unpublish, delete.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'update', 'publish', 'unpublish', 'delete'] },
+            post_id: { type: 'string', description: 'Blog post UUID' },
+            slug: { type: 'string', description: 'Blog post slug (for get)' },
+            status: { type: 'string', description: 'Filter by status (for list)' },
+            title: { type: 'string' },
+            excerpt: { type: 'string' },
+            featured_image: { type: 'string' },
+            limit: { type: 'number', description: 'Max results (default 20)' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_blog_categories',
+    description: 'Manage blog categories and tags: list, create, delete categories/tags.',
+    handler: 'module:blog',
+    category: 'content',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_blog_categories',
+        description: 'Manage blog categories and tags.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list_categories', 'create_category', 'list_tags', 'create_tag'] },
+            name: { type: 'string' },
+            slug: { type: 'string' },
+            description: { type: 'string' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'browse_blog',
+    description: 'Browse published blog posts (visitor-facing).',
+    handler: 'module:blog',
+    category: 'content',
+    scope: 'both',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'browse_blog',
+        description: 'List published blog posts for visitors.',
+        parameters: {
+          type: 'object',
+          properties: {
+            search: { type: 'string', description: 'Search term' },
+            limit: { type: 'number', description: 'Max results (default 5)' },
+          },
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_kb_article',
+    description: 'Manage knowledge base articles: list, get, create, update, publish, unpublish.',
+    handler: 'module:kb',
+    category: 'content',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_kb_article',
+        description: 'Manage KB articles.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'create', 'update', 'publish', 'unpublish'] },
+            article_id: { type: 'string' },
+            slug: { type: 'string' },
+            title: { type: 'string' },
+            question: { type: 'string' },
+            answer: { type: 'string' },
+            category: { type: 'string' },
+            include_in_chat: { type: 'boolean' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_global_blocks',
+    description: 'Manage global blocks (header, footer, etc): list, get, update, toggle active status.',
+    handler: 'module:globalElements',
+    category: 'content',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_global_blocks',
+        description: 'Manage global blocks like header, footer.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'update', 'toggle'] },
+            slot: { type: 'string', description: 'Slot name (header, footer, etc.)' },
+            block_data: { type: 'object', description: 'Block data for update' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_leads',
+    description: 'Full lead management: list, get, update status/score, delete leads.',
+    handler: 'module:crm',
+    category: 'crm',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_leads',
+        description: 'Manage CRM leads. Actions: list, get, update, delete.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'update', 'delete'] },
+            lead_id: { type: 'string' },
+            status: { type: 'string', description: 'Filter or set status' },
+            score: { type: 'number' },
+            search: { type: 'string' },
+            limit: { type: 'number', description: 'Max results (default 50)' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_deal',
+    description: 'Manage deals: list, create, update, move stage.',
+    handler: 'module:deals',
+    category: 'crm',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_deal',
+        description: 'Manage sales deals.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'create', 'update', 'move_stage'] },
+            deal_id: { type: 'string' },
+            title: { type: 'string' },
+            value_cents: { type: 'number' },
+            stage: { type: 'string' },
+            lead_id: { type: 'string' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_company',
+    description: 'Manage companies: list, get, create, update, delete.',
+    handler: 'module:companies',
+    category: 'crm',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_company',
+        description: 'Manage CRM companies.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'create', 'update', 'delete'] },
+            company_id: { type: 'string' },
+            name: { type: 'string' },
+            domain: { type: 'string' },
+            industry: { type: 'string' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'browse_products',
+    description: 'Browse products in the catalog (visitor-facing).',
+    handler: 'module:products',
+    category: 'commerce',
+    scope: 'both',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'browse_products',
+        description: 'Browse available products.',
+        parameters: {
+          type: 'object',
+          properties: {
+            search: { type: 'string' },
+            type: { type: 'string', enum: ['physical', 'digital', 'service'] },
+          },
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_product',
+    description: 'Manage products: create, update, delete, manage variants.',
+    handler: 'module:products',
+    category: 'commerce',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_product',
+        description: 'Manage products in the catalog.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'create', 'update', 'delete'] },
+            product_id: { type: 'string' },
+            name: { type: 'string' },
+            price_cents: { type: 'number' },
+            description: { type: 'string' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_inventory',
+    description: 'Manage product inventory: list stock, update quantities, set low-stock alerts.',
+    handler: 'module:products',
+    category: 'commerce',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_inventory',
+        description: 'Manage product inventory levels.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list_stock', 'update_stock', 'low_stock'] },
+            product_id: { type: 'string' },
+            quantity: { type: 'number' },
+            threshold: { type: 'number', description: 'Low stock threshold (default 5)' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_orders',
+    description: 'Manage orders: list, get details, update status, view stats.',
+    handler: 'module:orders',
+    category: 'commerce',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_orders',
+        description: 'Manage e-commerce orders.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'update_status', 'stats'] },
+            order_id: { type: 'string' },
+            status: { type: 'string' },
+            period: { type: 'string', enum: ['today', 'week', 'month', 'quarter'] },
+            limit: { type: 'number' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'check_availability',
+    description: 'Check booking availability for a specific date.',
+    handler: 'module:booking',
+    category: 'crm',
+    scope: 'both',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'check_availability',
+        description: 'Check available booking slots for a date.',
+        parameters: {
+          type: 'object',
+          properties: {
+            date: { type: 'string', description: 'Date in YYYY-MM-DD format' },
+            service_id: { type: 'string', description: 'Optional service filter' },
+          },
+          required: ['date'],
+        },
+      },
+    },
+  },
+  {
+    name: 'browse_services',
+    description: 'List available booking services.',
+    handler: 'module:booking',
+    category: 'crm',
+    scope: 'both',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'browse_services',
+        description: 'List available booking services.',
+        parameters: { type: 'object', properties: {} },
+      },
+    },
+  },
+  {
+    name: 'manage_booking_availability',
+    description: 'Manage booking hours and blocked dates.',
+    handler: 'module:booking',
+    category: 'crm',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_booking_availability',
+        description: 'Manage booking availability hours and blocked dates.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list_hours', 'set_hours', 'block_date', 'unblock_date', 'list_blocked'] },
+            day_of_week: { type: 'number', description: '0=Sunday, 6=Saturday' },
+            start_time: { type: 'string', description: 'HH:MM format' },
+            end_time: { type: 'string', description: 'HH:MM format' },
+            date: { type: 'string', description: 'Date for blocking (YYYY-MM-DD)' },
+            reason: { type: 'string' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_bookings',
+    description: 'List, view, update or cancel bookings.',
+    handler: 'module:booking',
+    category: 'crm',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_bookings',
+        description: 'Manage bookings: list, update status, cancel.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'update_status', 'cancel'] },
+            booking_id: { type: 'string' },
+            status: { type: 'string' },
+            period: { type: 'string', enum: ['today', 'week', 'month'] },
+            limit: { type: 'number' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_newsletter_subscribers',
+    description: 'Manage newsletter subscribers: list, search, count, remove.',
+    handler: 'module:newsletter',
+    category: 'communication',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_newsletter_subscribers',
+        description: 'Manage newsletter subscribers.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'search', 'count', 'remove'] },
+            search: { type: 'string' },
+            status: { type: 'string' },
+            email: { type: 'string' },
+            limit: { type: 'number' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_consultant_profile',
+    description: 'Manage consultant/resume profiles: list, create, update, delete, deduplicate.',
+    handler: 'module:resume',
+    category: 'content',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_consultant_profile',
+        description: 'Manage consultant profiles. Actions: list, create, update, delete, find_duplicates.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'create', 'update', 'delete', 'find_duplicates'] },
+            profile_id: { type: 'string' },
+            name: { type: 'string' },
+            title: { type: 'string' },
+            skills: { type: 'array', items: { type: 'string' } },
+            bio: { type: 'string' },
+            experience_years: { type: 'number' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'match_consultant',
+    description: 'Match consultants to a job description using AI.',
+    handler: 'module:resume',
+    category: 'content',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'match_consultant',
+        description: 'Find best matching consultants for a job.',
+        parameters: {
+          type: 'object',
+          properties: {
+            job_description: { type: 'string', description: 'Job requirements text' },
+            max_results: { type: 'number', description: 'Max matches (default 3)' },
+          },
+          required: ['job_description'],
+        },
+      },
+    },
+  },
+  {
+    name: 'media_browse',
+    description: 'Browse, search, and manage media files in the media library. Supports listing, getting URLs, deleting single files, and clearing entire library.',
+    handler: 'module:media',
+    category: 'content',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'media_browse',
+        description: 'Manage media library: list, search, delete, clear all files.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get_url', 'delete', 'clear_all'] },
+            folder: { type: 'string', description: 'Folder to browse (pages, imports, templates, uploads, blog)' },
+            search: { type: 'string', description: 'Search by filename' },
+            file_path: { type: 'string', description: 'File path for delete/get_url' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_form_submissions',
+    description: 'View and manage form submissions.',
+    handler: 'module:forms',
+    category: 'crm',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_form_submissions',
+        description: 'View and manage form submissions.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'get', 'delete'] },
+            submission_id: { type: 'string' },
+            form_name: { type: 'string' },
+            limit: { type: 'number' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_webinar',
+    description: 'Manage webinars and registrations.',
+    handler: 'module:webinars',
+    category: 'communication',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_webinar',
+        description: 'Manage webinars: list, create, update, view registrations.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['list', 'create', 'update', 'registrations'] },
+            webinar_id: { type: 'string' },
+            title: { type: 'string' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_site_settings',
+    description: 'Read and update site settings including module configuration, site name, theme, etc.',
+    handler: 'db:site_settings',
+    category: 'system',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_site_settings',
+        description: 'Read and update site settings. Keys: modules, site_name, theme, ai_config, chat_config, etc.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['get', 'get_all', 'update'] },
+            key: { type: 'string', description: 'Settings key to read/update' },
+            value: { type: 'object', description: 'New value (for update)' },
+          },
+          required: ['action'],
+        },
+      },
+    },
+  },
+  {
+    name: 'seo_audit_page',
+    description: 'Run an SEO audit on a page or blog post, checking title, meta, content depth, images, links.',
+    handler: 'module:analytics',
+    category: 'analytics',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'seo_audit_page',
+        description: 'Run SEO audit on a page/post by slug.',
+        parameters: {
+          type: 'object',
+          properties: {
+            slug: { type: 'string', description: 'Page or blog post slug to audit' },
+          },
+          required: ['slug'],
+        },
+      },
+    },
+  },
+  {
+    name: 'kb_gap_analysis',
+    description: 'Analyze chat data to find questions not covered by KB articles, underperforming articles, and content gaps.',
+    handler: 'module:analytics',
+    category: 'analytics',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'kb_gap_analysis',
+        description: 'Find knowledge base content gaps from chat data.',
+        parameters: {
+          type: 'object',
+          properties: {
+            limit: { type: 'number', description: 'Max uncovered questions (default 20)' },
+          },
+        },
+      },
+    },
+  },
+  {
+    name: 'analyze_chat_feedback',
+    description: 'Analyze chat feedback: summary stats, negative feedback drill-down.',
+    handler: 'module:analytics',
+    category: 'analytics',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'analyze_chat_feedback',
+        description: 'Analyze visitor chat feedback.',
+        parameters: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['summary', 'negative_only'] },
+            period: { type: 'string', enum: ['week', 'month', 'quarter'] },
+            limit: { type: 'number' },
+          },
+        },
+      },
+    },
+  },
+  {
+    name: 'manage_automations',
+    description: 'Create and manage agent automations (cron jobs, event triggers, signal handlers).',
+    handler: 'module:automations',
+    category: 'automation',
+    scope: 'internal',
+    requires_approval: false,
+    tool_definition: {
+      type: 'function',
+      function: {
+        name: 'manage_automations',
+        description: 'Create and manage agent automations.',
+        parameters: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            description: { type: 'string' },
+            trigger_type: { type: 'string', enum: ['cron', 'event', 'signal', 'manual'] },
+            trigger_config: { type: 'object' },
+            skill_name: { type: 'string', description: 'Skill to execute' },
+            skill_arguments: { type: 'object' },
+            enabled: { type: 'boolean' },
+          },
+          required: ['name', 'skill_name'],
+        },
+      },
+    },
+  },
 ];
 
 // Default Soul & Identity
