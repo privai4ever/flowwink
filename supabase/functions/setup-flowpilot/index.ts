@@ -1411,7 +1411,7 @@ This skill is primarily triggered by automations, not directly by users.
         parameters: {
           type: 'object',
           properties: {
-            action: { type: 'string', enum: ['list', 'get', 'delete'] },
+            action: { type: 'string', enum: ['list', 'get', 'delete', 'stats'] },
             submission_id: { type: 'string' },
             form_name: { type: 'string' },
             limit: { type: 'number' },
