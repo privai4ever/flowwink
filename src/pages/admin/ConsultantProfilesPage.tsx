@@ -212,6 +212,36 @@ function useConsultantProfiles() {
   });
 }
 
+/** Small button that copies the check-in link for a consultant */
+function CopyCheckinLinkButton({ profileId, profileName }: { profileId: string; profileName: string }) {
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
+
+  const handleCopy = async () => {
+    const url = `${window.location.origin}/chat?mode=checkin&id=${profileId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast({ title: "Check-in link copied", description: `Send this link to ${profileName} to update their profile via chat.` });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" });
+    }
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8"
+      onClick={handleCopy}
+      title={`Copy check-in link for ${profileName}`}
+    >
+      {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <LinkIcon className="h-3.5 w-3.5" />}
+    </Button>
+  );
+}
+
 export default function ConsultantProfilesPage() {
   const { data: profiles = [], isLoading } = useConsultantProfiles();
   const queryClient = useQueryClient();
