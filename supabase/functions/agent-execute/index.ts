@@ -445,6 +445,26 @@ async function executeModuleAction(
         return { deleted: file_path };
       }
 
+      if (action === 'clear_all') {
+        const targetFolders = ['pages', 'imports', 'templates', 'uploads', 'blog'];
+        let totalDeleted = 0;
+        for (const f of targetFolders) {
+          const { data: files } = await supabase.storage
+            .from('cms-images')
+            .list(f, { limit: 1000 });
+          if (files?.length) {
+            const paths = files
+              .filter((file: any) => file.name !== '.emptyFolderPlaceholder')
+              .map((file: any) => `${f}/${file.name}`);
+            if (paths.length > 0) {
+              const { error } = await supabase.storage.from('cms-images').remove(paths);
+              if (!error) totalDeleted += paths.length;
+            }
+          }
+        }
+        return { action: 'clear_all', total_deleted: totalDeleted, folders_cleaned: targetFolders };
+      }
+
       return { error: `Unknown media action: ${action}` };
     }
 
