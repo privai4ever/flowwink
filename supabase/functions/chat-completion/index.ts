@@ -124,17 +124,31 @@ const AVAILABLE_TOOLS = {
       }
     }
   },
-  save_kb_article: {
+  save_consultant_profile: {
     type: "function",
     function: {
-      name: "save_kb_article",
-      description: "Save the updated consultant profile to the knowledge base. Call this when you have gathered enough information (at least 3 exchanges) about the consultant's latest project, skills, and availability.",
+      name: "save_consultant_profile",
+      description: "Save the updated consultant profile after gathering information about their latest project, skills, and availability. Call this when you have enough information (at least 3 exchanges).",
       parameters: {
         type: "object",
         properties: {
           summary: {
             type: "string",
-            description: "A comprehensive plain-text summary of the consultant's profile including: name, role/title, skills and tech stack, latest project description, what went well, challenges, and current availability."
+            description: "A comprehensive updated bio/summary of the consultant including: latest project, skills, what went well, challenges, and current availability."
+          },
+          skills: {
+            type: "array",
+            items: { type: "string" },
+            description: "Updated list of all skills and technologies the consultant mentioned."
+          },
+          availability: {
+            type: "string",
+            enum: ["available", "busy", "on_leave"],
+            description: "Current availability status."
+          },
+          title: {
+            type: "string",
+            description: "Updated professional title if mentioned."
           }
         },
         required: ["summary"]
