@@ -689,7 +689,7 @@ export const serviceProTemplate: StarterTemplate = {
   aiChatPosition: 'Widget for quick questions',
   helpStyle: 'none',
   pages: serviceProPages,
-  requiredModules: ['bookings', 'products', 'orders', 'forms', 'chat', 'leads', 'blog'],
+  requiredModules: ['bookings', 'ecommerce', 'forms', 'chat', 'leads', 'blog'],
   blogPosts: serviceProBlogPosts,
   products: serviceProProducts,
   branding: {
