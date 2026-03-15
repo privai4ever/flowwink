@@ -111,7 +111,6 @@ export default function AutonomyTestSuitePage() {
         <AdminPageHeader
           title="Autonomy Test Suite"
           description="Run OpenClaw conformance tests across all three layers"
-          icon={FlaskConical}
         />
 
         {/* Controls */}
