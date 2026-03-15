@@ -29,7 +29,7 @@ export function PublicNavigation() {
   const currentSlug = location.pathname === '/' ? 'hem' : location.pathname.slice(1);
   const { branding } = useBranding();
   const { resolvedTheme } = useTheme();
-  const productsEnabled = useIsModuleEnabled('products');
+  const ecommerceEnabled = useIsModuleEnabled('ecommerce');
   
   // Use header global block settings
   const { data: headerBlock } = useHeaderBlock();
