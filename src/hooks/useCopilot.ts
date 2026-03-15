@@ -29,10 +29,10 @@ const BLOCK_MODULE_MAP: Record<string, keyof ModulesSettings> = {
   'newsletter': 'newsletter',
   
   // E-commerce
-  'products': 'products',
-  'cart': 'orders',
-  'pricing': 'products',
-  'comparison': 'products',
+  'products': 'ecommerce',
+  'cart': 'ecommerce',
+  'pricing': 'ecommerce',
+  'comparison': 'ecommerce',
   
   // Forms
   'form': 'forms',
@@ -332,8 +332,8 @@ export function useCopilot(): UseCopilotReturn {
   const detectModulesFromPlatform = (platform: string): (keyof ModulesSettings)[] => {
     const platformModules: Record<string, (keyof ModulesSettings)[]> = {
       wordpress: ['blog', 'forms', 'newsletter'],
-      woocommerce: ['products', 'orders', 'blog', 'newsletter'],
-      shopify: ['products', 'orders', 'newsletter'],
+      woocommerce: ['ecommerce', 'blog', 'newsletter'],
+      shopify: ['ecommerce', 'newsletter'],
       wix: ['forms', 'bookings', 'blog'],
       squarespace: ['blog', 'newsletter', 'forms'],
     };

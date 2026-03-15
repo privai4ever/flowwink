@@ -36,8 +36,7 @@ export interface ModulesSettings {
   leads: ModuleConfig;
   deals: ModuleConfig;
   companies: ModuleConfig;
-  products: ModuleConfig;
-  orders: ModuleConfig;
+  ecommerce: ModuleConfig;
   contentApi: ModuleConfig;
   globalElements: ModuleConfig;
   mediaLibrary: ModuleConfig;
@@ -158,22 +157,13 @@ export const defaultModulesSettings: ModulesSettings = {
     autonomy: 'view-required',
     adminUI: true,
   },
-  products: {
-    enabled: true,
-    name: 'Products',
-    description: 'Product catalog for deals and services',
-    icon: 'Package',
+  ecommerce: {
+    enabled: false,
+    name: 'E-commerce',
+    description: 'Products, orders, cart, and customer portal',
+    icon: 'ShoppingBag',
     category: 'data',
     autonomy: 'config-required',
-    adminUI: true,
-  },
-  orders: {
-    enabled: true,
-    name: 'Orders',
-    description: 'Order management and e-commerce transactions',
-    icon: 'ShoppingCart',
-    category: 'data',
-    autonomy: 'view-required',
     adminUI: true,
   },
   contentApi: {
@@ -265,8 +255,8 @@ export const SIDEBAR_TO_MODULE: Record<string, keyof ModulesSettings> = {
   '/admin/leads': 'leads',
   '/admin/deals': 'deals',
   '/admin/companies': 'companies',
-  '/admin/products': 'products',
-  '/admin/orders': 'orders',
+  '/admin/products': 'ecommerce',
+  '/admin/orders': 'ecommerce',
   '/admin/content-hub': 'contentApi',
   '/admin/global-blocks': 'globalElements',
   '/admin/media': 'mediaLibrary',
@@ -290,13 +280,29 @@ export function useModules() {
       
       // Merge stored settings with defaults to ensure all modules exist
       const stored = (data?.value as unknown as Partial<ModulesSettings>) || {};
+      
+      // Backward compatibility: migrate old products/orders keys to ecommerce
+      const storedAny = stored as Record<string, unknown>;
+      if (('products' in storedAny || 'orders' in storedAny) && !('ecommerce' in storedAny)) {
+        const oldProducts = storedAny.products as ModuleConfig | undefined;
+        const oldOrders = storedAny.orders as ModuleConfig | undefined;
+        storedAny.ecommerce = {
+          ...defaultModulesSettings.ecommerce,
+          enabled: oldProducts?.enabled || oldOrders?.enabled || false,
+        };
+        delete storedAny.products;
+        delete storedAny.orders;
+      }
+      
       return {
         ...defaultModulesSettings,
         ...Object.fromEntries(
-          Object.entries(stored).map(([key, value]) => [
-            key,
-            { ...defaultModulesSettings[key as keyof ModulesSettings], ...value }
-          ])
+          Object.entries(stored)
+            .filter(([key]) => key in defaultModulesSettings)
+            .map(([key, value]) => [
+              key,
+              { ...defaultModulesSettings[key as keyof ModulesSettings], ...value }
+            ])
         ),
       } as ModulesSettings;
     },

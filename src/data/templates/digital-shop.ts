@@ -658,7 +658,7 @@ export const digitalShopTemplate: StarterTemplate = {
   aiChatPosition: 'Widget for customer support',
   helpStyle: 'none',
   pages: digitalShopPages,
-  requiredModules: ['products', 'orders', 'chat', 'forms', 'blog'],
+  requiredModules: ['ecommerce', 'chat', 'forms', 'blog'],
   blogPosts: digitalShopBlogPosts,
   products: digitalShopProducts,
   branding: {

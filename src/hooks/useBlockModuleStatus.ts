@@ -16,8 +16,8 @@ export const BLOCK_TO_MODULE: Partial<Record<ContentBlockType, keyof ModulesSett
   
   // Data modules
   'booking': 'bookings',
-  'products': 'products',
-  'cart': 'products',
+  'products': 'ecommerce',
+  'cart': 'ecommerce',
   
   // Knowledge Base
   'kb-featured': 'knowledgeBase',
