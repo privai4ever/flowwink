@@ -81,8 +81,11 @@ export default function ProductDetailPage() {
   const isInCart = product ? items.some((i) => i.productId === product.id) : false;
   const isInWishlist = product ? wishlistItems.some((w) => w.product_id === product.id) : false;
 
+  const canPurchase = product ? isProductPurchasable(product) : false;
+  const stockStatus = product ? getStockStatus(product) : 'untracked';
+
   const handleAdd = () => {
-    if (!product || isInCart) return;
+    if (!product || isInCart || !canPurchase) return;
     addItem({
       productId: product.id,
       productName: product.name,
