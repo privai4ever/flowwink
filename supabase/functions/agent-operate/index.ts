@@ -61,6 +61,7 @@ serve(async (req) => {
       soulPrompt: buildSoulPrompt(soul, identity),
       memoryContext,
       objectiveContext,
+      cmsSchemaContext: cmsSchemaCtx,
     });
 
     // Build tools
