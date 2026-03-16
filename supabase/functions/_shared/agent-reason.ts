@@ -834,6 +834,10 @@ Success criteria: ${JSON.stringify(objective.success_criteria || {})}`,
 }
 
 async function handleDecomposeObjective(supabase: any, args: { objective_id: string }) {
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!args.objective_id || !UUID_RE.test(args.objective_id)) {
+    return { status: 'error', error: `Invalid objective_id UUID: "${args.objective_id}". Use the full UUID from the objectives list.` };
+  }
   const { data: obj, error } = await supabase.from('agent_objectives')
     .select('id, goal, constraints, success_criteria, progress')
     .eq('id', args.objective_id).single();
