@@ -34,6 +34,7 @@ export interface PromptCompilerInput {
   cmsSchemaContext?: string;
   heartbeatState?: string;
   tokenBudget?: number;
+  siteMaturity?: SiteMaturity;
   // Chat-specific
   chatSystemPrompt?: string;
 }
