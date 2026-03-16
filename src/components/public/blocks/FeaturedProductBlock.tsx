@@ -57,7 +57,7 @@ export function FeaturedProductBlock({ data }: FeaturedProductBlockProps) {
 
   if (!product) {
     return (
-      <section className="py-16 md:py-24">
+      <section>
         <div className="max-w-6xl mx-auto px-4 text-center text-muted-foreground">
           <ShoppingCart className="h-12 w-12 mx-auto mb-3 opacity-40" />
           <p>Select a product to feature</p>
