@@ -40,7 +40,7 @@ export function FeaturedProductBlock({ data }: FeaturedProductBlockProps) {
 
   if (isLoading) {
     return (
-      <section className="py-16 md:py-24">
+      <section>
         <div className="max-w-6xl mx-auto px-4">
           <div className="animate-pulse grid md:grid-cols-2 gap-12">
             <div className="aspect-square bg-muted rounded-2xl" />
@@ -57,7 +57,7 @@ export function FeaturedProductBlock({ data }: FeaturedProductBlockProps) {
 
   if (!product) {
     return (
-      <section className="py-16 md:py-24">
+      <section>
         <div className="max-w-6xl mx-auto px-4 text-center text-muted-foreground">
           <ShoppingCart className="h-12 w-12 mx-auto mb-3 opacity-40" />
           <p>Select a product to feature</p>
@@ -73,7 +73,7 @@ export function FeaturedProductBlock({ data }: FeaturedProductBlockProps) {
   };
 
   return (
-    <section className={cn('py-16 md:py-24', bgClasses[data.backgroundStyle || 'default'])}>
+    <section className={cn(bgClasses[data.backgroundStyle || 'default'])}>
       <div className="max-w-6xl mx-auto px-4">
         <div className={cn(
           'grid md:grid-cols-2 gap-8 md:gap-12 items-center',

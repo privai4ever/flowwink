@@ -15,7 +15,7 @@ export function CTABlock({ data }: CTABlockProps) {
   // Split variant - image on one side, content on the other
   if (variant === 'split') {
     return (
-      <section className="py-0">
+      <section>
         <div className="grid md:grid-cols-2 min-h-[400px]">
           {/* Image side */}
           <div className="relative bg-muted">
@@ -66,7 +66,7 @@ export function CTABlock({ data }: CTABlockProps) {
   // Minimal variant - clean, understated design
   if (variant === 'minimal') {
     return (
-      <section className="py-16 px-6">
+      <section className="px-6">
         <div className="container mx-auto text-center max-w-3xl">
           <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4 text-foreground">
             {data.title}
@@ -102,7 +102,7 @@ export function CTABlock({ data }: CTABlockProps) {
   // With-image variant - full background image with overlay
   if (variant === 'with-image' && data.backgroundImage) {
     return (
-      <section className="relative py-16 px-6">
+      <section className="relative px-6">
         {/* Background image */}
         <div className="absolute inset-0">
           <img
@@ -155,7 +155,7 @@ export function CTABlock({ data }: CTABlockProps) {
   return (
     <section
       className={cn(
-        'py-16 px-6',
+        'px-6',
         useGradient
           ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground'
           : 'bg-primary text-primary-foreground'

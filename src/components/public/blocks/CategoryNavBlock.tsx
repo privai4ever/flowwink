@@ -28,7 +28,7 @@ export function CategoryNavBlock({ data }: CategoryNavBlockProps) {
 
   if (isLoading) {
     return (
-      <section className="py-12 md:py-16">
+      <section>
         <div className="max-w-6xl mx-auto px-4">
           <div className={cn('grid grid-cols-2 gap-4', colClasses[columns])}>
             {Array.from({ length: columns }).map((_, i) => (
@@ -42,7 +42,7 @@ export function CategoryNavBlock({ data }: CategoryNavBlockProps) {
 
   if (categories.length === 0) {
     return (
-      <section className="py-12 md:py-16">
+      <section>
         <div className="max-w-6xl mx-auto px-4 text-center text-muted-foreground">
           <LayoutGrid className="h-10 w-10 mx-auto mb-3 opacity-40" />
           <p>No categories yet</p>
@@ -52,7 +52,7 @@ export function CategoryNavBlock({ data }: CategoryNavBlockProps) {
   }
 
   return (
-    <section className="py-12 md:py-16">
+    <section>
       <div className="max-w-6xl mx-auto px-4">
         {data.title && (
           <h2 className="font-serif text-2xl md:text-3xl font-semibold mb-8 text-center">
