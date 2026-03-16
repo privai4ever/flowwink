@@ -71,6 +71,16 @@ export interface HeartbeatState {
   iteration_count: number;
 }
 
+export interface SiteMaturity {
+  isFresh: boolean;
+  blogPosts: number;
+  leads: number;
+  subscribers: number;
+  pageViews: number;
+  contentResearch: number;
+  contentProposals: number;
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const SELF_HEAL_THRESHOLD = 3;
