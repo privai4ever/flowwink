@@ -127,7 +127,8 @@ export function AdminContentHeader() {
       {/* Spacer in copilot mode */}
       {isCopilotMode && <div className="flex-1" />}
 
-      {/* Theme toggle */}
+      {/* Briefing bell + Theme toggle */}
+      <FlowPilotBriefingBell />
       <AdminThemeToggle />
 
       {/* Profile */}
