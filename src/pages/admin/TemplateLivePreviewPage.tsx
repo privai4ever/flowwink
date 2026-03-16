@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ALL_TEMPLATES } from '@/data/templates';
 import { BlockRenderer } from '@/components/public/BlockRenderer';
 import { TemplateBrandingProvider } from '@/components/admin/templates/TemplateBrandingProvider';
-import { ContentBlock } from '@/types/cms';
+import { ContentBlock, SectionBackground } from '@/types/cms';
 import { cn } from '@/lib/utils';
 
 export default function TemplateLivePreviewPage() {
