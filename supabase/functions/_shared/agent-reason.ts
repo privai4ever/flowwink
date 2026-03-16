@@ -852,6 +852,10 @@ async function handleDecomposeObjective(supabase: any, args: { objective_id: str
 }
 
 async function handleAdvancePlan(supabase: any, supabaseUrl: string, serviceKey: string, args: { objective_id: string; chain?: boolean }) {
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!args.objective_id || !UUID_RE.test(args.objective_id)) {
+    return { status: 'error', error: `Invalid objective_id UUID: "${args.objective_id}". Use the full UUID from the objectives list.` };
+  }
   const { objective_id, chain = true } = args;
   const maxSteps = chain ? MAX_CHAIN_DEPTH : 1;
   const chainResults: any[] = [];
