@@ -42,7 +42,7 @@ export function CategoryNavBlock({ data }: CategoryNavBlockProps) {
 
   if (categories.length === 0) {
     return (
-      <section className="py-12 md:py-16">
+      <section>
         <div className="max-w-6xl mx-auto px-4 text-center text-muted-foreground">
           <LayoutGrid className="h-10 w-10 mx-auto mb-3 opacity-40" />
           <p>No categories yet</p>
