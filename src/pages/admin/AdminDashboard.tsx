@@ -34,6 +34,7 @@ import { toast } from 'sonner';
 
 // Widget metadata
 const WIDGET_META: Record<string, { title: string; description: string; moduleId?: string }> = {
+  'business-pulse': { title: 'Business Pulse', description: 'Health score, key metrics & daily briefing' },
   'needs-attention': { title: 'Needs Attention', description: 'Action items requiring your attention' },
   'content-overview': { title: 'Content Overview', description: 'Page statistics overview' },
   'leads': { title: 'Leads', description: 'Recent leads and stats', moduleId: 'leads' },
