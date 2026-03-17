@@ -11,7 +11,7 @@ import { useExtensionRelay } from '@/hooks/useExtensionRelay';
 import { useBrandingSettings, useChatSettings } from '@/hooks/useSiteSettings';
 import { useProactiveMessages } from '@/hooks/useProactiveMessages';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -157,46 +157,73 @@ export default function CopilotPage() {
             </Button>
           </div>
 
-          {/* Chat history */}
+          {/* Chat history — grouped by day */}
           <div className="flex-1 overflow-auto px-2 pt-1 pb-2">
-            <div className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-normal mb-1 px-2">
-              Recent chats
-            </div>
-            {operate.conversations.map((conv) => (
-              <div key={conv.id} className="group/chat relative">
-                <button
-                  onClick={() => handleSwitchConversation(conv.id)}
-                  className={cn(
-                    'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-colors',
-                    operate.conversationId === conv.id
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'hover:bg-sidebar-accent/50'
-                  )}
-                >
-                  <Zap className="h-4 w-4 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <span className="block truncate text-sm">{conv.title || 'Untitled'}</span>
-                    <span className="block text-[10px] text-sidebar-foreground/50">
-                      {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
-                    </span>
-                  </div>
-                </button>
-                <button
-                  onClick={(e) => handleDeleteConversation(conv.id, e)}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 transition-opacity p-1 rounded hover:bg-sidebar-accent"
-                  title="Delete chat"
-                >
-                  <Trash2 className="h-3 w-3 text-sidebar-foreground/60" />
-                </button>
-              </div>
-            ))}
+            {(() => {
+              const groups: { label: string; convs: typeof operate.conversations }[] = [];
+              const today: typeof operate.conversations = [];
+              const yesterday: typeof operate.conversations = [];
+              const thisWeek: typeof operate.conversations = [];
+              const older: typeof operate.conversations = [];
 
-            {operate.conversations.length === 0 && (
-              <div className="flex flex-col items-center gap-2 py-8 px-4 text-sidebar-foreground/40">
-                <MessageSquare className="h-8 w-8 opacity-30" />
-                <p className="text-xs text-center">No previous chats</p>
-              </div>
-            )}
+              for (const conv of operate.conversations) {
+                const d = new Date(conv.created_at);
+                if (isToday(d)) today.push(conv);
+                else if (isYesterday(d)) yesterday.push(conv);
+                else if (isThisWeek(d)) thisWeek.push(conv);
+                else older.push(conv);
+              }
+
+              if (today.length) groups.push({ label: 'Today', convs: today });
+              if (yesterday.length) groups.push({ label: 'Yesterday', convs: yesterday });
+              if (thisWeek.length) groups.push({ label: 'This week', convs: thisWeek });
+              if (older.length) groups.push({ label: 'Older', convs: older });
+
+              if (groups.length === 0) {
+                return (
+                  <div className="flex flex-col items-center gap-2 py-8 px-4 text-sidebar-foreground/40">
+                    <MessageSquare className="h-8 w-8 opacity-30" />
+                    <p className="text-xs text-center">No previous chats</p>
+                  </div>
+                );
+              }
+
+              return groups.map(group => (
+                <div key={group.label} className="mb-2">
+                  <div className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-normal mb-1 px-2">
+                    {group.label}
+                  </div>
+                  {group.convs.map((conv) => (
+                    <div key={conv.id} className="group/chat relative">
+                      <button
+                        onClick={() => handleSwitchConversation(conv.id)}
+                        className={cn(
+                          'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-colors',
+                          operate.conversationId === conv.id
+                            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                            : 'hover:bg-sidebar-accent/50'
+                        )}
+                      >
+                        <Zap className="h-4 w-4 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <span className="block truncate text-sm">{conv.title || 'Untitled'}</span>
+                          <span className="block text-[10px] text-sidebar-foreground/50">
+                            {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
+                          </span>
+                        </div>
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteConversation(conv.id, e)}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 transition-opacity p-1 rounded hover:bg-sidebar-accent"
+                        title="Delete chat"
+                      >
+                        <Trash2 className="h-3 w-3 text-sidebar-foreground/60" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ));
+            })()}
           </div>
 
           {/* Escalations section */}
