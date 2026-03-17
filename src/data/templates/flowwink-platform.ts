@@ -1149,7 +1149,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
         // BOOKING
         {
           id: 'health-booking',
-          type: 'booking-calendar',
+          type: 'booking',
           data: {
             title: 'Book Your Appointment',
             subtitle: 'Same-day appointments available. Choose your service and preferred time.',
