@@ -310,6 +310,76 @@ serve(async (req) => {
 
     console.log(`[briefing] Created: ${title} | Health: ${healthScore} | Actions: ${actionItems.length}`);
 
+    // ─── Inject proactive chat message ──────────────────────────────
+    try {
+      // Find or create a FlowPilot conversation for the admin
+      let conversationId: string | null = null;
+      const { data: existing } = await supabase
+        .from("chat_conversations")
+        .select("id")
+        .eq("title", "FlowPilot Daily")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existing) {
+        conversationId = existing.id;
+      } else {
+        const { data: newConv } = await supabase
+          .from("chat_conversations")
+          .insert({ title: "FlowPilot Daily" })
+          .select("id")
+          .single();
+        conversationId = newConv?.id ?? null;
+      }
+
+      if (conversationId) {
+        // Build a markdown briefing message
+        const healthEmoji = healthScore >= 75 ? "🟢" : healthScore >= 50 ? "🟡" : "🔴";
+        const lines: string[] = [
+          `☀️ **Good morning!** Here's your daily briefing:`,
+          ``,
+          `${healthEmoji} **Health Score: ${healthScore}/100**`,
+        ];
+        if (trafficToday > 0) lines.push(`• ${trafficToday} visitors today (${trafficTrend >= 0 ? "+" : ""}${trafficTrend}% vs last week)`);
+        if (newLeadsToday > 0) lines.push(`• ${newLeadsToday} new lead${newLeadsToday > 1 ? "s" : ""} captured`);
+        if (publishedThisWeek > 0) lines.push(`• ${publishedThisWeek} post${publishedThisWeek > 1 ? "s" : ""} published this week`);
+        if (successActions > 0) lines.push(`• FlowPilot completed ${successActions} action${successActions > 1 ? "s" : ""}`);
+        lines.push(``);
+        lines.push(`Anything you'd like me to focus on today?`);
+
+        const chatContent = lines.join("\n");
+
+        const actionPayload = {
+          type: "briefing",
+          title,
+          healthScore,
+          metrics: [
+            { label: "Visitors", value: trafficToday },
+            { label: "Leads", value: newLeadsToday },
+            { label: "Traffic", value: `${trafficTrend >= 0 ? "+" : ""}${trafficTrend}%` },
+          ],
+          actions: actionItems.slice(0, 3).map((item: any) => ({
+            label: item.text.length > 40 ? item.text.substring(0, 40) + "…" : item.text,
+            link: item.link,
+            variant: item.priority === "high" ? "default" : "outline",
+          })),
+        };
+
+        await supabase.from("chat_messages").insert({
+          conversation_id: conversationId,
+          role: "assistant",
+          content: chatContent,
+          source: "proactive",
+          action_payload: actionPayload,
+        });
+
+        console.log(`[briefing] Proactive chat message injected into conversation ${conversationId}`);
+      }
+    } catch (chatErr: any) {
+      console.error("[briefing] Failed to inject chat message:", chatErr.message);
+    }
+
     // ─── Send email via Resend ──────────────────────────────────────
     let emailed = false;
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
