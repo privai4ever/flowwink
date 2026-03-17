@@ -1195,7 +1195,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
         },
         {
           id: 'features-consultancy',
-          type: 'checklist',
+          type: 'features',
           data: {
             title: 'The Consultancy Module',
             subtitle: 'Everything you need to manage and match consulting talent — powered by FlowPilot.',
