@@ -1253,6 +1253,98 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
       ],
     },
   ],
+
+  // ═══════════════════════════════════════════════════════════
+  // SEED DATA — Products, Consultants, Booking
+  // ═══════════════════════════════════════════════════════════
+  products: [
+    { name: 'FlowWink Starter', description: 'Free self-hosted plan with full FlowPilot agent, all 58+ blocks, and unlimited pages.', price_cents: 0, currency: 'USD', type: 'one_time', is_active: true },
+    { name: 'FlowWink Pro', description: 'Managed cloud hosting with automatic updates, daily backups, SSL, CDN, and priority support.', price_cents: 4900, currency: 'USD', type: 'recurring', is_active: true },
+    { name: 'FlowWink Enterprise', description: 'Dedicated infrastructure, custom skill development, SSO, compliance support, and a dedicated success manager.', price_cents: 19900, currency: 'USD', type: 'recurring', is_active: true },
+    { name: 'FlowPilot Add-on', description: 'Enhanced FlowPilot capabilities: premium AI models, extended memory, and priority skill execution.', price_cents: 2900, currency: 'USD', type: 'recurring', is_active: true },
+  ],
+
+  consultants: [
+    {
+      name: 'Anna Lindqvist',
+      title: 'FlowWink Platform Architect',
+      summary: 'Seasoned technology executive with 18 years leading engineering organisations. Specializes in FlowWink platform architecture, FlowPilot objective design, and autonomous CMS strategy for enterprise deployments.',
+      skills: ['FlowWink Architecture', 'FlowPilot Objectives', 'Tech Strategy', 'Platform Design', 'Team Building', 'CMS Migration'],
+      experience_years: 18,
+      certifications: ['Executive Leadership (INSEAD)', 'SAFe 6 SPC'],
+      languages: ['English', 'German'],
+      availability: 'partially_available',
+      hourly_rate_cents: 195000,
+      currency: 'USD',
+      is_active: true,
+    },
+    {
+      name: 'Marcus Berg',
+      title: 'FlowWink Cloud & Infrastructure Specialist',
+      summary: 'Cloud architect specializing in FlowWink self-hosted deployments and managed cloud migrations. Has deployed 40+ FlowWink instances across AWS and Azure with zero-downtime migrations.',
+      skills: ['FlowWink Deployment', 'AWS', 'Azure', 'Docker', 'Kubernetes', 'Terraform', 'CI/CD', 'FinOps'],
+      experience_years: 14,
+      certifications: ['AWS Solutions Architect Professional', 'CKA'],
+      languages: ['English'],
+      availability: 'available',
+      hourly_rate_cents: 175000,
+      currency: 'USD',
+      is_active: true,
+    },
+    {
+      name: 'Sofia Eriksson',
+      title: 'FlowPilot Skill Developer',
+      summary: 'Full-stack developer specializing in FlowPilot custom skill development, edge function authoring, and block creation. Has built 20+ custom skills for clients in fintech and e-commerce.',
+      skills: ['FlowPilot Skills', 'React', 'TypeScript', 'Supabase Edge Functions', 'Block Development', 'API Integration'],
+      experience_years: 8,
+      certifications: ['AWS Cloud Practitioner'],
+      languages: ['English'],
+      availability: 'available',
+      hourly_rate_cents: 135000,
+      currency: 'USD',
+      is_active: true,
+    },
+    {
+      name: 'Emma Karlsson',
+      title: 'FlowWink DevOps & Automation Engineer',
+      summary: 'SRE specializing in FlowWink infrastructure automation, FlowPilot monitoring, and autonomous workflow optimization. Cuts deployment cycles from weeks to hours.',
+      skills: ['FlowWink Ops', 'Kubernetes', 'GitHub Actions', 'Prometheus', 'Grafana', 'Automation Workflows', 'Edge Functions'],
+      experience_years: 10,
+      certifications: ['CKA', 'CKS'],
+      languages: ['English', 'Norwegian'],
+      availability: 'available',
+      hourly_rate_cents: 165000,
+      currency: 'USD',
+      is_active: true,
+    },
+    {
+      name: 'Erik Johansson',
+      title: 'FlowWink Frontend & Block Developer',
+      summary: 'Component-library author and design-system advocate specializing in FlowWink custom block development. Has led frontend architecture for multiple FlowWink-powered sites through growth phases.',
+      skills: ['FlowWink Blocks', 'React', 'TypeScript', 'Tailwind CSS', 'Storybook', 'Design Systems', 'Web Performance'],
+      experience_years: 6,
+      languages: ['English'],
+      availability: 'available',
+      hourly_rate_cents: 120000,
+      currency: 'USD',
+      is_active: true,
+    },
+  ],
+
+  bookingServices: [
+    { name: 'Product Demo', description: 'A 30-minute guided walkthrough of FlowWink and FlowPilot capabilities tailored to your use case.', duration_minutes: 30, price_cents: 0, currency: 'USD', color: '#3b82f6', is_active: true },
+    { name: 'Implementation Workshop', description: 'A 60-minute hands-on session to configure FlowWink for your specific business needs, including template setup and FlowPilot objectives.', duration_minutes: 60, price_cents: 15000, currency: 'USD', color: '#8b5cf6', is_active: true },
+    { name: 'Strategy Call', description: 'A 45-minute consultation on CMS strategy, autonomous operations planning, and FlowPilot skill roadmap.', duration_minutes: 45, price_cents: 9500, currency: 'USD', color: '#10b981', is_active: true },
+  ],
+
+  bookingAvailability: [
+    { day_of_week: 1, start_time: '09:00', end_time: '17:00', is_active: true },
+    { day_of_week: 2, start_time: '09:00', end_time: '17:00', is_active: true },
+    { day_of_week: 3, start_time: '09:00', end_time: '17:00', is_active: true },
+    { day_of_week: 4, start_time: '09:00', end_time: '17:00', is_active: true },
+    { day_of_week: 5, start_time: '09:00', end_time: '17:00', is_active: true },
+  ],
+
   branding: {
     logo: '',
     organizationName: 'FlowWink',
