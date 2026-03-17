@@ -238,9 +238,33 @@ export function UnifiedChat({
           isAdmin ? renderAdminEmpty() : renderVisitorEmpty()
         ) : isAdmin ? (
           <div className="py-4 px-4 space-y-4">
-            {messages.map(msg => (
-              <AdminMessage key={msg.id} msg={msg} />
-            ))}
+            {/* Merge admin messages with proactive messages by timestamp */}
+            {(() => {
+              const combined: Array<{ type: 'msg'; data: OperateMessage } | { type: 'proactive'; data: ProactiveMessage }> = [
+                ...messages.map(m => ({ type: 'msg' as const, data: m })),
+                ...proactiveMessages.map(m => ({ type: 'proactive' as const, data: m })),
+              ].sort((a, b) => {
+                const timeA = a.type === 'msg' ? new Date(a.data.timestamp || 0).getTime() : new Date(a.data.created_at).getTime();
+                const timeB = b.type === 'msg' ? new Date(b.data.timestamp || 0).getTime() : new Date(b.data.created_at).getTime();
+                return timeA - timeB;
+              });
+
+              return combined.map((item) => {
+                if (item.type === 'proactive') {
+                  const pm = item.data;
+                  return (
+                    <ProactiveMessageCard
+                      key={`proactive-${pm.id}`}
+                      content={pm.content}
+                      payload={pm.action_payload || { type: 'update' }}
+                      createdAt={pm.created_at}
+                      onAction={onProactiveAction}
+                    />
+                  );
+                }
+                return <AdminMessage key={item.data.id} msg={item.data} />;
+              });
+            })()}
           </div>
         ) : (
           <div className="py-2">
