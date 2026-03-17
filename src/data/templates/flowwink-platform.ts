@@ -288,6 +288,21 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             grayscale: false,
           },
         },
+        // QUICK LINKS — Evaluate after trust section
+        {
+          id: 'links-after-trust',
+          type: 'quick-links',
+          data: {
+            heading: 'Ready to evaluate?',
+            links: [
+              { id: 'ql3-features', label: 'Compare Features', url: '/features' },
+              { id: 'ql3-pricing', label: 'View Pricing', url: '/pricing' },
+              { id: 'ql3-github', label: 'Self-Host Free', url: 'https://github.com/flowwink/flowwink' },
+            ],
+            variant: 'dark',
+            layout: 'split',
+          },
+        },
         // CTA — Final
         {
           id: 'cta-final',
