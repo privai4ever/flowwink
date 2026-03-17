@@ -116,9 +116,21 @@ function AnimatedCounter({
 
     if (ref.current) {
       observer.observe(ref.current);
+      observerActive.current = true;
     }
 
-    return () => observer.disconnect();
+    // Fallback: if observer never fires (e.g., in iframe/preview), show value after timeout
+    const fallbackTimer = setTimeout(() => {
+      if (!hasAnimated.current) {
+        setDisplayValue(value);
+        hasAnimated.current = true;
+      }
+    }, 3000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
   }, [value, duration]);
 
   return (
