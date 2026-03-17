@@ -569,6 +569,8 @@ export function useTemplateInstaller() {
         kbCategoryIds: createdKbCategoryIds,
         productIds: createdProductIds,
         consultantIds: createdConsultantIds,
+        bookingServiceIds: createdBookingServiceIds,
+        bookingAvailabilityIds: createdBookingAvailabilityIds,
       };
       await supabase.from('installed_template').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       await supabase.from('installed_template').insert({
