@@ -31,6 +31,11 @@ export default function CopilotPage() {
   const showPublicChats = chatSettings?.showPublicChatsInCopilot ?? false;
   const { messages: proactiveMessages } = useProactiveMessages(operate.conversationId ?? undefined);
 
+  // Auto-detect extension on mount
+  useEffect(() => {
+    relay.detectExtension();
+  }, []);
+
   // Wire extension relay into the agent operate hook
   useEffect(() => {
     operate.setRelayHandler(async (url: string) => {
