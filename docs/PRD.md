@@ -1129,30 +1129,52 @@ for vårdorganisationer that/which Requires HIPAA:
 
 ## Appendix A: Roadmap
 
-### Fas 1: MVP ✅ (Complete)
-- Blocks-based page builder (46 Blocks types)
+### Phase 1: MVP ✅ (Complete)
+- Block-based page builder (46 block types)
 - Editorial workflow (Draft → Review → Published)
 - Branding & SEO
 - AI Chat & Import
 - Headless API (REST + GraphQL)
 
-### Fas 2: Core Modules ✅ (Complete)
+### Phase 2: Core Modules ✅ (Complete)
 - **Blog Module** — Posts, categories, tags, author profiles, RSS feed
 - **Newsletter Module** — Subscribers, campaigns, open/click tracking, GDPR export
-- **integration Module** — Webhooks, N8N templates, event system
+- **Integration Module** — Webhooks, N8N templates, event system
 
-### Fas 3: process Automation ✅ (Complete)
+### Phase 3: Process Automation ✅ (Complete)
+- Booking/scheduling, Lead CRM, conversion blocks, interactive blocks
 
-| Module | Priority | Synergy | Status |
-|--------|----------|---------|--------|
-| **Booking/Scheduling** | High | Newsletter (reminders), Webhooks (calendar sync) | ✅ Complete |
-| **Lead CRM** | Medium | Forms → Pipeline, Newsletter nurturing | ✅ Complete |
-| **Conversion Blocks** | High | Social proof, pricing tables | ✅ Complete |
-| **Interactive Blocks** | High | Tabs, countdown, progress | ✅ Complete |
+### Phase 4: FlowPilot Agent v1 ✅ (Complete — Jan 2025)
+- 20 default skills, persistent memory, objectives, self-healing
+- Public chat with context-augmented generation
+- Skill registry with hot-reload
+
+### Phase 5: Autonomous Agentic Web v2.0 ✅ (Complete — March 2026)
+
+| Feature | Status |
+|---------|--------|
+| **37+ skills** across CMS, CRM, Commerce, Communication | ✅ Complete |
+| **Workflow DAGs** — multi-step chains with conditional branching | ✅ Complete |
+| **A2A Delegation** — specialist sub-agents (SEO, content, sales, analytics, email) | ✅ Complete |
+| **Skill Packs** — bundle and distribute capability sets | ✅ Complete |
+| **pgvector Memory** — semantic search across all learned context | ✅ Complete |
+| **Plan Decomposition** — AI-generated 3-7 step plans from any objective | ✅ Complete |
+| **Proactive Proposals** — FlowPilot surfaces gaps before you notice them | ✅ Complete |
+| **Soul Evolution** — personality, values, and tone update as brand evolves | ✅ Complete |
+| **Content Authority** — competitor monitoring, content research pipeline | ✅ Complete |
+| **Sales Intelligence** — prospect research and fit analysis | ✅ Complete |
+| **Consultant Profiles** — team expertise management with AI matching | ✅ Complete |
+| **Resume Matcher** — AI-powered CV-to-consultant matching block | ✅ Complete |
+| **Federation** — A2A peer management and cross-agent collaboration | ✅ Complete |
+| **Campaigns** — multi-channel content proposals with pillar content | ✅ Complete |
+| **Webinars** — plan, promote, and follow up online events | ✅ Complete |
+| **Content API v2** — REST + GraphQL + Markdown export for LLM consumption | ✅ Complete |
+| **10 starter templates** with blog posts, KB, FlowPilot config | ✅ Complete |
+| **61+ block types** | ✅ Complete |
 
 #### Booking Module Features
 
-**Basic Booking Blocks**:
+**Basic Booking Block**:
 - **Form Mode**: Built-in appointment request form
 - **embed Mode**: Calendly, Cal.com, HubSpotintegration
 - **Webhook Trigger**: Automatic `booking.submitted` event for n8n workflows
