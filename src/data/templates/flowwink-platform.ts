@@ -1222,7 +1222,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
         },
         {
           id: 'rich-text-checkin',
-          type: 'rich-text',
+          type: 'text',
           data: {
             content: {
               type: 'doc',
