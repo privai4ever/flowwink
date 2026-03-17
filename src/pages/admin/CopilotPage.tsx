@@ -311,6 +311,8 @@ export default function CopilotPage() {
                 onReset={operate.clearMessages}
                 onCancel={operate.cancelRequest}
                 proactiveMessages={proactiveMessages}
+                onApproveAction={operate.approveAction}
+                onRejectAction={operate.rejectAction}
               />
             </div>
           </ResizablePanel>
