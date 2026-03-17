@@ -1,22 +1,24 @@
 # FlowWink - Product Requirements Document (PRD)
 
-> **Version:** 2.3  
+> **Version:** 3.0  
 > **Last Updated:** March 2026  
-> **Status:** FlowPilot Agent Architecture Complete
+> **Status:** Autonomous Agentic Web Platform — v2.0 Complete
 
 ---
 
 ## Executive Summary
 
-**FlowWink** is a modernt Content Management System byggt specific for svenska vårdgivare and organisationer that/which behöver:
+**FlowWink** is an autonomous agentic web platform — a self-hosted CMS + AI business operating system that runs your entire digital presence. Built for organizations that need:
 
-- ✅ a komplett webbplats without utvecklare
-- ✅ Headless API for multi-kanal distribution
-- ✅ AI-drivna verktyg for innehållshantering
-- ✅ GDPR- and WCAG-efterlevnad built-in
-- ✅ Svenskt språkstöd and lokalisering
+- ✅ A complete website without developers
+- ✅ Headless API for multi-channel distribution (REST/GraphQL/Markdown for LLMs)
+- ✅ An autonomous AI agent (FlowPilot) that writes content, qualifies leads, runs campaigns
+- ✅ 37+ agent skills with self-healing, plan decomposition, and workflow DAGs
+- ✅ Agent-to-Agent (A2A) delegation protocol for specialist sub-agents
+- ✅ GDPR and WCAG compliance built-in
+- ✅ Self-hostable with Docker, private LLM support (HIPAA-ready)
 
-### Unik Positionering: "Head + Headless"
+### Unique Positioning: "Agentic CMS" — Head + Headless + Autonomous
 
 to skillnad from traditionella CMS (that/which bara levererar webbplats) or rena headless-lösningar (that/which require separate frontend development), offers FlowWink **båda**:
 
@@ -50,57 +52,70 @@ to skillnad from traditionella CMS (that/which bara levererar webbplats) or rena
 
 FlowWink uses a modular Blocks-architecture for flexible innehållshantering:
 
-#### available Blocks (50+ types)
+#### Available Blocks (61+ types)
 
-| category | Blocks | description |
+| Category | Block | Description |
 |----------|-------|-------------|
-| **text & Media** | text | richtext with Tiptap-editor (eyebrow, title, accenttext) |
-| | Image | image with alttext and caption |
-| | Gallery | gallery with grid/carousel/masonry + lightbox |
-| | Quote | quote with author and source |
-| | YouTube | embedded YouTube-video with autoplay-inställningar |
-| | embed | Anpassad iframe/HTML-embed with aspect ratio |
-| | Table | structured data with columns and rows |
-| **layout** | Two-Column | Tvåkolumnslayout withtext, image, eyebrow, title, accenttext, CTA |
-| | Separator | visual divider (line/dots/ornament/spacing) |
-| | Tabs | tab-based content with icons and variants |
-| **navigation** | Link Grid | grid with link cards and icons |
-| | Hero | page header with background (image/video/color), title and CTA |
-| | Announcement Bar | top banner for messages and offers |
-| **Information** | Info Box | info box withvariant (info/success/warning/highlight) |
-| | Stats | key metrics and statistics with icons and cards |
-| | Accordion | expandable FAQ/content with bilder (Tiptap richtext) |
-| | Article Grid | grid with article cards |
-| | Features | features/services with icons, hovereffects, card styles |
-| | Timeline | step-by-stepprocess or history with icons and Descriptionar |
-| | Progress | progress indicators and progress bars |
-| | Countdown | countdown timer to specific date (cards/hero/minimal) |
-| | Marquee | scrollingtext/icons for attention |
-| **Social Proof** | Testimonials | Kundrecensioner with star ratings, quote, avatar |
-| | Logos | Kundlogotyper/partners with grayscale-/scroll-variant |
-| | Team | team members withbio, photo and social links |
-| | Badge | certifications and trust icons (SOC2, GDPR, etc.) |
-| | Social Proof | live counters, ratings and activity notifications |
-| **conversion** | CTA | Call-to-action with buttons andgradient |
-| | Pricing | pricing table withtiers, features andbadges |
-| | Comparison | comparison table for products/plans |
-| | Booking | booking form orembed (Calendly/Cal.com/HubSpot) |
-| | Smart Booking | built-in bokningssystem with services, availability and calendar |
-| | Form | customizable form with field validation (default/card/minimal) |
-| | Newsletter | newsletter-signup with GDPR-consent (default/card/minimal) |
-| | Floating CTA | scroll-triggered CTA that/which appears upp vidscroll (bar/card/pill) |
-| | Notificationtoast | dynamic activity notifications (purchases, registrations) |
-| **Kontakt** | Contact | contact information with address and opening hours |
-| | Map | Google Maps-embed with address |
-| **interactive** | Chat | embedded AI-chat with context-aware |
-| | Chatlauncher | ChatGPT-stillauncher that/which routes to /chat withinitialprompt |
-| | Popup | triggered popups (scroll/time/exit intent) |
-| **Knowledge Base** | KB Hub | knowledge base-landing page with categories |
-| | KB Search | SökBlock for knowledge base |
-| | KB Featured | featured KB-articles |
-| | KB Accordion | FAQ in accordion-format |
-| **E-commerce** | Products | product grid from databas with cart |
-| | Cart | cart with summary and checkout |
+| **Text & Media** | Text | Rich text with Tiptap editor (eyebrow, title, accent text) |
+| | Image | Image with alt text and caption |
+| | Gallery | Gallery with grid/carousel/masonry + lightbox |
+| | Quote | Quote with author and source |
+| | YouTube | Embedded YouTube video with autoplay settings |
+| | Embed | Custom iframe/HTML embed with aspect ratio |
+| | Table | Structured data with columns and rows |
+| | Lottie | Lottie animation player |
+| **Layout** | Two-Column | Two-column layout with text, image, eyebrow, title, accent, CTA |
+| | Separator | Visual divider (line/dots/ornament/spacing) |
+| | Section Divider | Decorative section dividers (wave, angle, curve) |
+| | Tabs | Tab-based content with icons and variants |
+| | Bento Grid | Bento-style grid layout for feature showcases |
+| | Parallax Section | Full-bleed parallax scrolling sections |
+| **Navigation** | Link Grid | Grid with link cards and icons |
+| | Hero | Page header with background (image/video/color), title and CTA |
+| | Announcement Bar | Top banner for messages and offers |
+| | Quick Links | Quick navigation link cards |
+| | Category Nav | Category navigation for e-commerce/content |
+| **Information** | Info Box | Info box with variant (info/success/warning/highlight) |
+| | Stats | Key metrics and statistics with icons and cards |
+| | Accordion | Expandable FAQ/content with images (Tiptap rich text) |
+| | Article Grid | Grid with article cards |
+| | Features | Features/services with icons, hover effects, card styles |
+| | Timeline | Step-by-step process or history with icons |
+| | Progress | Progress indicators and progress bars |
+| | Countdown | Countdown timer to specific date (cards/hero/minimal) |
+| | Marquee | Scrolling text/icons for attention |
+| | Trust Bar | Trust indicators and security badges |
+| | Shipping Info | Shipping and delivery information |
+| **Social Proof** | Testimonials | Customer reviews with star ratings, quotes, avatars |
+| | Logos | Client/partner logos with grayscale/scroll variants |
+| | Team | Team members with bio, photo and social links |
+| | Badge | Certifications and trust icons (SOC2, GDPR, etc.) |
+| | Social Proof | Live counters, ratings and activity notifications |
+| **Conversion** | CTA | Call-to-action with buttons and gradient |
+| | Pricing | Pricing table with tiers, features and badges |
+| | Comparison | Comparison table for products/plans |
+| | Booking | Booking form or embed (Calendly/Cal.com/HubSpot) |
+| | Smart Booking | Built-in booking system with services, availability and calendar |
+| | Form | Customizable form with field validation (default/card/minimal) |
+| | Newsletter | Newsletter signup with GDPR consent (default/card/minimal) |
+| | Floating CTA | Scroll-triggered CTA (bar/card/pill) |
+| | Notification Toast | Dynamic activity notifications (purchases, registrations) |
+| | Featured Carousel | Carousel for featured content/products |
+| | Featured Product | Single product spotlight |
+| **Contact** | Contact | Contact information with address and opening hours |
+| | Map | Google Maps embed with address |
+| **Interactive** | Chat | Embedded AI chat with context awareness |
+| | Chat Launcher | ChatGPT-style launcher that routes to /chat with initial prompt |
+| | AI Assistant | Inline AI assistant block |
+| | Popup | Triggered popups (scroll/time/exit intent) |
+| | Webinar | Webinar registration and countdown |
+| | Resume Matcher | AI-powered resume/CV matching for consultant profiles |
+| **Knowledge Base** | KB Hub | Knowledge base landing page with categories |
+| | KB Search | Search block for knowledge base |
+| | KB Featured | Featured KB articles |
+| | KB Accordion | FAQ in accordion format |
+| **E-commerce** | Products | Product grid from database with cart |
+| | Cart | Cart with summary and checkout |
 
 #### Blocks-features
 
@@ -248,26 +263,39 @@ FlowWink uses två olikaeditor-types beroende on innehållstyp:
 
 ### 3.1 Templates (Complete Packages)
 
-Templates is kompletta paket that/which contains:
+Templates are complete packages that include:
 - **Pre-configured pages** (homepage, about us, services, contact, etc.)
-- **Blocks-content** (already ifyllda with relevanttext and bilder)
+- **Block content** (pre-filled with relevant text and images)
 - **Branding settings** (colors, typography, logo, etc.)
+- **Blog posts** (pre-written content for SEO and marketing)
+- **KB articles** (knowledge base content for support)
+- **FlowPilot configuration** (soul, objectives, priority skills)
+- **Consultant profiles** (for agency/consulting templates)
+- **Products** (for e-commerce templates)
 
-| Template | category | Sidor | Target audience |
-|----------|----------|-------|----------|
+| Template | Category | Pages | Target |
+|----------|----------|-------|--------|
 | **Launchpad** | Startup | 5 | SaaS/Tech startups |
+| **Momentum** | Startup | 4 | Single-page dark design |
 | **TrustCorp** | Enterprise | 5 | B2B companies |
 | **SecureHealth** | Compliance | 7 | Healthcare providers |
-| **FlowWink Platform** | Platform | 5 | CMS showcase |
+| **FlowWink Platform** | Platform | 5 | CMS showcase (dogfooding) |
+| **Help Center** | Help Center | 4 | Help center with KB + AI |
+| **Service Pro** | Startup | 5 | Service business + booking |
+| **Digital Shop** | Platform | 5 | E-commerce / digital products |
+| **FlowWink Agency** | Platform | 5 | Agency white-label |
+| **Consult Agency** | Platform | 5 | Consulting agency with AI matching |
 
 #### Template Selection
-Varje template has sina egna Branding settings. När du väljer a template:
-- All pages are created automatically with förkonfigurerat content
+Each template has its own branding settings. When you choose a template:
+- All pages are created automatically with pre-configured content
+- Blog posts, KB articles, products, and consultant profiles are seeded
+- FlowPilot soul and objectives are configured via `setup-flowpilot`
 - Branding settings applied (colors, typography, logo)
-- Du can anpassa allt efter behov (ändra Blocks, Colors, content)
+- Everything can be customized after installation
 
 #### Reset to Template Defaults
-BrandingSettingsPage shows vilken template that/which is aktiv and offers "Reset to Template Defaults"-knapp for att återställa branding to template-standarden.
+BrandingSettingsPage shows which template is active and offers a "Reset to Template Defaults" button.
 
 ### 3.2 Custom Themes (Brand Guide Assistant)
 
@@ -961,8 +989,8 @@ for vårdorganisationer that/which Requires HIPAA:
 ├─────────────────────────────────────────────────────────────┤
 │                        BACKEND                              │
 │                                                             │
-│   Supabase (via Lovable Cloud)                             │
-│   ├── PostgreSQL Database                                   │
+│   Supabase (Self-hosted via Docker)                        │
+│   ├── PostgreSQL + pgvector (semantic memory)              │
 │   ├── Row Level Security (RLS)                             │
 │   ├── Edge Functions (Deno)                                │
 │   ├── Storage (S3-compatible)                              │
@@ -971,15 +999,43 @@ for vårdorganisationer that/which Requires HIPAA:
 ├─────────────────────────────────────────────────────────────┤
 │                      EDGE FUNCTIONS                         │
 │                                                             │
-│   ├── chat-completion (AI Chat)                            │
-│   ├── content-api (REST/GraphQL)                           │
+│   CORE CMS:                                                │
 │   ├── get-page (Cached page fetch)                         │
+│   ├── content-api (REST/GraphQL/Markdown)                  │
 │   ├── migrate-page (AI import)                             │
 │   ├── analyze-brand (Brand extraction)                     │
 │   ├── process-image (WebP conversion)                      │
-│   ├── create-user (Admin user creation)                    │
-│   ├── invalidate-cache (Cache management)                  │
-│   └── publish-scheduled-pages (Cron job)                   │
+│   ├── publish-scheduled-pages (Cron job)                   │
+│   │                                                         │
+│   FLOWPILOT AGENT:                                         │
+│   ├── agent-reason (Core reasoning module — shared)        │
+│   ├── agent-execute (Unified skill router)                 │
+│   ├── agent-operate (SSE streaming interactive)            │
+│   ├── flowpilot-heartbeat (12h autonomous loop)            │
+│   ├── flowpilot-learn (Daily feedback distillation)        │
+│   ├── setup-flowpilot (Bootstrap skills/soul/objectives)   │
+│   │                                                         │
+│   AI & CHAT:                                               │
+│   ├── chat-completion (Public AI chat)                     │
+│   │                                                         │
+│   AUTOMATION:                                              │
+│   ├── automation-dispatcher (Cron trigger)                 │
+│   ├── signal-dispatcher (Signal condition eval)            │
+│   ├── signal-ingest (External webhook endpoint)            │
+│   ├── send-webhook (Webhook delivery)                      │
+│   │                                                         │
+│   CRM & COMMERCE:                                          │
+│   ├── qualify-lead (AI lead scoring)                       │
+│   ├── enrich-company (Domain enrichment)                   │
+│   ├── prospect-research (Company research)                 │
+│   ├── prospect-fit-analysis (AI fit scoring)               │
+│   │                                                         │
+│   CONTENT:                                                 │
+│   ├── research-content (AI topic research)                 │
+│   ├── generate-content-proposal (Multi-channel content)    │
+│   ├── web-search / web-scrape (Jina/Firecrawl)           │
+│   ├── business-digest (Weekly cross-module summary)        │
+│   └── newsletter-send (Email via Resend)                   │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -1073,30 +1129,52 @@ for vårdorganisationer that/which Requires HIPAA:
 
 ## Appendix A: Roadmap
 
-### Fas 1: MVP ✅ (Complete)
-- Blocks-based page builder (46 Blocks types)
+### Phase 1: MVP ✅ (Complete)
+- Block-based page builder (46 block types)
 - Editorial workflow (Draft → Review → Published)
 - Branding & SEO
 - AI Chat & Import
 - Headless API (REST + GraphQL)
 
-### Fas 2: Core Modules ✅ (Complete)
+### Phase 2: Core Modules ✅ (Complete)
 - **Blog Module** — Posts, categories, tags, author profiles, RSS feed
 - **Newsletter Module** — Subscribers, campaigns, open/click tracking, GDPR export
-- **integration Module** — Webhooks, N8N templates, event system
+- **Integration Module** — Webhooks, N8N templates, event system
 
-### Fas 3: process Automation ✅ (Complete)
+### Phase 3: Process Automation ✅ (Complete)
+- Booking/scheduling, Lead CRM, conversion blocks, interactive blocks
 
-| Module | Priority | Synergy | Status |
-|--------|----------|---------|--------|
-| **Booking/Scheduling** | High | Newsletter (reminders), Webhooks (calendar sync) | ✅ Complete |
-| **Lead CRM** | Medium | Forms → Pipeline, Newsletter nurturing | ✅ Complete |
-| **Conversion Blocks** | High | Social proof, pricing tables | ✅ Complete |
-| **Interactive Blocks** | High | Tabs, countdown, progress | ✅ Complete |
+### Phase 4: FlowPilot Agent v1 ✅ (Complete — Jan 2025)
+- 20 default skills, persistent memory, objectives, self-healing
+- Public chat with context-augmented generation
+- Skill registry with hot-reload
+
+### Phase 5: Autonomous Agentic Web v2.0 ✅ (Complete — March 2026)
+
+| Feature | Status |
+|---------|--------|
+| **37+ skills** across CMS, CRM, Commerce, Communication | ✅ Complete |
+| **Workflow DAGs** — multi-step chains with conditional branching | ✅ Complete |
+| **A2A Delegation** — specialist sub-agents (SEO, content, sales, analytics, email) | ✅ Complete |
+| **Skill Packs** — bundle and distribute capability sets | ✅ Complete |
+| **pgvector Memory** — semantic search across all learned context | ✅ Complete |
+| **Plan Decomposition** — AI-generated 3-7 step plans from any objective | ✅ Complete |
+| **Proactive Proposals** — FlowPilot surfaces gaps before you notice them | ✅ Complete |
+| **Soul Evolution** — personality, values, and tone update as brand evolves | ✅ Complete |
+| **Content Authority** — competitor monitoring, content research pipeline | ✅ Complete |
+| **Sales Intelligence** — prospect research and fit analysis | ✅ Complete |
+| **Consultant Profiles** — team expertise management with AI matching | ✅ Complete |
+| **Resume Matcher** — AI-powered CV-to-consultant matching block | ✅ Complete |
+| **Federation** — A2A peer management and cross-agent collaboration | ✅ Complete |
+| **Campaigns** — multi-channel content proposals with pillar content | ✅ Complete |
+| **Webinars** — plan, promote, and follow up online events | ✅ Complete |
+| **Content API v2** — REST + GraphQL + Markdown export for LLM consumption | ✅ Complete |
+| **10 starter templates** with blog posts, KB, FlowPilot config | ✅ Complete |
+| **61+ block types** | ✅ Complete |
 
 #### Booking Module Features
 
-**Basic Booking Blocks**:
+**Basic Booking Block**:
 - **Form Mode**: Built-in appointment request form
 - **embed Mode**: Calendly, Cal.com, HubSpotintegration
 - **Webhook Trigger**: Automatic `booking.submitted` event for n8n workflows
@@ -1289,23 +1367,30 @@ Se separat API-dokumentation for fullständig referens of:
 
 ## Appendix D: Starter Templates
 
-### Available Templates
+### Available Templates (10)
 
-| Template | Category | Pages | Target |
-|----------|----------|-------|--------|
-| **Launchpad** | Startup | 5 | SaaS/Tech startups |
-| **TrustCorp** | Enterprise | 5 | B2B companies |
-| **SecureHealth** | Compliance | 7 | Healthcare providers |
-| **FlowWink Platform** | Platform | 5 | CMS showcase |
+| Template | Category | Pages | Blog Posts | KB Articles | Target |
+|----------|----------|-------|------------|-------------|--------|
+| **Launchpad** | Startup | 5 | ✅ | ✅ | SaaS/Tech startups |
+| **Momentum** | Startup | 4 | ✅ | — | Single-page dark design |
+| **TrustCorp** | Enterprise | 5 | ✅ | ✅ | B2B companies |
+| **SecureHealth** | Compliance | 7 | ✅ | ✅ | Healthcare providers (HIPAA) |
+| **FlowWink Platform** | Platform | 5 | ✅ | ✅ | CMS showcase (dogfooding) |
+| **Help Center** | Help Center | 4 | — | ✅ | Help center with KB + AI |
+| **Service Pro** | Startup | 5 | ✅ | — | Service business + booking |
+| **Digital Shop** | Platform | 5 | ✅ | — | E-commerce / digital products |
+| **FlowWink Agency** | Platform | 5 | ✅ | ✅ | Agency white-label |
+| **Consult Agency** | Platform | 5 | ✅ | ✅ | Consulting agency with AI matching |
 
-### SecureHealth Template Highlights
-- HIPAA-compliant messaging
-- Dedicated Appointments page (`/boka`)
-- Service-based booking with 5 pre-configured medical services
-- Webhookintegration for n8n calendar sync
-- Patient resources and FAQ
-- Team profiles for medical staff
-- Emergency contact information
+### Template Features
+
+Each template now includes:
+- **FlowPilot configuration** — soul (purpose, tone, values) + initial objectives + priority skills
+- **Blog posts** — SEO-optimized content relevant to the template niche
+- **KB articles** — support content organized by category
+- **Products** — e-commerce templates include sample products
+- **Consultant profiles** — consulting templates include team expertise profiles
+- **Required modules** — auto-enables relevant modules on install
 
 ### Template Export/Import System
 
