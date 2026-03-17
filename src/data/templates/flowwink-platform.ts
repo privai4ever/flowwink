@@ -1377,7 +1377,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
     organizationName: 'FlowWink',
     shortDescription: 'Open-source autonomous agentic CMS powered by FlowPilot — an AI agent with persistent memory, 30+ skills, and self-evolution.',
     schemaOrgEnabled: true,
-    schemaOrgType: 'SoftwareApplication',
+    schemaOrgType: 'Organization',
     faqSchemaEnabled: true,
     articleSchemaEnabled: true,
     sitemapEnabled: true,
