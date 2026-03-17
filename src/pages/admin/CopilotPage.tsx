@@ -29,6 +29,7 @@ export default function CopilotPage() {
   const adminName = branding?.adminName || 'FlowWink';
   const showEscalations = chatSettings?.showEscalationsInCopilot ?? false;
   const showPublicChats = chatSettings?.showPublicChatsInCopilot ?? false;
+  const { messages: proactiveMessages } = useProactiveMessages(operate.conversationId ?? undefined);
 
   // Wire extension relay into the agent operate hook
   useEffect(() => {
