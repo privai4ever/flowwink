@@ -9,6 +9,7 @@ import { ContextPanel } from '@/components/admin/copilot/ContextPanel';
 import { useAgentOperate } from '@/hooks/useAgentOperate';
 import { useExtensionRelay } from '@/hooks/useExtensionRelay';
 import { useBrandingSettings, useChatSettings } from '@/hooks/useSiteSettings';
+import { useProactiveMessages } from '@/hooks/useProactiveMessages';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
