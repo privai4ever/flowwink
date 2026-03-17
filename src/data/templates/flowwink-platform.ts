@@ -193,6 +193,21 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             contentAlignment: 'center',
           },
         },
+        // QUICK LINKS — Go deeper on the agent after bento + parallax
+        {
+          id: 'links-after-agent',
+          type: 'quick-links',
+          data: {
+            heading: 'Explore the architecture',
+            links: [
+              { id: 'ql2-flowpilot', label: 'Explore FlowPilot', url: '/flowpilot' },
+              { id: 'ql2-blocks', label: 'View All 58+ Blocks', url: '/blocks' },
+              { id: 'ql2-features', label: 'Full Feature List', url: '/features' },
+            ],
+            variant: 'muted',
+            layout: 'split',
+          },
+        },
         // TESTIMONIALS
         {
           id: 'testimonials-main',
