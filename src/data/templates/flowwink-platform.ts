@@ -1054,7 +1054,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
         // BOOKING WIDGET
         {
           id: 'services-booking',
-          type: 'booking-calendar',
+          type: 'booking',
           data: {
             title: 'Book Your Appointment',
             subtitle: 'Choose a service and time that works for you. Instant confirmation.',
