@@ -155,7 +155,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             gap: 'md',
             staggeredReveal: true,
             items: [
-              { id: 'bg-skills', title: 'Skill Engine', description: '20+ built-in skills across content, CRM, email, and analytics. FlowPilot doesn\'t just suggest — it executes. And it can forge new skills for itself.', icon: 'Zap', span: 'wide', accentColor: '#3B82F6' },
+              { id: 'bg-skills', title: 'Skill Engine', description: '30+ built-in skills across content, CRM, email, and analytics. FlowPilot doesn\'t just suggest — it executes. And it can forge new skills for itself.', icon: 'Zap', span: 'wide', accentColor: '#3B82F6' },
               { id: 'bg-memory', title: 'Persistent Memory', description: 'Not session context — deep organizational memory. FlowPilot knows your brand voice, remembers every lead, recalls past decisions. The longer it runs, the sharper it gets.', icon: 'Brain', span: 'large', accentColor: '#8B5CF6' },
               { id: 'bg-objectives', title: 'Objectives & Goals', description: 'Set the destination. FlowPilot maps the route, executes step by step, and reports back.', icon: 'Target', accentColor: '#10B981' },
               { id: 'bg-heartbeat', title: 'Autonomous Heartbeat', description: 'Every 12 hours, FlowPilot reviews performance, reflects on what to improve, and queues the next moves.', icon: 'Activity', accentColor: '#F59E0B' },
