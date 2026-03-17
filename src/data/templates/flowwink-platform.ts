@@ -249,18 +249,18 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             autoplaySpeed: 5,
           },
         },
-        // SOCIAL PROOF + BADGES — Trust section
+        // SOCIAL PROOF — What autonomy looks like in numbers
         {
           id: 'social-proof-live',
           type: 'social-proof',
           data: {
-            title: 'Autonomous Operations in Production',
-            subtitle: 'Real numbers from teams letting FlowPilot run their digital presence.',
+            title: 'What Happens When the Agent Runs',
+            subtitle: 'Average metrics from a single FlowPilot-powered site after 90 days of autonomous operation.',
             items: [
-              { id: 'sp1', type: 'counter', label: 'Sites Running', value: 1200, icon: 'globe' },
-              { id: 'sp2', type: 'counter', label: 'Skills Executed', value: 48500, icon: 'zap' },
-              { id: 'sp3', type: 'rating', label: 'Approval Rate', value: 4.9, maxRating: 5 },
-              { id: 'sp4', type: 'counter', label: 'GitHub Stars', value: 1450, icon: 'star' },
+              { id: 'sp1', type: 'counter', label: 'Skill Executions / Month', value: 2400, icon: 'zap' },
+              { id: 'sp2', type: 'counter', label: 'Hours Saved / Month', value: 86, icon: 'clock' },
+              { id: 'sp3', type: 'rating', label: 'Owner Approval Rate', value: 4.9, maxRating: 5 },
+              { id: 'sp4', type: 'counter', label: 'Blocks Available', value: 58, icon: 'layout' },
             ],
             variant: 'cards',
             layout: 'horizontal',
