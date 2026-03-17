@@ -1256,7 +1256,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
       experience_years: 10,
       hourly_rate_cents: 16000,
       currency: 'EUR',
-      availability: 'partial',
+      availability: 'partially_available',
       summary: 'Frontend architecture expert with deep focus on design systems and web performance.',
       bio: 'Priya is a frontend architect with 10 years of experience building scalable design systems and optimizing web performance. She has led frontend teams at two unicorn startups.',
       is_active: true,
