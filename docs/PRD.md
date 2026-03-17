@@ -989,8 +989,8 @@ for vårdorganisationer that/which Requires HIPAA:
 ├─────────────────────────────────────────────────────────────┤
 │                        BACKEND                              │
 │                                                             │
-│   Supabase (via Lovable Cloud)                             │
-│   ├── PostgreSQL Database                                   │
+│   Supabase (Self-hosted via Docker)                        │
+│   ├── PostgreSQL + pgvector (semantic memory)              │
 │   ├── Row Level Security (RLS)                             │
 │   ├── Edge Functions (Deno)                                │
 │   ├── Storage (S3-compatible)                              │
@@ -999,15 +999,43 @@ for vårdorganisationer that/which Requires HIPAA:
 ├─────────────────────────────────────────────────────────────┤
 │                      EDGE FUNCTIONS                         │
 │                                                             │
-│   ├── chat-completion (AI Chat)                            │
-│   ├── content-api (REST/GraphQL)                           │
+│   CORE CMS:                                                │
 │   ├── get-page (Cached page fetch)                         │
+│   ├── content-api (REST/GraphQL/Markdown)                  │
 │   ├── migrate-page (AI import)                             │
 │   ├── analyze-brand (Brand extraction)                     │
 │   ├── process-image (WebP conversion)                      │
-│   ├── create-user (Admin user creation)                    │
-│   ├── invalidate-cache (Cache management)                  │
-│   └── publish-scheduled-pages (Cron job)                   │
+│   ├── publish-scheduled-pages (Cron job)                   │
+│   │                                                         │
+│   FLOWPILOT AGENT:                                         │
+│   ├── agent-reason (Core reasoning module — shared)        │
+│   ├── agent-execute (Unified skill router)                 │
+│   ├── agent-operate (SSE streaming interactive)            │
+│   ├── flowpilot-heartbeat (12h autonomous loop)            │
+│   ├── flowpilot-learn (Daily feedback distillation)        │
+│   ├── setup-flowpilot (Bootstrap skills/soul/objectives)   │
+│   │                                                         │
+│   AI & CHAT:                                               │
+│   ├── chat-completion (Public AI chat)                     │
+│   │                                                         │
+│   AUTOMATION:                                              │
+│   ├── automation-dispatcher (Cron trigger)                 │
+│   ├── signal-dispatcher (Signal condition eval)            │
+│   ├── signal-ingest (External webhook endpoint)            │
+│   ├── send-webhook (Webhook delivery)                      │
+│   │                                                         │
+│   CRM & COMMERCE:                                          │
+│   ├── qualify-lead (AI lead scoring)                       │
+│   ├── enrich-company (Domain enrichment)                   │
+│   ├── prospect-research (Company research)                 │
+│   ├── prospect-fit-analysis (AI fit scoring)               │
+│   │                                                         │
+│   CONTENT:                                                 │
+│   ├── research-content (AI topic research)                 │
+│   ├── generate-content-proposal (Multi-channel content)    │
+│   ├── web-search / web-scrape (Jina/Firecrawl)           │
+│   ├── business-digest (Weekly cross-module summary)        │
+│   └── newsletter-send (Email via Resend)                   │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
