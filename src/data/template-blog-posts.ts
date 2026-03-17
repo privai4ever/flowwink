@@ -411,7 +411,7 @@ export const flowwinkBlogPosts: TemplateBlogPost[] = [
           p('FlowPilot is not a chatbot. It is not an AI assistant. It is an autonomous digital operator inspired by the OpenClaw framework — designed to run your website, qualify your leads, publish your content, and learn from every interaction.'),
           h2('The Six Core Capabilities'),
           h3('1. Skill Engine'),
-          p('FlowPilot has 20+ skills out of the box — from writing blog posts to qualifying leads to sending newsletters. Each skill is a registered tool with defined inputs, outputs, and approval requirements. And FlowPilot can create new skills when it encounters novel situations.'),
+          p('FlowPilot has 30+ skills out of the box — from writing blog posts to qualifying leads to sending newsletters. Each skill is a registered tool with defined inputs, outputs, and approval requirements. And FlowPilot can create new skills when it encounters novel situations.'),
           h3('2. Persistent Memory'),
           p('Unlike stateless AI tools, FlowPilot remembers. It stores brand guidelines, user preferences, past decisions, and learned patterns in a structured memory system. Every interaction makes it smarter.'),
           h3('3. Objectives & Goals'),
@@ -537,7 +537,7 @@ export const flowwinkBlogPosts: TemplateBlogPost[] = [
   {
     title: 'Skill Engine Deep Dive: How FlowPilot Learns New Capabilities',
     slug: 'skill-engine-deep-dive-flowpilot-capabilities',
-    excerpt: 'FlowPilot ships with 20+ skills and can create new ones autonomously. Here is how the skill engine works — registration, routing, approval, and self-evolution.',
+    excerpt: 'FlowPilot ships with 30+ skills and can create new ones autonomously. Here is how the skill engine works — registration, routing, approval, and self-evolution.',
     featured_image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200',
     featured_image_alt: 'Connected network representing skill engine',
     content: [

@@ -52,7 +52,7 @@ to skillnad from traditionella CMS (that/which bara levererar webbplats) or rena
 
 FlowWink uses a modular Blocks-architecture for flexible innehållshantering:
 
-#### Available Blocks (61+ types)
+#### Available Blocks (58+ types)
 
 | Category | Block | Description |
 |----------|-------|-------------|
@@ -734,7 +734,7 @@ Visuellt diagram that/which demonstrerar innehållsflöde from CMS to olika kana
 
 ### 8.3 Content Model Overview
 
-Översikt of alla 50+ Blocks-types with:
+Översikt of alla 58+ Blocks-types with:
 - Antal instanser in Publishede sidor
 - JSON-preview of Blocks-struktur
 - Dokumentation of data-format
@@ -1170,7 +1170,7 @@ for vårdorganisationer that/which Requires HIPAA:
 | **Webinars** — plan, promote, and follow up online events | ✅ Complete |
 | **Content API v2** — REST + GraphQL + Markdown export for LLM consumption | ✅ Complete |
 | **10 starter templates** with blog posts, KB, FlowPilot config | ✅ Complete |
-| **61+ block types** | ✅ Complete |
+| **58+ block types** | ✅ Complete |
 
 #### Booking Module Features
 
