@@ -1073,28 +1073,34 @@ export type Database = {
       }
       chat_messages: {
         Row: {
+          action_payload: Json | null
           content: string
           conversation_id: string
           created_at: string
           id: string
           metadata: Json | null
           role: string
+          source: string
         }
         Insert: {
+          action_payload?: Json | null
           content: string
           conversation_id: string
           created_at?: string
           id?: string
           metadata?: Json | null
           role: string
+          source?: string
         }
         Update: {
+          action_payload?: Json | null
           content?: string
           conversation_id?: string
           created_at?: string
           id?: string
           metadata?: Json | null
           role?: string
+          source?: string
         }
         Relationships: [
           {

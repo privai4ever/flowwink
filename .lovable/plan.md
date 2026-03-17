@@ -1,109 +1,178 @@
+# FlowPilot Agentic Architecture
 
+## Phase 1: Skill Registry + Unified Tool Engine ✅ DONE
 
-## The Core Tension
+### Completed
+- **Database tables**: `agent_skills`, `agent_memory`, `agent_activity` with RLS policies
+- **Enums**: `agent_scope`, `agent_skill_category`, `agent_activity_status`, `agent_type`, `agent_memory_category`
+- **11 built-in skills** seeded: migrate_url, create_page_block, write_blog_post, send_newsletter, create_campaign, add_lead, search_web, book_appointment, check_order, update_settings, analyze_analytics
+- **`agent-execute` edge function**: Unified skill executor with scope validation, approval checks, handler routing (edge/module/db/webhook), and activity logging
+- **TypeScript types**: `src/types/agent.ts` with full type coverage
 
-You're right to pause here. The current architecture has FlowPilot's "voice" fragmented across three separate surfaces:
+### Verified
+- Direct execution works (analyze_analytics returns real page view data)
+- Scope validation works (internal skills blocked from chat agent)
+- Approval gating works (send_newsletter returns 202 pending_approval)
 
-1. **Bell notifications** — proactive alerts, but feels like a system notification, not a person
-2. **ContextPanel** — activity feed, but passive/read-only
-3. **Chat** — conversational, but only reactive (responds when you talk)
+## Phase 2: FlowPilot "Operate" Mode ✅ DONE
 
-The result: FlowPilot feels like a tool, not an assistant. The whole promise is "talk to your business operator" — but right now the operator only speaks when spoken to.
+### Completed
+- Mode switcher (Operate | Migrate) in CopilotPage header using Tabs
+- OperateChat component — chat with quick actions, skill badges, and inline results
+- ActivityFeed sidebar — shows recent actions with status, duration, approve button
+- `agent-operate` edge function — AI router that picks skills via tool calling, executes via agent-execute, summarizes results
+- `useAgentOperate` hook — manages messages, skills, activity, and approval flow
 
-## The Design Insight
+### TODO (refinement)
+- [ ] Refactor copilot-action to load tool definitions from agent_skills table
 
-**FlowPilot should proactively post into the chat.** This is his voice. The bell and dashboard remain as quick-glance surfaces, but the chat is where the relationship lives.
+## Phase 2.5: Active Memory ✅ DONE
 
-Think of it like Slack: your team member posts updates in a channel. You don't go to a separate "notification bell" to see what they did — they tell you directly, and you can respond.
+### Completed
+- **agent-operate** loads all `agent_memory` entries into system prompt before each AI call
+- **memory_write** built-in tool — FlowPilot saves preferences, facts, context to DB
+- **memory_read** built-in tool — FlowPilot searches memory by key/category
+- Memory tools handled locally in agent-operate (no round-trip to agent-execute)
+- Two new skills registered in `agent_skills` table (memory_write, memory_read)
+- FlowPilot proactively saves useful info when it learns something new
 
-## Proposed Architecture: "FlowPilot Speaks First"
+## Phase 3.5: Skill Hub Admin UI ✅ DONE
 
-### 1. Proactive Chat Messages
+### Completed
+- **SkillHubPage** (`/admin/skills`) with Skills, Activity, and Objectives (placeholder) tabs
+- **SkillCard** — card grid with inline enable/disable toggle, scope/category/handler badges
+- **SkillEditorSheet** — full CRUD sheet with JSON tool definition editor (CodeMirror)
+- **ActivityTable** — filterable activity log with expand for input/output JSON, approve/reject
+- **useSkillHub** hook — CRUD for skills, activity queries, approval mutations
+- **Sidebar** — "Skill Hub" added to Main group with Bot icon
 
-When FlowPilot completes autonomous work (heartbeat, briefing, lead capture, content publish), it **injects a message into the admin's active conversation** (or creates a new one titled "Daily Update"):
+## Phase 3: Public Chat Gets Skills ✅ DONE
 
-```text
-┌─────────────────────────────────────────────┐
-│  FlowPilot · 07:02                          │
-│                                             │
-│  ☀️ Good morning! Here's your briefing:     │
-│                                             │
-│  Health Score: 78/100                        │
-│  • 3 new leads overnight (1 hot — Sarah K.) │
-│  • Blog post "5 Tips..." published           │
-│  • Traffic up 12% vs last week               │
-│                                             │
-│  → [View Sarah's profile](/admin/contacts)   │
-│  → [Review blog post](/admin/blog/edit/xxx)  │
-│                                             │
-│  Anything you'd like me to focus on today?   │
-└─────────────────────────────────────────────┘
+### Completed
+- **chat-completion** loads external/both skills from `agent_skills` table as OpenAI-compatible tools
+- Skills are routed through `agent-execute` edge function (scope validation, approval gating, activity logging)
+- `agentSkillNames` map tracks which tool calls are agent skills vs built-in tools
+- System prompt dynamically extended with skill usage instructions
+- Works for both OpenAI and local AI providers (when tool calling is supported)
+- Approval-gated skills return friendly "pending approval" messages to visitors
+
+## Phase 4: Automation Layer ✅ DONE
+
+### Completed
+- **agent_automations table** with cron/event/signal trigger types and RLS policies
+- **AutomationsPanel** — full CRUD UI with trigger-type badges, skill linking, JSON config editor
+- **ObjectivesPanel** — full CRUD UI with status management, progress tracking, constraint/criteria JSON
+- **FlowPilot skills**: `create_objective` and `create_automation` registered in agent_skills
+- **agent-execute** updated with `module:objectives` and `module:automations` handlers
+- **5 seed automations** and **4 seed objectives** for onboarding
+
+### Runtime
+- **`automation-dispatcher` edge function** — reads due cron automations, executes via agent-execute, updates run metadata
+- **pg_cron** runs dispatcher every minute via pg_net HTTP POST
+- Simple cron parser calculates `next_run_at` for common patterns (*/N, daily, weekly)
+
+- **Event-trigger dispatch** — `send-webhook` now also checks `agent_automations` with matching `event_name` and executes their skills via `agent-execute`, merging event data into arguments
+- **Signal-trigger dispatch** — `signal-dispatcher` edge function evaluates dynamic conditions (score thresholds, status changes, field matches, compound logic) against incoming data
+
+### Signal Integration Points
+- `qualify-lead` → emits `lead_score_updated` and `lead_status_changed` signals
+- `send-webhook` → emits every webhook event as a signal (e.g. `form.submitted`, `booking.submitted`)
+- Signal conditions supported: `score_threshold`, `count_threshold`, `status_change`, `field_match`, `compound` (all/any)
+
+## Phase 5: Autonomy Unlocks ✅ DONE
+
+### Completed
+- **Multi-tool loop** — up to 6 iterations, all tool_calls processed in parallel per round
+- **Approval re-execution** — approved pending actions auto-re-execute with original args
+- **Conversation persistence** — sessions saved to chat_conversations/chat_messages
+- **Markdown rendering** — assistant messages rendered with react-markdown
+- **Multi-skill result tracking** — Response format supports `skill_results[]` array
+
+## Phase 6: Agent Self-Improvement ✅ DONE
+
+### Completed
+- **skill_create/update/list/disable** — FlowPilot can manage its own skill registry
+- **automation_create/list** — Create and view automations
+- **reflect** — Introspection: 7-day activity analysis, error rates, improvement suggestions
+
+## Phase 7: Weekly Business Digest ✅ DONE
+
+### Completed
+- **`business-digest` edge function** — queries 7-day data across all modules (page views, leads, bookings, orders, blog posts, newsletters, chat conversations, form submissions, subscribers)
+- **Structured + markdown output** — metrics table, top pages, hot leads, device/referrer breakdown, actionable callouts
+- **`weekly_business_digest` skill** — registered in agent_skills with `edge:business-digest` handler
+- **Cron automation** — "Weekly Business Digest" scheduled Monday 9:00 AM (disabled by default for safety)
+- **Actionable callouts** — hot leads needing follow-up, pending bookings, unpublished drafts, low sentiment alerts
+
+## Phase 8: Sales Intelligence Pipeline ✅ DONE
+
+### Completed
+- **`prospect-research` edge function** — Replaces n8n ScoutOut workflows (MBA 1-3). Uses Jina Reader (website scraping), Jina Search (market context), Hunter Domain Search (contact discovery), and AI (OpenAI/Gemini) to generate qualifying Q&A. Upserts to `companies` table and creates `leads` entries.
+- **`prospect-fit-analysis` edge function** — Replaces n8n ScoutOut workflow 4 + ScoutIn. Loads company profile from `site_settings`, evaluates fit score (0-100), maps prospect problems to services, generates personalized introduction letter + email subject. Uses Hunter Email Finder for decision-maker lookup.
+- **Hunter.io integration** — New `HUNTER_API_KEY` secret, added to `check-secrets`, `useIntegrationStatus`, `useIntegrations` (category: Sales Intelligence), and `configure-secrets.sh`.
+- **2 new agent skills** — `prospect_research` (edge:prospect-research) and `prospect_fit_analysis` (edge:prospect-fit-analysis) registered in `agent_skills` table, category: crm, scope: internal.
+- **Company Profile** — Uses `site_settings` key `company_profile` to store business context (about_us, services, delivered_value, clients, etc.) for AI prompts.
+- **Data flow**: Research → `companies` + `leads` tables; Fit score → `leads.score`; Intro letters → `agent_memory`; Research Q&A → `agent_memory`.
+
+### External APIs (No n8n dependency)
+- **Jina Reader**: `https://r.jina.ai/{url}` — free, no key
+- **Jina Search**: `https://s.jina.ai/{query}` — free, no key
+- **Hunter Domain Search**: `https://api.hunter.io/v2/domain-search`
+- **Hunter Email Finder**: `https://api.hunter.io/v2/email-finder`
+
+### FlowPilot Usage
+```
+"Research Acme Corp" → prospect_research skill
+"Analyze fit for Acme Corp and draft an intro" → prospect_fit_analysis skill
+"Research Acme Corp and prepare an introduction if fit score > 70" → chained execution
 ```
 
-The owner can reply naturally: "Tell me more about Sarah" or "Pause content publishing this week."
+## Phase 9: Autonomous Wiring ✅ DONE
 
-### 2. Notification Bell Becomes a Badge, Not the Voice
+### Completed
+- **Cron scheduling fix** — dispatcher picks up NULL `next_run_at` automations and initializes them
+- **DB triggers** — Postgres triggers on `leads`, `blog_posts`, `bookings`, `form_submissions`, `orders` fire events + signals via `pg_net`
+- **Objective progress auto-tracking** — `agent-execute` links successful skills to matching objectives
 
-The bell stays but becomes secondary — a "you have unread FlowPilot messages" indicator that deep-links to the chat, not a standalone popover. Like an unread count on a messaging app.
+## Phase 10: Agent Self-Evolution ✅ DONE
 
-### 3. ContextPanel Shows Live State (No Change Needed)
+### Completed
+- **SOUL/IDENTITY layer** — persistent personality stored in `agent_memory` (soul: purpose/values/tone/philosophy, identity: name/role/capabilities/boundaries), injected into every system prompt
+- **`soul_update` tool** — FlowPilot can evolve its own personality, values, and tone over time
+- **`instructions` field on `agent_skills`** — rich markdown knowledge (equivalent to OpenClaw's SKILL.md) injected into prompts when skills load
+- **`skill_instruct` tool** — FlowPilot can write knowledge/context/examples into any skill, making it smarter
+- **Reflect → auto-persist** — `reflect` tool now auto-saves error learnings and suggestions to `agent_memory` as lessons
+- **Skill Hub UI** — Instructions field added to SkillEditorSheet for manual editing
+- **Memory filtering** — soul/identity excluded from general memory list to avoid duplication in prompts
 
-The right panel continues showing objectives, activity feed, and status. It's the "dashboard glance" — complementary to the chat, not competing with it.
+### OpenClaw/NanoClaw Parity
+| Concept | OpenClaw | NanoClaw | FlowPilot |
+|---------|----------|----------|-----------|
+| Personality | SOUL.md file | SOUL.md + IDENTITY.md | `agent_memory` soul + identity entries |
+| Skill knowledge | SKILL.md markdown | .claude/skills/SKILL.md | `instructions` column on `agent_skills` |
+| Self-modification | Terminal (code rewrite) | Claude Code rewrite | DB tools (skill_create/update/instruct, soul_update) |
+| Heartbeat | HEARTBEAT.md config | task-scheduler.ts | `flowpilot-heartbeat` edge fn + pg_cron |
+| Learning loop | Manual | Implicit via Claude | reflect → auto-persist to memory |
 
-### 4. Action Items as Interactive Chat Cards
+## Architecture Reference
 
-When FlowPilot needs approval (HIL), instead of routing to a separate page, it posts a rich card in chat with inline approve/reject buttons:
-
-```text
-┌─────────────────────────────────────────────┐
-│  FlowPilot · 14:30                          │
-│                                             │
-│  📝 I drafted a newsletter for this week.    │
-│  Subject: "Spring Updates from FlowWink"     │
-│                                             │
-│  [Preview] [Approve & Send] [Edit First]     │
-└─────────────────────────────────────────────┘
+```
+skill.handler routing:
+  edge:function-name  →  supabase.functions.invoke()
+  module:name         →  Direct DB operations (blog, crm, booking, etc.)
+  db:table            →  DB read/write (settings, analytics)
+  webhook:n8n         →  External webhook POST
 ```
 
-## Technical Plan
-
-### Step 1: Proactive Message Injection
-
-- Add a `flowpilot_proactive_messages` table (or reuse `chat_messages` with a `source: 'system'` flag) to queue messages from edge functions (briefing, heartbeat, automations)
-- In the CopilotPage, subscribe to new proactive messages via Realtime and render them in the chat stream
-- Messages include markdown with deep-link buttons rendered as inline actions
-
-### Step 2: Rich Action Cards in Chat
-
-- Extend `UnifiedChat` message rendering to detect structured blocks (type: `action_card`) with buttons like Approve, Reject, View
-- Button clicks trigger the existing `agent-execute` function or navigate to admin routes
-- This makes HIL approvals conversational rather than requiring page navigation
-
-### Step 3: Bell → Unread Chat Indicator  
-
-- Simplify the bell: instead of showing full briefing cards, show unread count and link to the FlowPilot chat
-- Keep the popover as a quick summary but clicking any item opens the cockpit chat
-
-### Step 4: Morning Briefing as Chat Message
-
-- Modify `flowpilot-briefing` edge function to also insert a formatted chat message into the admin's FlowPilot conversation (in addition to the email)
-- The chat message includes the same health score, metrics, and action items but as interactive markdown
-
-### Database Changes
-
-- Add `source` column to `chat_messages` (values: `user`, `assistant`, `system`, `proactive`) to distinguish FlowPilot-initiated messages
-- Add `action_payload` JSONB column for interactive card data (button labels, handlers, links)
-
-### Files to Create/Edit
-
-| File | Change |
-|------|--------|
-| Migration | Add `source`, `action_payload` columns to `chat_messages` |
-| `flowpilot-briefing/index.ts` | Insert briefing as proactive chat message |
-| `UnifiedChat.tsx` | Render `proactive` messages with special styling + action cards |
-| `FlowPilotBriefingBell.tsx` | Simplify to unread-count badge linking to cockpit |
-| `CopilotPage.tsx` | Subscribe to proactive messages via Realtime |
-| New: `ProactiveMessageCard.tsx` | Rich card component for HIL approvals and briefings in chat |
-
-This keeps the conversational-first philosophy intact. FlowPilot talks to you. The bell just tells you he said something.
-
+## Key Files
+| File | Purpose |
+|------|---------|
+| `supabase/functions/agent-execute/index.ts` | Unified skill executor + objective tracker |
+| `supabase/functions/agent-operate/index.ts` | FlowPilot operate mode with SOUL/IDENTITY |
+| `supabase/functions/flowpilot-heartbeat/index.ts` | Autonomous 12h heartbeat loop |
+| `supabase/functions/automation-dispatcher/index.ts` | Cron automation executor |
+| `supabase/functions/signal-dispatcher/index.ts` | Signal condition evaluator |
+| `supabase/functions/prospect-research/index.ts` | Sales research pipeline |
+| `supabase/functions/prospect-fit-analysis/index.ts` | Fit scoring + intro drafting |
+| `src/types/agent.ts` | TypeScript types for skill engine |
+| `src/components/admin/skills/SkillEditorSheet.tsx` | Skill editor with instructions field |

@@ -9,6 +9,7 @@ import { ContextPanel } from '@/components/admin/copilot/ContextPanel';
 import { useAgentOperate } from '@/hooks/useAgentOperate';
 import { useExtensionRelay } from '@/hooks/useExtensionRelay';
 import { useBrandingSettings, useChatSettings } from '@/hooks/useSiteSettings';
+import { useProactiveMessages } from '@/hooks/useProactiveMessages';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -28,6 +29,7 @@ export default function CopilotPage() {
   const adminName = branding?.adminName || 'FlowWink';
   const showEscalations = chatSettings?.showEscalationsInCopilot ?? false;
   const showPublicChats = chatSettings?.showPublicChatsInCopilot ?? false;
+  const { messages: proactiveMessages } = useProactiveMessages(operate.conversationId ?? undefined);
 
   // Wire extension relay into the agent operate hook
   useEffect(() => {
@@ -308,6 +310,7 @@ export default function CopilotPage() {
                 onSendMessage={handleSendMessage}
                 onReset={operate.clearMessages}
                 onCancel={operate.cancelRequest}
+                proactiveMessages={proactiveMessages}
               />
             </div>
           </ResizablePanel>
