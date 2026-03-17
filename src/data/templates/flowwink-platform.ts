@@ -1164,6 +1164,94 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
         { id: 'cta-pricing', type: 'cta', data: { title: 'Start Building Today', subtitle: 'Self-host for free or start a managed trial. Autonomous operations included in every plan.', buttonText: 'Self-Host Free', buttonUrl: 'https://github.com/magnusfroste/flowwink', secondaryButtonText: 'Start Trial', secondaryButtonUrl: '/contact', gradient: true } },
       ],
     },
+
+    // ═══════════════════════════════════════════════════════════
+    // CONSULTANCY — Find the Right Expert
+    // ═══════════════════════════════════════════════════════════
+    {
+      title: 'Consultancy',
+      slug: 'consultancy',
+      menu_order: 7,
+      showInMenu: true,
+      meta: {
+        description: 'Find the perfect consultant with AI-powered matching. Browse our expert roster, get tailored CVs, and book implementation sessions.',
+        showTitle: false,
+        titleAlignment: 'center',
+      },
+      blocks: [
+        {
+          id: 'hero-consultancy',
+          type: 'hero',
+          data: {
+            title: 'Find the Right Expert in Seconds',
+            subtitle: 'Paste a job description and our AI matches you with the best consultant — complete with a tailored CV, cover letter, and skill gap analysis.',
+            backgroundType: 'color',
+            heightMode: 'auto',
+            contentAlignment: 'center',
+            overlayOpacity: 0,
+            primaryButton: { text: 'Try the Matcher', url: '#resume-matcher' },
+            secondaryButton: { text: 'Book a Demo', url: '/demo' },
+          },
+        },
+        {
+          id: 'features-consultancy',
+          type: 'checklist',
+          data: {
+            title: 'The Consultancy Module',
+            subtitle: 'Everything you need to manage and match consulting talent — powered by FlowPilot.',
+            items: [
+              { id: 'ck1', text: 'AI Resume Matcher — paste a job description, get ranked matches with scores and tailored summaries', checked: true },
+              { id: 'ck2', text: 'Consultant Profiles — full skill, certification, and experience management with availability tracking', checked: true },
+              { id: 'ck3', text: 'Voice Check-In — consultants update their profile via a conversational chat link, no login required', checked: true },
+              { id: 'ck4', text: 'Chrome Extension Check-In — FlowPilot browses LinkedIn and enriches profiles using your authenticated browser session', checked: true },
+              { id: 'ck5', text: 'Booking Integration — clients book demo sessions, workshops, or strategy calls directly from the site', checked: true },
+            ],
+            variant: 'cards',
+            columns: 1,
+          },
+        },
+        {
+          id: 'resume-matcher',
+          type: 'resume-matcher',
+          data: {
+            title: 'AI-Powered Consultant Matching',
+            subtitle: 'Paste a job description or assignment brief below. FlowPilot will analyze your requirements and match you with the best consultants from our roster.',
+            placeholder: 'Paste the job description or assignment brief here...',
+            buttonText: 'Find Match',
+          },
+        },
+        {
+          id: 'rich-text-checkin',
+          type: 'rich-text',
+          data: {
+            content: {
+              type: 'doc',
+              content: [
+                { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'The Check-In Workflow' }] },
+                { type: 'paragraph', content: [{ type: 'text', text: 'Keeping consultant profiles up-to-date is the biggest challenge in any staffing operation. FlowWink solves this with two automated workflows:' }] },
+                { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: '🎤 Voice Check-In (Chat Link)' }] },
+                { type: 'paragraph', content: [{ type: 'text', text: 'Each consultant gets a unique check-in URL. When they visit it, FlowPilot starts a conversational interview — asking about new skills, certifications, project updates, and availability changes. The profile is updated in real-time. No forms. No logins. Just talk.' }] },
+                { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: '🌐 Browser Control (Chrome Extension)' }] },
+                { type: 'paragraph', content: [{ type: 'text', text: 'For deeper enrichment, FlowPilot can browse LinkedIn, GitHub, and portfolio sites using the Chrome Extension relay. It reads the consultant\'s public profile through your authenticated browser session and automatically updates skills, endorsements, and experience data. No scraping APIs. No rate limits. Just your real browser.' }] },
+              ],
+            },
+          },
+        },
+        {
+          id: 'cta-consultancy',
+          type: 'cta',
+          data: {
+            title: 'See It in Action',
+            subtitle: 'Visit the demo page to experience live booking, product browsing, and consultant matching — all managed by FlowPilot.',
+            buttonText: 'Try the Demo',
+            buttonUrl: '/demo',
+            secondaryButtonText: 'View Pricing',
+            secondaryButtonUrl: '/pricing',
+            gradient: true,
+          },
+        },
+      ],
+    },
   ],
   branding: {
     logo: '',
