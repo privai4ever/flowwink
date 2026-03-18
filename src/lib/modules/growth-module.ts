@@ -21,17 +21,19 @@ export const growthModule: ModuleDefinition<GrowthCampaignInput, GrowthCampaignO
     try {
       const validated = growthCampaignInputSchema.parse(input);
 
+      const insertData = {
+        name: validated.name,
+        platform: validated.platform,
+        objective: validated.objective || null,
+        budget_cents: validated.budget_cents,
+        currency: validated.currency || 'SEK',
+        target_audience: validated.target_audience || {} as Record<string, unknown>,
+        status: 'draft' as const,
+      };
+
       const { data, error } = await supabase
         .from('ad_campaigns')
-        .insert({
-          name: validated.name,
-          platform: validated.platform,
-          objective: validated.objective || null,
-          budget_cents: validated.budget_cents,
-          currency: validated.currency || 'SEK',
-          target_audience: validated.target_audience || {},
-          status: 'draft',
-        })
+        .insert(insertData)
         .select('id, name, status')
         .single();
 
