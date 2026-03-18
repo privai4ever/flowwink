@@ -130,7 +130,7 @@ const digitalShopPages: TemplatePage[] = [
           imageAspectRatio: '4:5',
           imageObjectFit: 'cover',
           imageRounded: 'xl',
-          primaryButton: { text: 'View Product — $49', url: '/products' },
+          primaryButton: { text: 'View Product — $49', url: '/home' },
           verticalAlignment: 'center',
         },
       },
