@@ -30,6 +30,7 @@ import {
   webinarsModule,
   resumeModule,
   browserControlModule,
+  growthModule,
 } from '@/lib/modules';
 
 // =============================================================================
