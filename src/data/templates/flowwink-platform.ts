@@ -342,7 +342,7 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
                 description: 'Dedicated FlowPilot with custom skills and compliance support.',
                 features: ['Everything in Managed', 'Dedicated infrastructure', 'Custom skill development', 'SSO (SAML/OIDC)', 'Dedicated success manager', 'Compliance & audit support'],
                 buttonText: 'Contact Sales',
-                buttonUrl: '/contact',
+                buttonUrl: '#contact-form',
               },
             ],
             columns: 3,
