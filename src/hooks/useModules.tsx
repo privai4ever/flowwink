@@ -105,6 +105,7 @@ export const defaultModulesSettings: ModulesSettings = {
     category: 'communication',
     autonomy: 'view-required',
     adminUI: true,
+    optionalIntegrations: ['openai', 'gemini', 'local_llm', 'n8n'],
   },
   liveSupport: {
     enabled: false,
