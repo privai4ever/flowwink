@@ -240,6 +240,15 @@ export const defaultModulesSettings: ModulesSettings = {
     autonomy: 'agent-capable',
     adminUI: true,
   },
+  paidGrowth: {
+    enabled: false,
+    name: 'Paid Growth',
+    description: 'Autonomous ad campaigns — create, optimize and monitor paid advertising across platforms',
+    icon: 'Megaphone',
+    category: 'insights',
+    autonomy: 'agent-capable',
+    adminUI: true,
+  },
 };
 
 // Map sidebar items to module IDs
