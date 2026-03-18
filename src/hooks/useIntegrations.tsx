@@ -52,7 +52,7 @@ export interface IntegrationConfig {
   name: string;
   description: string;
   icon: string;
-  category: 'payments' | 'communication' | 'ai' | 'media' | 'automation' | 'analytics' | 'notifications' | 'sales';
+  category: 'payments' | 'communication' | 'ai' | 'media' | 'automation' | 'analytics' | 'notifications' | 'sales' | 'advertising';
   features: string[];
   secretName: string;
   docsUrl: string;
