@@ -810,6 +810,42 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             autoplaySpeed: 6,
           },
         },
+        // TABS — expertise areas
+        {
+          id: 'consult-tabs',
+          type: 'tabs',
+          data: {
+            title: 'Expertise Areas',
+            orientation: 'horizontal',
+            variant: 'pills',
+            tabs: [
+              {
+                id: 'tab-cloud',
+                title: 'Cloud & DevOps',
+                icon: 'Cloud',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'AWS, Azure, GCP — our cloud architects design resilient multi-cloud strategies. From Kubernetes orchestration to Terraform IaC, we staff the engineers who keep your infrastructure scalable and secure.' }] }] },
+              },
+              {
+                id: 'tab-frontend',
+                title: 'Frontend & Design',
+                icon: 'Layout',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'React, Vue, Angular, Design Systems — our frontend specialists build accessible, performant user experiences. From component libraries to full redesigns, we match the right talent to your tech stack.' }] }] },
+              },
+              {
+                id: 'tab-data',
+                title: 'Data & AI',
+                icon: 'Brain',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Machine learning engineers, data architects, and analytics specialists. From data pipelines to production ML models, our consultants turn raw data into business intelligence.' }] }] },
+              },
+              {
+                id: 'tab-security',
+                title: 'Security & Compliance',
+                icon: 'Shield',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Penetration testers, security architects, and compliance experts. SOC 2, ISO 27001, GDPR — our specialists ensure your systems meet the highest security standards.' }] }] },
+              },
+            ],
+          },
+        },
         // CTA
         {
           id: 'cta-consult',
@@ -945,6 +981,26 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             layout: 'horizontal',
             size: 'lg',
             animated: true,
+          },
+        },
+        // MARQUEE — trusted by brands
+        {
+          id: 'ecom-marquee',
+          type: 'marquee',
+          data: {
+            title: 'Trusted by Creators & Brands',
+            items: [
+              { id: 'em1', text: 'Shopify Migrants' },
+              { id: 'em2', text: 'Indie Creators' },
+              { id: 'em3', text: 'SaaS Companies' },
+              { id: 'em4', text: 'Design Studios' },
+              { id: 'em5', text: 'Digital Agencies' },
+              { id: 'em6', text: 'Course Creators' },
+            ],
+            speed: 'normal',
+            pauseOnHover: true,
+            direction: 'left',
+            variant: 'default',
           },
         },
         // CTA
@@ -1101,6 +1157,24 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             subtitle: 'Choose a service and time that works for you. Instant confirmation.',
           },
         },
+        // PROGRESS — service quality KPIs
+        {
+          id: 'services-progress',
+          type: 'progress',
+          data: {
+            title: 'Our Track Record',
+            subtitle: 'Numbers that speak for themselves.',
+            items: [
+              { id: 'sp1', label: 'Client Satisfaction', value: 98, color: 'hsl(142 71% 45%)' },
+              { id: 'sp2', label: 'On-Time Delivery', value: 96, color: 'hsl(217 91% 60%)' },
+              { id: 'sp3', label: 'Repeat Clients', value: 89, color: 'hsl(280 65% 60%)' },
+              { id: 'sp4', label: 'Same-Day Availability', value: 75, color: 'hsl(35 92% 55%)' },
+            ],
+            showPercentage: true,
+            animated: true,
+            variant: 'default',
+          },
+        },
         // CTA
         {
           id: 'cta-services',
@@ -1207,6 +1281,36 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
               { question: 'How do I book an appointment?', answer: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'You can book appointments online 24/7 using our booking system. Simply select your service, choose an available time, and confirm. You\'ll receive an email confirmation immediately.' }] }] } },
               { question: 'What insurance do you accept?', answer: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'We accept most major insurance plans including Medicare, Blue Cross Blue Shield, Aetna, Cigna, and United Healthcare. Contact us to verify your specific coverage before your visit.' }] }] } },
               { question: 'How do I access my medical records?', answer: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'You can access your medical records through our secure patient portal. We use two-factor authentication and encrypted connections to protect your privacy.' }] }] } },
+            ],
+          },
+        },
+        // TABS — healthcare services
+        {
+          id: 'health-tabs',
+          type: 'tabs',
+          data: {
+            title: 'Our Services',
+            orientation: 'horizontal',
+            variant: 'pills',
+            tabs: [
+              {
+                id: 'tab-primary',
+                title: 'Primary Care',
+                icon: 'Heart',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Comprehensive primary care including annual physicals, chronic disease management, preventive screenings, and wellness consultations. Your first point of contact for all health concerns.' }] }] },
+              },
+              {
+                id: 'tab-specialists',
+                title: 'Specialists',
+                icon: 'Stethoscope',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Board-certified specialists in cardiology, dermatology, orthopedics, and neurology. Referrals coordinated seamlessly through our integrated system — no paperwork, no delays.' }] }] },
+              },
+              {
+                id: 'tab-telehealth',
+                title: 'Telehealth',
+                icon: 'Video',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Secure video consultations from the comfort of your home. HIPAA-compliant, end-to-end encrypted, and available same-day for urgent non-emergency concerns.' }] }] },
+              },
             ],
           },
         },
