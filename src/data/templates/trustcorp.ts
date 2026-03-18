@@ -654,9 +654,9 @@ export const trustcorpTemplate: StarterTemplate = {
         description: 'Learn about TrustCorp',
         children: [
           { id: 'about', label: 'About Us', url: '/about', description: 'Our mission and values', icon: '🏢' },
-          { id: 'careers', label: 'Careers', url: '/careers', description: 'Join our team', icon: '💼' },
-          { id: 'partners', label: 'Partners', url: '/partners', description: 'Partner program and ecosystem', icon: '🤝' },
-          { id: 'press', label: 'Press', url: '/press', description: 'News and media resources', icon: '📰' },
+          { id: 'careers', label: 'Careers', url: '/contact', description: 'Join our team', icon: '💼' },
+          { id: 'partners', label: 'Partners', url: '/contact', description: 'Partner program and ecosystem', icon: '🤝' },
+          { id: 'press', label: 'Press', url: '/about', description: 'News and media resources', icon: '📰' },
           { id: 'contact', label: 'Contact', url: '/contact', description: 'Get in touch with us', icon: '📧' },
         ],
       },
