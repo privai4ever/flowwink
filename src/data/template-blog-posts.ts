@@ -623,7 +623,7 @@ export const flowwinkBlogPosts: TemplateBlogPost[] = [
     title: 'Agent-to-Agent: How FlowPilot Talks to Other AI Agents',
     slug: 'agent-to-agent-flowpilot-a2a-protocol',
     excerpt: 'The agentic web is not one agent per company — it is agents collaborating across boundaries. FlowPilot supports A2A peer connections with token-authenticated communication.',
-    featured_image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200',
+    featured_image: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?w=1200',
     featured_image_alt: 'Network of connected nodes representing agent-to-agent communication',
     content: [
       createTextBlock({
