@@ -681,10 +681,10 @@ export const digitalShopTemplate: StarterTemplate = {
     welcomeMessage: 'Hi! I\'m your personal shopping assistant. I know every product in our catalog — what are you looking for?',
     systemPrompt: 'You are a knowledgeable shopping concierge for a premium digital product store. You know every product intimately. Help users find the perfect product by understanding their needs. Be conversational, specific with product recommendations, and mention prices. Suggest the Pro Membership when appropriate. Keep answers concise but helpful.',
     suggestedPrompts: [
-      'What do you recommend for beginners?',
+      'What\'s your best-selling template?',
+      'I need something for a SaaS landing page',
       'Tell me about Pro Membership',
-      'I need templates for a startup',
-      'How does delivery work?',
+      'Do you offer refunds?',
     ],
     includeContentAsContext: true,
     includedPageSlugs: ['*'],

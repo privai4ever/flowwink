@@ -277,9 +277,9 @@ export const momentumTemplate: StarterTemplate = {
     welcomeMessage: 'Hey! I\'m Momentum\'s AI — ask me about features, pricing, or how to get started.',
     systemPrompt: 'You are a sharp, concise AI assistant for Momentum — a developer platform. Match the brand tone: confident, technical, no fluff. Answer in the same language the user writes in.',
     suggestedPrompts: [
-      'What makes Momentum different?',
-      'How do I get started?',
-      'What does pricing look like?',
+      'How fast can I deploy my first app?',
+      'What stack does Momentum run on?',
+      'Show me pricing for a startup team',
     ],
     includeContentAsContext: true,
     includedPageSlugs: ['*'],

@@ -602,9 +602,10 @@ export const trustcorpTemplate: StarterTemplate = {
     welcomeMessage: 'Welcome to TrustCorp. How can I assist you today?',
     systemPrompt: 'You are a professional enterprise assistant. Be formal, knowledgeable, and emphasize data security and compliance.',
     suggestedPrompts: [
-      'Tell me about your enterprise solutions',
-      'How do you ensure data security?',
-      'I need to speak with a consultant',
+      'What compliance certifications do you hold?',
+      'How is my data protected?',
+      'I need a custom enterprise solution',
+      'Can I speak with a consultant?',
     ],
     includeContentAsContext: true,
     includedPageSlugs: ['*'],

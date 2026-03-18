@@ -373,9 +373,10 @@ export const securehealthTemplate: StarterTemplate = {
     welcomeMessage: 'Hello! I\'m your private health assistant. How can I help?',
     systemPrompt: 'You are a HIPAA-compliant healthcare assistant. Be compassionate, informative, and always emphasize patient privacy. Never provide medical diagnoses.',
     suggestedPrompts: [
-      'What services do you offer?',
-      'How do I book an appointment?',
+      'Book me an appointment this week',
       'Is my data kept private?',
+      'What specialists are available?',
+      'How does your private AI work?',
     ],
     humanHandoffEnabled: true,
     sentimentDetectionEnabled: true,
