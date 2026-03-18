@@ -169,6 +169,8 @@ export const defaultModulesSettings: ModulesSettings = {
     category: 'data',
     autonomy: 'config-required',
     adminUI: true,
+    requiredIntegrations: ['stripe'],
+    optionalIntegrations: ['resend', 'stripe_webhook'],
   },
   contentApi: {
     enabled: false,
