@@ -89,6 +89,10 @@ export function ModuleCard({
   const hasApi = !!registryModule;
   const capabilities = registryModule?.capabilities || [];
   
+  // Integration readiness
+  const readiness = useModuleReadiness(moduleId);
+  const hasIntegrationDeps = readiness.totalRequired > 0 || readiness.totalOptional > 0;
+  
   // Simplified capability indicators
   const canReceiveContent = capabilities.includes('content:receive');
   const triggersWebhooks = capabilities.includes('webhook:trigger');
