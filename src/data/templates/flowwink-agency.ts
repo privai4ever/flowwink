@@ -553,7 +553,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
           imageAlt: 'Code editor showing API',
           imagePosition: 'right',
           ctaText: 'View API Docs →',
-          ctaUrl: '/docs',
+          ctaUrl: '/home',
         },
       },
       {
