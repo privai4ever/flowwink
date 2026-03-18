@@ -810,6 +810,42 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             autoplaySpeed: 6,
           },
         },
+        // TABS — expertise areas
+        {
+          id: 'consult-tabs',
+          type: 'tabs',
+          data: {
+            title: 'Expertise Areas',
+            orientation: 'horizontal',
+            variant: 'pills',
+            tabs: [
+              {
+                id: 'tab-cloud',
+                title: 'Cloud & DevOps',
+                icon: 'Cloud',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'AWS, Azure, GCP — our cloud architects design resilient multi-cloud strategies. From Kubernetes orchestration to Terraform IaC, we staff the engineers who keep your infrastructure scalable and secure.' }] }] },
+              },
+              {
+                id: 'tab-frontend',
+                title: 'Frontend & Design',
+                icon: 'Layout',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'React, Vue, Angular, Design Systems — our frontend specialists build accessible, performant user experiences. From component libraries to full redesigns, we match the right talent to your tech stack.' }] }] },
+              },
+              {
+                id: 'tab-data',
+                title: 'Data & AI',
+                icon: 'Brain',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Machine learning engineers, data architects, and analytics specialists. From data pipelines to production ML models, our consultants turn raw data into business intelligence.' }] }] },
+              },
+              {
+                id: 'tab-security',
+                title: 'Security & Compliance',
+                icon: 'Shield',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Penetration testers, security architects, and compliance experts. SOC 2, ISO 27001, GDPR — our specialists ensure your systems meet the highest security standards.' }] }] },
+              },
+            ],
+          },
+        },
         // CTA
         {
           id: 'cta-consult',
