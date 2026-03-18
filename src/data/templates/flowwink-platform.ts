@@ -1284,6 +1284,36 @@ export const flowwinkPlatformTemplate: StarterTemplate = {
             ],
           },
         },
+        // TABS — healthcare services
+        {
+          id: 'health-tabs',
+          type: 'tabs',
+          data: {
+            title: 'Our Services',
+            orientation: 'horizontal',
+            variant: 'pills',
+            tabs: [
+              {
+                id: 'tab-primary',
+                title: 'Primary Care',
+                icon: 'Heart',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Comprehensive primary care including annual physicals, chronic disease management, preventive screenings, and wellness consultations. Your first point of contact for all health concerns.' }] }] },
+              },
+              {
+                id: 'tab-specialists',
+                title: 'Specialists',
+                icon: 'Stethoscope',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Board-certified specialists in cardiology, dermatology, orthopedics, and neurology. Referrals coordinated seamlessly through our integrated system — no paperwork, no delays.' }] }] },
+              },
+              {
+                id: 'tab-telehealth',
+                title: 'Telehealth',
+                icon: 'Video',
+                content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Secure video consultations from the comfort of your home. HIPAA-compliant, end-to-end encrypted, and available same-day for urgent non-emergency concerns.' }] }] },
+              },
+            ],
+          },
+        },
         // CTA
         {
           id: 'cta-health',
