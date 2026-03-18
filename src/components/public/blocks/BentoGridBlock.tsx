@@ -100,11 +100,11 @@ export function BentoGridBlock({ data }: BentoGridBlockProps) {
   );
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-12 md:py-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         {(eyebrow || title || subtitle) && (
-          <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
+          <div className="text-center mb-8 md:mb-12 max-w-3xl mx-auto">
             {eyebrow && (
               <span
                 className="inline-block text-xs font-semibold uppercase tracking-[0.2em] mb-3"
