@@ -59,6 +59,7 @@ export const defaultModulesSettings: ModulesSettings = {
     category: 'insights',
     autonomy: 'view-required',
     adminUI: true,
+    optionalIntegrations: ['google_analytics', 'meta_pixel'],
   },
   bookings: {
     enabled: true,
