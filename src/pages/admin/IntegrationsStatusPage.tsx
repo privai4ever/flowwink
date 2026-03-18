@@ -66,6 +66,7 @@ const iconMap = {
   Target,
   MessageSquare,
   Search,
+  Megaphone,
 };
 
 type IntegrationStatus = 'active' | 'disabled' | 'not_configured';
