@@ -629,12 +629,12 @@ export const trustcorpTemplate: StarterTemplate = {
         id: 'solutions', label: 'Solutions', url: '#', enabled: true,
         description: 'Enterprise-grade solutions for every business need',
         children: [
-          { id: 'analytics', label: 'Analytics Platform', url: '/solutions/analytics', description: 'Real-time business intelligence and reporting', icon: '📊' },
-          { id: 'security', label: 'Security Suite', url: '/solutions/security', description: 'Enterprise security and compliance tools', icon: '🔒' },
-          { id: 'integration', label: 'Integration Hub', url: '/solutions/integration', description: 'Connect all your business systems', icon: '🔗' },
-          { id: 'automation', label: 'Automation', url: '/solutions/automation', description: 'Streamline workflows and processes', icon: '⚡' },
-          { id: 'collaboration', label: 'Collaboration', url: '/solutions/collaboration', description: 'Team productivity and communication', icon: '👥' },
-          { id: 'cloud', label: 'Cloud Services', url: '/solutions/cloud', description: 'Scalable cloud infrastructure', icon: '☁️' },
+          { id: 'analytics', label: 'Analytics Platform', url: '/services', description: 'Real-time business intelligence and reporting', icon: '📊' },
+          { id: 'security', label: 'Security Suite', url: '/services', description: 'Enterprise security and compliance tools', icon: '🔒' },
+          { id: 'integration', label: 'Integration Hub', url: '/services', description: 'Connect all your business systems', icon: '🔗' },
+          { id: 'automation', label: 'Automation', url: '/services', description: 'Streamline workflows and processes', icon: '⚡' },
+          { id: 'collaboration', label: 'Collaboration', url: '/services', description: 'Team productivity and communication', icon: '👥' },
+          { id: 'cloud', label: 'Cloud Services', url: '/services', description: 'Scalable cloud infrastructure', icon: '☁️' },
         ],
       },
       {
