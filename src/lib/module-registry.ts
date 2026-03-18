@@ -58,6 +58,7 @@ class ModuleRegistry {
       formsModule,
       ordersModule,
       webinarsModule,
+      salesIntelligenceModule,
       resumeModule,
       browserControlModule,
       growthModule,
