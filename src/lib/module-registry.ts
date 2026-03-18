@@ -59,6 +59,7 @@ class ModuleRegistry {
       webinarsModule,
       resumeModule,
       browserControlModule,
+      growthModule,
     ];
 
     for (const mod of builtIn) {

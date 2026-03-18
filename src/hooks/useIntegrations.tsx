@@ -44,7 +44,8 @@ export interface IntegrationProviderConfig {
   notifyOnFormSubmit?: boolean;
   // Jina
   preferFreeTier?: boolean;
-}
+  // Meta Ads
+  adAccountId?: string;
 
 // Integration configuration type
 export interface IntegrationConfig {
