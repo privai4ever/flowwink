@@ -16,6 +16,7 @@
  * client logos, testimonials, agentic chat launcher, A2A integration CTA.
  */
 import type { StarterTemplate } from './types';
+import { consultAgencyBlogPosts } from '../template-blog-posts';
 
 export const consultAgencyTemplate: StarterTemplate = {
   id: 'consult-agency',
