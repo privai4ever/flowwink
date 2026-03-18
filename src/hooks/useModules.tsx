@@ -68,6 +68,7 @@ export const defaultModulesSettings: ModulesSettings = {
     category: 'data',
     autonomy: 'config-required',
     adminUI: true,
+    optionalIntegrations: ['resend', 'stripe'],
   },
   pages: {
     enabled: true,
