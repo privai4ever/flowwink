@@ -17,7 +17,7 @@ const securehealthPages: StarterTemplate['pages'] = [
     showInMenu: true,
     meta: { description: 'Your health, your privacy — trusted care with complete data security', showTitle: false, titleAlignment: 'center' },
     blocks: [
-      { id: 'hero-1', type: 'hero', data: { title: 'Your Health, Your Privacy', subtitle: 'Trusted care with complete data security. Your information never leaves our servers.', backgroundType: 'video', videoUrl: 'https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4', videoType: 'direct', videoPosterUrl: 'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=1920', videoLoop: true, videoMuted: true, heightMode: '80vh', contentAlignment: 'center', overlayOpacity: 60, titleAnimation: 'slide-up', showScrollIndicator: true, primaryButton: { text: 'Book Appointment', url: '/book' }, secondaryButton: { text: 'Our Services', url: '/services' } } },
+      { id: 'hero-1', type: 'hero', data: { title: 'Your Health, Your Privacy', subtitle: 'Trusted care with complete data security. Your information never leaves our servers.', backgroundType: 'video', videoUrl: 'https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4', videoType: 'direct', videoPosterUrl: 'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=1920', videoLoop: true, videoMuted: true, heightMode: '80vh', contentAlignment: 'center', overlayOpacity: 60, titleAnimation: 'slide-up', showScrollIndicator: true, primaryButton: { text: 'Book Appointment', url: '/book' }, secondaryButton: { text: 'Ask Our Private AI', url: '/chat' } } },
       { id: 'divider-hero-badges', type: 'section-divider', data: { shape: 'curved', height: 'sm' } },
       { id: 'badge-compliance', type: 'badge', data: { title: 'Trusted & Certified', badges: [{ id: 'b1', title: 'HIPAA Compliant', icon: 'shield' }, { id: 'b2', title: 'SOC 2 Type II', icon: 'check' }, { id: 'b3', title: 'JCI Accredited', icon: 'award' }, { id: 'b4', title: 'ISO 27001', icon: 'medal' }], variant: 'minimal', columns: 4, size: 'md', showTitles: true, grayscale: false } },
       { id: 'info-box-1', type: 'info-box', data: { title: 'Now Accepting New Patients', content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Same-day appointments available. Call us or use our AI assistant to find the next available slot.' }] }] }, variant: 'highlight' } },
@@ -373,9 +373,10 @@ export const securehealthTemplate: StarterTemplate = {
     welcomeMessage: 'Hello! I\'m your private health assistant. How can I help?',
     systemPrompt: 'You are a HIPAA-compliant healthcare assistant. Be compassionate, informative, and always emphasize patient privacy. Never provide medical diagnoses.',
     suggestedPrompts: [
-      'What services do you offer?',
-      'How do I book an appointment?',
+      'Book me an appointment this week',
       'Is my data kept private?',
+      'What specialists are available?',
+      'How does your private AI work?',
     ],
     humanHandoffEnabled: true,
     sentimentDetectionEnabled: true,

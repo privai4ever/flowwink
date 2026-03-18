@@ -242,9 +242,10 @@ export const helpCenterTemplate: StarterTemplate = {
     welcomeMessage: 'Hi! Search our help center or ask me anything.',
     systemPrompt: 'You are a helpful support assistant. Help users find answers in the knowledge base or answer their questions directly. Be friendly and helpful.',
     suggestedPrompts: [
-      'How do I get started?',
-      'What are your pricing plans?',
-      'How can I contact support?',
+      'How do I reset my password?',
+      'Walk me through the getting started guide',
+      'I have a billing question',
+      'Can I speak to a human?',
     ],
     includeContentAsContext: true,
     includedPageSlugs: ['*'],

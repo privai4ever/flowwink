@@ -49,7 +49,7 @@ const serviceProPages: TemplatePage[] = [
           overlayOpacity: 60,
           titleAnimation: 'fade-in',
           primaryButton: { text: 'Book Your Appointment', url: '/book' },
-          secondaryButton: { text: 'See Our Services', url: '/services' },
+          secondaryButton: { text: 'Ask Our AI', url: '/chat' },
         },
       },
       {
@@ -712,8 +712,9 @@ export const serviceProTemplate: StarterTemplate = {
     systemPrompt: 'You are a helpful assistant for a service business. Help users book appointments, answer questions about services, and provide information. Be friendly and professional.',
     suggestedPrompts: [
       'What services do you offer?',
-      'How do I book an appointment?',
-      'What are your hours?',
+      'Book me the next available slot',
+      'What are your prices?',
+      'Do you have same-day availability?',
     ],
     includeContentAsContext: true,
     includedPageSlugs: ['*'],
