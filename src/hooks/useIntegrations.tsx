@@ -279,6 +279,20 @@ export const defaultIntegrationsSettings: IntegrationsSettings = {
       preferFreeTier: true,
     },
   },
+  meta_ads: {
+    enabled: false,
+    name: 'Meta Ads',
+    description: 'Facebook & Instagram campaign management',
+    icon: 'Megaphone',
+    category: 'advertising',
+    features: ['Campaign creation', 'Creative generation', 'Performance tracking', 'Budget optimization'],
+    secretName: 'META_ADS_ACCESS_TOKEN',
+    docsUrl: 'https://developers.facebook.com/docs/marketing-apis',
+    docsLabel: 'Get access token',
+    config: {
+      adAccountId: '',
+    },
+  },
 };
 
 // Category definitions
