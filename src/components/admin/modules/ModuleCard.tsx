@@ -10,6 +10,7 @@ import {
   Link2, 
   Info, 
   Hash,
+  ArrowRight,
   ArrowRightLeft,
   Webhook,
   Monitor,
