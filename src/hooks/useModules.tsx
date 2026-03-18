@@ -45,6 +45,7 @@ export interface ModulesSettings {
   resume: ModuleConfig;
   browserControl: ModuleConfig;
   federation: ModuleConfig;
+  paidGrowth: ModuleConfig;
 }
 
 export const defaultModulesSettings: ModulesSettings = {
