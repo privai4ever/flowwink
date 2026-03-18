@@ -40,7 +40,7 @@ const trustcorpPages: StarterTemplate['pages'] = [
           overlayOpacity: 65,
           parallaxEffect: false,
           titleAnimation: 'fade-in',
-          primaryButton: { text: 'Request Demo', url: '/contact' },
+          primaryButton: { text: 'Talk to Our AI', url: '/chat' },
           secondaryButton: { text: 'Our Services', url: '/services' },
         },
       },

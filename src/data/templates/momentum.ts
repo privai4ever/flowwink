@@ -49,8 +49,8 @@ const momentumPages: StarterTemplate['pages'] = [
           overlayOpacity: 85,
           titleAnimation: 'slide-up',
           showScrollIndicator: true,
-          primaryButton: { text: 'Start Building Free', url: '#pricing' },
-          secondaryButton: { text: 'Watch Demo', url: '#features' },
+          primaryButton: { text: 'Talk to AI', url: '/chat' },
+          secondaryButton: { text: 'See Pricing', url: '#pricing' },
         },
       },
       {

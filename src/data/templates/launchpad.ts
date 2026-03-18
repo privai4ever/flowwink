@@ -50,7 +50,7 @@ const launchpadPages: StarterTemplate['pages'] = [
           overlayOpacity: 70,
           titleAnimation: 'slide-up',
           showScrollIndicator: true,
-          primaryButton: { text: 'Start Building Free', url: '/contact' },
+          primaryButton: { text: 'Ask FlowPilot', url: '/chat' },
           secondaryButton: { text: 'See How It Works', url: '/product' },
         },
       },
