@@ -226,6 +226,7 @@ export function useTemplateInstaller() {
     setStep('creating');
     const pageIds: string[] = [];
 
+    toastSilencer.silent = true;
     try {
       // Clear media
       if (opts.clearMedia && mediaCount && mediaCount > 0) {
