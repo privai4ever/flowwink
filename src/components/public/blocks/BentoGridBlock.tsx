@@ -193,12 +193,12 @@ export function BentoGridBlock({ data }: BentoGridBlockProps) {
                   </h3>
 
                   {item.description && (
-                    <p className={cn(
-                      'text-sm leading-relaxed',
+                    <div className={cn(
+                      'text-sm leading-relaxed whitespace-pre-line',
                       item.image ? 'text-white/80' : 'text-muted-foreground',
                     )}>
                       {item.description}
-                    </p>
+                    </div>
                   )}
 
                   {item.linkLabel && (
