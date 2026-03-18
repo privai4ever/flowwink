@@ -51,7 +51,7 @@ const flowwinkAgencyPages: TemplatePage[] = [
           overlayOpacity: 50,
           titleAnimation: 'slide-up',
           showScrollIndicator: true,
-          primaryButton: { text: 'Ask FlowPilot', url: '/chat' },
+          primaryButton: { text: 'Ask FlowPilot', url: '#chat-launcher' },
           secondaryButton: { text: 'Calculate Your Savings', url: '/roi-calculator' },
         },
       },
