@@ -46,6 +46,7 @@ export interface IntegrationProviderConfig {
   preferFreeTier?: boolean;
   // Meta Ads
   adAccountId?: string;
+}
 
 // Integration configuration type
 export interface IntegrationConfig {
