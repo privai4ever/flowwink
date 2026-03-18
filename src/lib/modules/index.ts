@@ -27,3 +27,4 @@ export { salesIntelligenceModule } from './sales-intelligence-module';
 export { resumeModule } from './resume-module';
 export { browserControlModule } from './browser-control-module';
 export { growthModule } from './growth-module';
+export { federationModule } from './federation-module';
