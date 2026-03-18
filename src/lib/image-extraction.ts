@@ -76,8 +76,24 @@ export const extractImagesFromBlockData = (data: Record<string, unknown>): Image
     data.team.forEach((member, index) => {
       if (typeof member === 'object' && member !== null) {
         const memberObj = member as Record<string, unknown>;
-        if (typeof memberObj.avatar === 'string' && isExternalUrl(memberObj.avatar)) {
-          images.push({ path: `team.${index}.avatar`, url: memberObj.avatar });
+        for (const field of ['avatar', 'image', 'photo']) {
+          if (typeof memberObj[field] === 'string' && isExternalUrl(memberObj[field] as string)) {
+            images.push({ path: `team.${index}.${field}`, url: memberObj[field] as string });
+          }
+        }
+      }
+    });
+  }
+
+  // Members block (members[].image/photo/avatar)
+  if (Array.isArray(data.members)) {
+    data.members.forEach((member, index) => {
+      if (typeof member === 'object' && member !== null) {
+        const memberObj = member as Record<string, unknown>;
+        for (const field of ['image', 'photo', 'avatar']) {
+          if (typeof memberObj[field] === 'string' && isExternalUrl(memberObj[field] as string)) {
+            images.push({ path: `members.${index}.${field}`, url: memberObj[field] as string });
+          }
         }
       }
     });
@@ -90,6 +106,20 @@ export const extractImagesFromBlockData = (data: Record<string, unknown>): Image
         const testimonialObj = testimonial as Record<string, unknown>;
         if (typeof testimonialObj.avatar === 'string' && isExternalUrl(testimonialObj.avatar)) {
           images.push({ path: `testimonials.${index}.avatar`, url: testimonialObj.avatar });
+        }
+      }
+    });
+  }
+
+  // Items block (items[].image/avatar)
+  if (Array.isArray(data.items)) {
+    data.items.forEach((item, index) => {
+      if (typeof item === 'object' && item !== null) {
+        const itemObj = item as Record<string, unknown>;
+        for (const field of ['image', 'avatar', 'photo', 'src']) {
+          if (typeof itemObj[field] === 'string' && isExternalUrl(itemObj[field] as string)) {
+            images.push({ path: `items.${index}.${field}`, url: itemObj[field] as string });
+          }
         }
       }
     });
