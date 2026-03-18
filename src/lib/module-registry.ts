@@ -63,6 +63,7 @@ class ModuleRegistry {
       resumeModule,
       browserControlModule,
       growthModule,
+      federationModule,
     ];
 
     for (const mod of builtIn) {
