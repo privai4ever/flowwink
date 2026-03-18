@@ -15,10 +15,13 @@ import {
   Bot,
   Settings2,
   Eye,
+  AlertTriangle,
+  Plug,
 } from "lucide-react";
 import { moduleRegistry } from "@/lib/module-registry";
 import type { ModuleStats } from "@/hooks/useModuleStats";
 import type { ModulesSettings, ModuleConfig, ModuleAutonomy } from "@/hooks/useModules";
+import { useModuleReadiness } from "@/hooks/useModuleReadiness";
 import { ModuleDetailSheet } from "./ModuleDetailSheet";
 import {
   Tooltip,
@@ -85,6 +88,10 @@ export function ModuleCard({
   const registryModule = moduleRegistry.list().find(m => m.id === moduleId);
   const hasApi = !!registryModule;
   const capabilities = registryModule?.capabilities || [];
+  
+  // Integration readiness
+  const readiness = useModuleReadiness(moduleId);
+  const hasIntegrationDeps = readiness.totalRequired > 0 || readiness.totalOptional > 0;
   
   // Simplified capability indicators
   const canReceiveContent = capabilities.includes('content:receive');
@@ -233,7 +240,27 @@ export function ModuleCard({
             </div>
           )}
           
-          {isEnabled && !hasApi && !stats && !canToggleUI && (
+          {/* Integration readiness indicator */}
+          {isEnabled && hasIntegrationDeps && (
+            <div className="flex items-center gap-1.5 pt-1 border-t border-border/50">
+              {!readiness.ready ? (
+                <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  <span>Missing: {readiness.missingRequired.join(', ')}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Plug className="h-3.5 w-3.5" />
+                  <span>
+                    {readiness.activeRequired.length + readiness.activeOptional.length}/
+                    {readiness.totalRequired + readiness.totalOptional} integrations
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {isEnabled && !hasApi && !stats && !canToggleUI && !hasIntegrationDeps && (
             <div className="flex items-center gap-1.5 text-xs text-primary">
               <Check className="h-3.5 w-3.5" />
               <span>Active</span>

@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { GmailIntegrationCard } from "@/components/admin/integrations/GmailIntegrationCard";
+import { useIntegrationModuleMap } from "@/hooks/useModuleReadiness";
 
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminPageContainer } from "@/components/admin/AdminPageContainer";
@@ -618,6 +619,7 @@ export default function IntegrationsStatusPage() {
   const { data: secretsStatus, isLoading: secretsLoading, refetch: refetchSecrets } = useIntegrationStatus();
   const { data: integrationSettings, isLoading: settingsLoading } = useIntegrations();
   const updateIntegrations = useUpdateIntegrations();
+  const integrationModuleMap = useIntegrationModuleMap();
 
   const isLoading = secretsLoading || settingsLoading;
   const hasUnsavedChanges = pendingSettings !== null;
@@ -885,6 +887,25 @@ export default function IntegrationsStatusPage() {
                           </div>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                          {/* Module usage */}
+                          {integrationModuleMap[key] && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1.5">Used by</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {integrationModuleMap[key].required.map((name) => (
+                                  <Badge key={name} variant="default" className="text-xs font-normal">
+                                    {name}
+                                  </Badge>
+                                ))}
+                                {integrationModuleMap[key].optional.map((name) => (
+                                  <Badge key={name} variant="secondary" className="text-xs font-normal">
+                                    {name}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           {/* Features */}
                           <div>
                             <p className="text-xs text-muted-foreground mb-1.5">Enables</p>
