@@ -842,7 +842,7 @@ This skill is primarily triggered by automations, not directly by users.
       type: 'function',
       function: {
         name: 'manage_page',
-        description: 'Manage CMS pages. Actions: list, get, create, update, publish, archive, delete, rollback.',
+        description: 'Manage CMS pages. Actions: list, get, create, update, publish, archive, delete, rollback. For create/update with content, pass blocks array OR use manage_page_blocks to add blocks individually.',
         parameters: {
           type: 'object',
           properties: {
@@ -851,8 +851,20 @@ This skill is primarily triggered by automations, not directly by users.
             slug: { type: 'string', description: 'Page slug (for get or create)' },
             title: { type: 'string', description: 'Page title (for create/update)' },
             status: { type: 'string', description: 'Filter by status (for list)' },
-            meta: { type: 'object', description: 'Page meta JSON (for create/update)' },
-            blocks: { type: 'array', description: 'Content blocks array (for create/update)' },
+            meta: { type: 'object', description: 'Page meta JSON (for create/update)', properties: {} },
+            blocks: {
+              type: 'array',
+              description: 'Content blocks for create/update. Each block: { id, type, data }. Block types: hero, text, cta, accordion, info-box, two-column, quote, separator, etc.',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', description: 'UUID — use crypto.randomUUID() or any unique string' },
+                  type: { type: 'string', description: 'Block type: hero, text, cta, accordion, info-box, two-column, quote, separator, stats, features, form, newsletter' },
+                  data: { type: 'object', description: 'Block-specific data. text block: { content: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "..." }] }] } }. hero block: { title, subtitle, buttonText, buttonLink }. accordion: { title, items: [{ question, answer }] }. cta: { title, subtitle, buttonText, buttonLink }.', properties: {} },
+                },
+                required: ['type', 'data'],
+              },
+            },
           },
           required: ['action'],
         },
@@ -870,15 +882,19 @@ This skill is primarily triggered by automations, not directly by users.
       type: 'function',
       function: {
         name: 'manage_page_blocks',
-        description: 'Manage blocks on a specific page.',
+        description: 'Manage blocks on a specific page. For text blocks, block_data must use Tiptap JSON: { content: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Your text here" }] }, { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Section Title" }] }] } }. For other blocks see manage_page description.',
         parameters: {
           type: 'object',
           properties: {
             action: { type: 'string', enum: ['list', 'add', 'update', 'remove', 'reorder', 'duplicate', 'toggle_visibility'] },
             page_id: { type: 'string', description: 'Page UUID' },
             block_id: { type: 'string', description: 'Block UUID (for update/remove/duplicate/toggle)' },
-            block_type: { type: 'string', description: 'Block type (for add)' },
-            block_data: { type: 'object', description: 'Block data (for add/update)' },
+            block_type: { type: 'string', description: 'Block type (for add): text, hero, cta, accordion, info-box, two-column, quote, separator, stats, features, form, newsletter' },
+            block_data: {
+              type: 'object',
+              description: 'Block content data. text: { content: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "..." }] }] } }. hero: { title, subtitle, buttonText, buttonLink }. accordion: { title, items: [{ question, answer }] }. cta: { title, subtitle, buttonText, buttonLink }. info-box: { title, content, variant }. two-column: { leftTitle, leftContent, rightTitle, rightContent }.',
+              properties: {},
+            },
             position: { type: 'number', description: 'Insert position (for add)' },
             block_ids: { type: 'array', items: { type: 'string' }, description: 'Ordered block IDs (for reorder)' },
           },
