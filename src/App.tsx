@@ -21,7 +21,7 @@ import UsersPage from "./pages/admin/UsersPage";
 import MediaLibraryPage from "./pages/admin/MediaLibraryPage";
 import SiteSettingsPage from "./pages/admin/SiteSettingsPage";
 import BrandingSettingsPage from "./pages/admin/BrandingSettingsPage";
-import MenuOrderPage from "./pages/admin/MenuOrderPage";
+
 import ChatSettingsPage from "./pages/admin/ChatSettingsPage";
 import ContentApiPage from "./pages/admin/ContentApiPage";
 import ContentCampaignsPage from "./pages/admin/ContentCampaignsPage";
