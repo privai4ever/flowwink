@@ -134,6 +134,14 @@
 - **DB triggers** — Postgres triggers on `leads`, `blog_posts`, `bookings`, `form_submissions`, `orders` fire events + signals via `pg_net`
 - **Objective progress auto-tracking** — `agent-execute` links successful skills to matching objectives
 
+## Phase 9.5: Autonomy Cold Start Fix ✅ DONE
+
+### Completed
+- **Auto-register heartbeat cron** — `setup-flowpilot` now calls `register_flowpilot_cron` DB function to schedule the heartbeat (every 12h) automatically during template install
+- **`register_flowpilot_cron` DB function** — SECURITY DEFINER function that idempotently creates `pg_cron` job for `flowpilot-heartbeat` via `pg_net`
+- **Immediate first heartbeat** — `useTemplateInstaller` fires `flowpilot-heartbeat` right after bootstrap when objectives were seeded, so decomposition starts within seconds
+- **`pg_cron` + `pg_net` extensions** — enabled via migration to support autonomous scheduling
+
 ## Phase 10: Agent Self-Evolution ✅ DONE
 
 ### Completed
