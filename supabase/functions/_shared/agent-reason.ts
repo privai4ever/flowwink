@@ -46,6 +46,7 @@ export interface ReasonConfig {
   extraContext?: string;
   builtInToolGroups?: Array<'memory' | 'objectives' | 'self-mod' | 'reflect' | 'soul' | 'planning' | 'automations-exec' | 'workflows' | 'a2a' | 'skill-packs'>;
   additionalTools?: any[];
+  tier?: AiTier;
 }
 
 export interface ReasonResult {
