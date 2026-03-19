@@ -3,9 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /**
  * Update Autonomy Cron — Re-registers pg_cron jobs based on admin schedule settings.
- * 
  * Reads autonomy_schedule from site_settings, converts local hours to UTC,
- * and updates the cron jobs via register_flowpilot_cron_v2.
+ * and updates cron jobs via schedule_cron_job/unschedule_cron_job DB functions.
  */
 
 const corsHeaders = {
@@ -13,55 +12,39 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/**
+ * Convert a local hour to UTC hour using Intl.DateTimeFormat.
+ * Uses a stable reference date (Jan 15) to get standard offset, 
+ * and Jul 15 for DST offset — picks whichever is "current".
+ */
 function localHourToUtc(localHour: number, timezone: string): number {
-  // Create a date in the given timezone at the specified hour
-  const now = new Date();
-  const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(localHour).padStart(2, '0')}:00:00`;
-  
-  // Parse in the target timezone
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hour12: false,
-  });
+  try {
+    // Use current date to get the correct offset (handles DST automatically)
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth();
+    const day = now.getUTCDate();
 
-  // Get UTC offset by comparing local time string with UTC
-  const localDate = new Date(dateStr);
-  const utcParts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'UTC',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hour12: false,
-  }).formatToParts(localDate);
-  
-  const tzParts = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hour12: false,
-  }).formatToParts(localDate);
-  
-  const getHour = (parts: Intl.DateTimeFormatPart[]) => {
-    const h = parts.find(p => p.type === 'hour')?.value;
-    return h ? parseInt(h, 10) : 0;
-  };
-
-  // More reliable: use a known reference point
-  // Create a Date for today at localHour in the timezone, then read UTC hour
-  const refDate = new Date();
-  // Set to a reference date to avoid DST edge cases
-  refDate.setUTCFullYear(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
-  refDate.setUTCHours(12, 0, 0, 0); // noon UTC as baseline
-  
-  // Get the timezone offset in hours
-  const utcStr = refDate.toLocaleString('en-US', { timeZone: 'UTC', hour: '2-digit', hour12: false });
-  const localStr = refDate.toLocaleString('en-US', { timeZone: timezone, hour: '2-digit', hour12: false });
-  const utcH = parseInt(utcStr, 10);
-  const localH = parseInt(localStr, 10);
-  const offsetHours = localH - utcH; // positive = ahead of UTC
-  
-  // Convert: UTC hour = local hour - offset
-  let utcHour = (localHour - offsetHours) % 24;
-  if (utcHour < 0) utcHour += 24;
-  return utcHour;
+    // Create a date at noon UTC to avoid date boundary issues
+    const ref = new Date(Date.UTC(year, month, day, 12, 0, 0));
+    
+    // Get UTC hour and local hour at the same instant
+    const utcFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', hour: 'numeric', hour12: false });
+    const localFormatter = new Intl.DateTimeFormat('en-US', { timeZone: timezone, hour: 'numeric', hour12: false });
+    
+    const refUtcHour = parseInt(utcFormatter.format(ref), 10);
+    const refLocalHour = parseInt(localFormatter.format(ref), 10);
+    
+    // offset = how many hours ahead local is from UTC
+    const offset = refLocalHour - refUtcHour;
+    
+    let utcHour = (localHour - offset) % 24;
+    if (utcHour < 0) utcHour += 24;
+    return utcHour;
+  } catch {
+    // Fallback: assume UTC
+    return localHour;
+  }
 }
 
 serve(async (req) => {
@@ -82,7 +65,7 @@ serve(async (req) => {
       .eq("key", "autonomy_schedule")
       .maybeSingle();
 
-    const settings = settingsRow?.value as any || {
+    const settings = (settingsRow?.value as any) || {
       timezone: "Europe/Stockholm",
       heartbeatEnabled: true,
       heartbeatHours: [0, 12],
@@ -100,72 +83,53 @@ serve(async (req) => {
 
     const results: Record<string, string> = {};
 
-    // 2. Heartbeat cron
-    // First unschedule existing
-    await supabase.rpc("exec_sql_if_exists", { sql: "SELECT cron.unschedule('flowpilot-heartbeat')" }).catch(() => {});
-    try { 
-      const { error } = await supabase.from("_cron_unschedule" as any).select("*").limit(0); // noop
-    } catch {}
-
-    // Use direct SQL via the DB function approach
+    // 2. Heartbeat
     if (settings.heartbeatEnabled && settings.heartbeatHours?.length) {
-      const utcHours = settings.heartbeatHours.map((h: number) => localHourToUtc(h, tz));
+      const utcHours = (settings.heartbeatHours as number[]).map((h) => localHourToUtc(h, tz));
       const cronExpr = `0 ${utcHours.join(",")} * * *`;
-      
-      // Unschedule + reschedule via register function
-      // We need to drop and recreate — use the RPC
-      const unscheduleResult = await supabase.rpc("unschedule_cron_job", { p_jobname: "flowpilot-heartbeat" }).catch(() => null);
-      
-      const scheduleBody = JSON.stringify({ time: new Date().toISOString() });
+
       const { error } = await supabase.rpc("schedule_cron_job", {
         p_jobname: "flowpilot-heartbeat",
         p_schedule: cronExpr,
         p_url: `${supabaseUrl}/functions/v1/flowpilot-heartbeat`,
         p_headers: authHeader,
-        p_body: scheduleBody,
+        p_body: JSON.stringify({ time: new Date().toISOString() }),
       });
-      
-      results.heartbeat = error ? `error: ${error.message}` : `${cronExpr} (UTC hours: ${utcHours.join(",")})`;
+      results.heartbeat = error ? `error: ${error.message}` : `${cronExpr} (local ${settings.heartbeatHours.join(",")}:00 ${tz})`;
     } else {
-      await supabase.rpc("unschedule_cron_job", { p_jobname: "flowpilot-heartbeat" }).catch(() => null);
+      await supabase.rpc("unschedule_cron_job", { p_jobname: "flowpilot-heartbeat" });
       results.heartbeat = "disabled";
     }
 
-    // 3. Briefing cron
+    // 3. Briefing
     if (settings.briefingEnabled) {
       const utcHour = localHourToUtc(settings.briefingHour, tz);
-      const cronExpr = `0 ${utcHour} * * *`;
-      
-      await supabase.rpc("unschedule_cron_job", { p_jobname: "flowpilot-daily-briefing" }).catch(() => null);
       const { error } = await supabase.rpc("schedule_cron_job", {
         p_jobname: "flowpilot-daily-briefing",
-        p_schedule: cronExpr,
+        p_schedule: `0 ${utcHour} * * *`,
         p_url: `${supabaseUrl}/functions/v1/flowpilot-briefing`,
         p_headers: authHeader,
         p_body: JSON.stringify({ source: "cron" }),
       });
-      results.briefing = error ? `error: ${error.message}` : `${cronExpr} (local ${settings.briefingHour}:00 ${tz})`;
+      results.briefing = error ? `error: ${error.message}` : `0 ${utcHour} * * * (local ${settings.briefingHour}:00 ${tz})`;
     } else {
-      await supabase.rpc("unschedule_cron_job", { p_jobname: "flowpilot-daily-briefing" }).catch(() => null);
+      await supabase.rpc("unschedule_cron_job", { p_jobname: "flowpilot-daily-briefing" });
       results.briefing = "disabled";
     }
 
-    // 4. Learn cron
+    // 4. Learn
     if (settings.learnEnabled) {
       const utcHour = localHourToUtc(settings.learnHour, tz);
-      const cronExpr = `0 ${utcHour} * * *`;
-      
-      await supabase.rpc("unschedule_cron_job", { p_jobname: "flowpilot-learn" }).catch(() => null);
       const { error } = await supabase.rpc("schedule_cron_job", {
         p_jobname: "flowpilot-learn",
-        p_schedule: cronExpr,
+        p_schedule: `0 ${utcHour} * * *`,
         p_url: `${supabaseUrl}/functions/v1/flowpilot-learn`,
         p_headers: authHeader,
         p_body: JSON.stringify({ time: new Date().toISOString() }),
       });
-      results.learn = error ? `error: ${error.message}` : `${cronExpr} (local ${settings.learnHour}:00 ${tz})`;
+      results.learn = error ? `error: ${error.message}` : `0 ${utcHour} * * * (local ${settings.learnHour}:00 ${tz})`;
     } else {
-      await supabase.rpc("unschedule_cron_job", { p_jobname: "flowpilot-learn" }).catch(() => null);
+      await supabase.rpc("unschedule_cron_job", { p_jobname: "flowpilot-learn" });
       results.learn = "disabled";
     }
 
