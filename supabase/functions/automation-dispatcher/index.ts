@@ -208,7 +208,7 @@ function calculateNextRun(cronExpr?: string, from?: Date): string {
   }
 
   const [minute, hour, dayOfMonth, month, dayOfWeek] = parts;
-  const now = new Date();
+  const now = from || new Date();
 
   // Simple common patterns
   // Every N minutes: */N * * * *
