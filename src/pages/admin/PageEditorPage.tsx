@@ -191,8 +191,9 @@ export default function PageEditorPage() {
     );
   }
 
-  const canEdit = page.status === 'draft' || isApprover;
-  const canSendForReview = page.status === 'draft';
+  const canEdit = page.status === 'draft' || isApprover || !reviewEnabled;
+  const canSendForReview = page.status === 'draft' && reviewEnabled;
+  const canPublishDirectly = page.status === 'draft' && !reviewEnabled;
   const canApprove = page.status === 'reviewing' && isApprover;
 
   return (
