@@ -26,6 +26,8 @@ import {
   useUpdateAeoSettings,
   useSystemAiSettings,
   useUpdateSystemAiSettings,
+  useAutonomyScheduleSettings,
+  useUpdateAutonomyScheduleSettings,
   SeoSettings,
   PerformanceSettings,
   CustomScriptsSettings,
@@ -34,6 +36,8 @@ import {
   GeneralSettings,
   AeoSettings,
   SystemAiSettings,
+  AutonomyScheduleSettings,
+  defaultAutonomyScheduleSettings,
   SchemaOrgType,
 } from '@/hooks/useSiteSettings';
 import { usePages } from '@/hooks/usePages';
