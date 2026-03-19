@@ -39,22 +39,17 @@ serve(async (req) => {
       .or(`next_run_at.lte.${now},next_run_at.is.null`);
 
     if (queryError) throw queryError;
-    if (!dueAutomations?.length) {
-      return new Response(
-        JSON.stringify({ dispatched: 0, message: "No automations due" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
 
     const results: Array<{
       id: string;
       name: string;
       status: string;
+      type: string;
       error?: string;
     }> = [];
 
-    // 2. Execute each (skip NULL next_run_at — just initialize them)
-    for (const auto of dueAutomations) {
+    // 2. Execute each automation (skip NULL next_run_at — just initialize them)
+    for (const auto of (dueAutomations || [])) {
       // If next_run_at was NULL, just initialize it and skip execution
       if (!auto.next_run_at) {
         const nextRun = calculateNextRun((auto.trigger_config as any)?.expression);
@@ -62,7 +57,7 @@ serve(async (req) => {
           .from("agent_automations")
           .update({ next_run_at: nextRun })
           .eq("id", auto.id);
-        results.push({ id: auto.id, name: auto.name, status: "initialized", error: undefined });
+        results.push({ id: auto.id, name: auto.name, status: "initialized", type: "automation" });
         continue;
       }
 
@@ -116,10 +111,70 @@ serve(async (req) => {
         })
         .eq("id", auto.id);
 
-      results.push({ id: auto.id, name: auto.name, status, error: lastError ?? undefined });
+      results.push({ id: auto.id, name: auto.name, status, type: "automation", error: lastError ?? undefined });
     }
 
-    console.log(`Dispatcher: executed ${results.length} automations`, results);
+    // ─── 5. Execute due cron workflows ─────────────────────────────────
+    const { data: dueWorkflows } = await supabase
+      .from("agent_workflows")
+      .select("*")
+      .eq("enabled", true)
+      .eq("trigger_type", "cron");
+
+    for (const wf of (dueWorkflows || [])) {
+      const cronExpr = (wf.trigger_config as any)?.expression;
+      if (!cronExpr) continue;
+
+      // Check if workflow is due based on last_run_at + cron interval
+      const nextRun = wf.last_run_at
+        ? calculateNextRun(cronExpr, new Date(wf.last_run_at))
+        : new Date(0).toISOString(); // Never run → overdue
+
+      if (new Date(nextRun) > new Date(now)) continue; // Not due yet
+
+      let status = "success";
+      let lastError: string | null = null;
+
+      try {
+        const wfResponse = await fetch(
+          `${supabaseUrl}/functions/v1/agent-execute`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${serviceKey}`,
+            },
+            body: JSON.stringify({
+              skill_name: "workflow_execute",
+              arguments: { workflow_id: wf.id },
+              agent_type: "flowpilot",
+            }),
+          }
+        );
+
+        const wfResult = await wfResponse.json();
+        if (!wfResponse.ok || wfResult.error) {
+          status = "failed";
+          lastError = wfResult.error || `HTTP ${wfResponse.status}`;
+        }
+      } catch (err) {
+        status = "failed";
+        lastError = (err as Error).message || "Workflow execution error";
+      }
+
+      await supabase
+        .from("agent_workflows")
+        .update({
+          last_run_at: now,
+          run_count: (wf.run_count || 0) + 1,
+          last_error: lastError,
+        })
+        .eq("id", wf.id);
+
+      results.push({ id: wf.id, name: wf.name, status, type: "workflow", error: lastError ?? undefined });
+    }
+
+    console.log(`Dispatcher: executed ${results.length} items`, results);
 
     return new Response(
       JSON.stringify({ dispatched: results.length, results }),
@@ -141,7 +196,7 @@ serve(async (req) => {
 // Cron expression → next run time (simple parser for common patterns)
 // =============================================================================
 
-function calculateNextRun(cronExpr?: string): string {
+function calculateNextRun(cronExpr?: string, from?: Date): string {
   if (!cronExpr) {
     // Default: 1 hour from now
     return new Date(Date.now() + 60 * 60 * 1000).toISOString();
@@ -153,7 +208,7 @@ function calculateNextRun(cronExpr?: string): string {
   }
 
   const [minute, hour, dayOfMonth, month, dayOfWeek] = parts;
-  const now = new Date();
+  const now = from || new Date();
 
   // Simple common patterns
   // Every N minutes: */N * * * *
