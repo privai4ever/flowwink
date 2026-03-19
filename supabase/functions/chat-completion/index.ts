@@ -838,7 +838,10 @@ When the user asks about a specific website, use firecrawl_search with the websi
       }
 
       const baseUrl = settings?.openaiBaseUrl || 'https://api.openai.com/v1';
-      const model = settings?.openaiModel || 'gpt-4o-mini';
+      // Migrate legacy model names server-side
+      const OPENAI_MIGRATE: Record<string, string> = { 'gpt-4o': 'gpt-4.1', 'gpt-4o-mini': 'gpt-4.1-mini', 'gpt-3.5-turbo': 'gpt-4.1-nano', 'gpt-4-turbo': 'gpt-4.1', 'gpt-4': 'gpt-4.1' };
+      const rawModel = settings?.openaiModel || 'gpt-4.1-mini';
+      const model = OPENAI_MIGRATE[rawModel] || rawModel;
 
       const requestBody: any = {
         model,
