@@ -842,7 +842,7 @@ This skill is primarily triggered by automations, not directly by users.
       type: 'function',
       function: {
         name: 'manage_page',
-        description: 'Manage CMS pages. Actions: list, get, create, update, publish, archive, delete, rollback.',
+        description: 'Manage CMS pages. Actions: list, get, create, update, publish, archive, delete, rollback. For create/update with content, pass blocks array OR use manage_page_blocks to add blocks individually.',
         parameters: {
           type: 'object',
           properties: {
@@ -851,8 +851,20 @@ This skill is primarily triggered by automations, not directly by users.
             slug: { type: 'string', description: 'Page slug (for get or create)' },
             title: { type: 'string', description: 'Page title (for create/update)' },
             status: { type: 'string', description: 'Filter by status (for list)' },
-            meta: { type: 'object', description: 'Page meta JSON (for create/update)' },
-            blocks: { type: 'array', description: 'Content blocks array (for create/update)' },
+            meta: { type: 'object', description: 'Page meta JSON (for create/update)', properties: {} },
+            blocks: {
+              type: 'array',
+              description: 'Content blocks for create/update. Each block: { id, type, data }. Block types: hero, text, cta, accordion, info-box, two-column, quote, separator, etc.',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', description: 'UUID — use crypto.randomUUID() or any unique string' },
+                  type: { type: 'string', description: 'Block type: hero, text, cta, accordion, info-box, two-column, quote, separator, stats, features, form, newsletter' },
+                  data: { type: 'object', description: 'Block-specific data. text block: { content: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "..." }] }] } }. hero block: { title, subtitle, buttonText, buttonLink }. accordion: { title, items: [{ question, answer }] }. cta: { title, subtitle, buttonText, buttonLink }.', properties: {} },
+                },
+                required: ['type', 'data'],
+              },
+            },
           },
           required: ['action'],
         },
