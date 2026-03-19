@@ -612,7 +612,7 @@ export type SystemAiProvider = 'openai' | 'gemini';
 
 export interface SystemAiSettings {
   provider: SystemAiProvider;
-  openaiModel: 'gpt-4o' | 'gpt-4o-mini' | 'gpt-3.5-turbo';
+  openaiModel: 'gpt-4.1' | 'gpt-4.1-mini' | 'gpt-4.1-nano';
   geminiModel: 'gemini-2.0-flash-exp' | 'gemini-1.5-pro' | 'gemini-1.5-flash';
   // Content generation preferences
   defaultTone: 'professional' | 'friendly' | 'formal';
