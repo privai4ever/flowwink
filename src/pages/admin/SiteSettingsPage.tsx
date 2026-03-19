@@ -266,6 +266,8 @@ export default function SiteSettingsPage() {
     defaultLanguage: 'en',
   });
 
+  const [autonomyData, setAutonomyData] = useState<AutonomyScheduleSettings>(defaultAutonomyScheduleSettings);
+
   useEffect(() => {
     if (seoSettings) setSeoData(seoSettings);
   }, [seoSettings]);
