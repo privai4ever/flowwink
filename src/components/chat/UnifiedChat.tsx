@@ -4,7 +4,7 @@
  * Single chat interface for both admin (FlowPilot) and visitor (public) scopes.
  * Replaces OperateChat, ChatConversation, and CopilotChat with one component.
  * 
- * - scope='admin': Full FlowPilot with @-commands, skills, SSE streaming
+ * - scope='admin': Full FlowPilot with /commands, skills, SSE streaming
  * - scope='visitor': Public chat with limited commands, standard completion
  */
 
