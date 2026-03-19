@@ -1942,64 +1942,21 @@ Deno.serve(async (req) => {
       console.log(`[setup-flowpilot] Seeded ${objectivesSeeded} objectives`);
     }
 
-    // 6. Auto-register heartbeat cron job (idempotent)
+    // 6. Auto-register heartbeat cron job via DB function (idempotent)
     let cronRegistered = false;
     try {
       const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_PUBLISHABLE_KEY') || '';
+      
+      const { data: cronResult, error: cronError } = await supabase.rpc('register_flowpilot_cron', {
+        p_supabase_url: supabaseUrl,
+        p_anon_key: anonKey,
+      });
 
-      // Check if cron job already exists
-      const { data: existingJob } = await supabase
-        .from('cron' as any)
-        .select('jobname')
-        .eq('jobname', 'flowpilot-heartbeat')
-        .maybeSingle();
-
-      if (!existingJob) {
-        // Register heartbeat cron — every 12 hours
-        const cronSql = `
-          SELECT cron.schedule(
-            'flowpilot-heartbeat',
-            '0 0,12 * * *',
-            $$
-            SELECT net.http_post(
-              url := '${supabaseUrl}/functions/v1/flowpilot-heartbeat',
-              headers := '{"Content-Type":"application/json","Authorization":"Bearer ${anonKey}"}'::jsonb,
-              body := concat('{"time":"', now(), '"}')::jsonb
-            ) AS request_id;
-            $$
-          );
-        `;
-        const { error: cronError } = await supabase.rpc('exec_sql' as any, { sql: cronSql });
-        if (cronError) {
-          // Fallback: try direct SQL via pg_net if exec_sql doesn't exist
-          console.warn('[setup-flowpilot] Could not register cron via exec_sql, trying direct insert...', cronError.message);
-          
-          // Try using the service role to call the cron.schedule function directly
-          const response = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${serviceKey}`,
-              'apikey': serviceKey,
-            },
-            body: JSON.stringify({ sql: cronSql }),
-          });
-          
-          if (!response.ok) {
-            console.warn('[setup-flowpilot] Cron registration failed (manual setup may be needed):', await response.text());
-          } else {
-            cronRegistered = true;
-          }
-        } else {
-          cronRegistered = true;
-        }
+      if (cronError) {
+        console.warn('[setup-flowpilot] Cron registration failed (manual setup may be needed):', cronError.message);
       } else {
         cronRegistered = true;
-        console.log('[setup-flowpilot] Heartbeat cron job already registered');
-      }
-
-      if (cronRegistered) {
-        console.log('[setup-flowpilot] Heartbeat cron registered (0 0,12 * * *)');
+        console.log('[setup-flowpilot] Cron registration result:', cronResult);
       }
     } catch (cronErr) {
       console.warn('[setup-flowpilot] Cron registration failed (non-fatal):', cronErr);
