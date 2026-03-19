@@ -102,6 +102,13 @@ export default function PageEditorPage() {
     }
   };
 
+  const handlePublishDirectly = async () => {
+    await handleSave();
+    if (id) {
+      await updateStatus.mutateAsync({ id, status: 'published' });
+    }
+  };
+
   const handleSchedule = async (scheduledAt: Date | null) => {
     if (!id) return;
     
