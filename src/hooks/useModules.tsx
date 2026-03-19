@@ -48,6 +48,7 @@ export interface ModulesSettings {
   browserControl: ModuleConfig;
   federation: ModuleConfig;
   paidGrowth: ModuleConfig;
+  companyInsights: ModuleConfig;
 }
 
 export const defaultModulesSettings: ModulesSettings = {
