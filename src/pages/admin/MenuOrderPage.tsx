@@ -99,6 +99,7 @@ export default function MenuOrderPage() {
       const { data, error } = await supabase
         .from('pages')
         .select('id, title, slug, status, menu_order, show_in_menu')
+        .is('deleted_at', null)
         .order('menu_order', { ascending: true })
         .order('title', { ascending: true });
 

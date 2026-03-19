@@ -58,6 +58,7 @@ export function PublicNavigation() {
         .select('id, title, slug, menu_order')
         .eq('status', 'published')
         .eq('show_in_menu', true)
+        .is('deleted_at', null)
         .order('menu_order', { ascending: true })
         .order('title', { ascending: true });
 
