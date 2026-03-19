@@ -313,10 +313,12 @@ export function buildSystemPrompt(input: PromptCompilerInput): string {
 
 // ─── AI Config Resolution ─────────────────────────────────────────────────────
 
-export async function resolveAiConfig(supabase: any): Promise<{ apiKey: string; apiUrl: string; model: string }> {
+export type AiTier = 'fast' | 'reasoning';
+
+export async function resolveAiConfig(supabase: any, tier: AiTier = 'fast'): Promise<{ apiKey: string; apiUrl: string; model: string }> {
   let apiKey = '';
   let apiUrl = 'https://api.openai.com/v1/chat/completions';
-  let model = 'gpt-4.1';
+  let model = tier === 'reasoning' ? 'gpt-4.1' : 'gpt-4.1-mini';
 
   const { data: settings } = await supabase
     .from('site_settings').select('value').eq('key', 'system_ai').maybeSingle();
@@ -326,10 +328,14 @@ export async function resolveAiConfig(supabase: any): Promise<{ apiKey: string; 
     if (cfg.provider === 'gemini' && Deno.env.get('GEMINI_API_KEY')) {
       apiKey = Deno.env.get('GEMINI_API_KEY')!;
       apiUrl = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-      model = cfg.model || 'gemini-2.5-flash';
+      model = tier === 'reasoning'
+        ? (cfg.geminiReasoningModel || 'gemini-2.5-pro')
+        : (cfg.geminiModel || cfg.model || 'gemini-2.5-flash');
     } else if (cfg.provider === 'openai' && Deno.env.get('OPENAI_API_KEY')) {
       apiKey = Deno.env.get('OPENAI_API_KEY')!;
-      model = cfg.model || 'gpt-4.1';
+      model = tier === 'reasoning'
+        ? (cfg.openaiReasoningModel || 'gpt-4.1')
+        : (cfg.openaiModel || cfg.model || 'gpt-4.1-mini');
     }
   }
 
@@ -338,7 +344,7 @@ export async function resolveAiConfig(supabase: any): Promise<{ apiKey: string; 
     if (lovableKey) {
       apiKey = lovableKey;
       apiUrl = 'https://ai.gateway.lovable.dev/v1/chat/completions';
-      model = 'google/gemini-2.5-flash';
+      model = tier === 'reasoning' ? 'google/gemini-2.5-pro' : 'google/gemini-2.5-flash';
     }
   }
 
