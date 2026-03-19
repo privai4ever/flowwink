@@ -69,6 +69,39 @@ It's not a CMS with AI. It's **an autonomous business operator with a website.**
 
 ---
 
+## The Competitive Landscape
+
+The agentic assistant space is already validated — and the white space is clear.
+
+**OpenClaw** (323k GitHub stars, 5,400+ community skills) proved that developers want a personal AI that lives on their machine, talks on every channel, and evolves over time. It's the reference architecture for autonomous agents — and explicitly personal. One human, one agent.
+
+**Polsia** (VC-backed) targets businesses — but runs one nightly batch task per customer, uses a fixed pipeline of 4 sequential prompts (CEO → Engineer → Growth → Ops), and is multi-tenant SaaS. Your data leaves your server. It's a scheduled job with a pretty dashboard.
+
+**Clawith** ("OpenClaw for Teams") tried to push OpenClaw upmarket. Still team productivity. Not a business operator.
+
+Nobody has shipped a genuinely autonomous, self-hosted business operator.
+
+```
+OpenClaw:   Owner ←→ Agent                           personal, proven (323k ★)
+Polsia:     CEO → Engineer → Growth → Ops            business, shallow autonomy
+FlowWink:   Owner ←→ FlowPilot ←→ Customers          business, full autonomy
+                          ↕
+                  Business outcomes
+             (leads, content, revenue)
+```
+
+The category exists. The market is ready. The architecture advantage is real.
+
+| | OpenClaw | Polsia | FlowWink |
+|---|---|---|---|
+| Target | Personal (1 user) | Business (SaaS) | Business (self-hosted) |
+| Autonomy | On-demand | 1 task/night | 2× daily heartbeat + event-driven |
+| Agent architecture | Peer-to-peer sessions | Fixed 4-agent pipeline | Dynamic delegation |
+| Data sovereignty | Local | Multi-tenant | Always single-tenant |
+| Skill ecosystem | 5,400+ community skills | Closed | Open + composable |
+
+---
+
 ## What Makes This a Platform Play
 
 FlowWink's unique insight: the "user" is a **business**, not a person.
@@ -111,4 +144,4 @@ We are already here.
 
 *"We don't sell software. We sell an operator."*
 
-*Updated: 2026-03-18*
+*Updated: 2026-03-19*

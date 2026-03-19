@@ -79,7 +79,7 @@ function ActivityItem({ activity }: { activity: AgentActivity }) {
       )} />
       <div className="flex-1 min-w-0 overflow-hidden">
         <p className="text-xs font-medium truncate">
-          {(activity.skill_name || 'Unknown').replace(/_/g, ' ')}
+          {(activity.log_message || activity.skill_name || 'Unknown').replace(/_/g, ' ')}
         </p>
         <p className="text-[10px] text-muted-foreground truncate">
           {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}

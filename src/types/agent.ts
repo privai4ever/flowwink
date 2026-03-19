@@ -102,6 +102,8 @@ export interface AgentActivity {
   error_message: string | null;
   duration_ms: number | null;
   token_usage: TokenUsage | null;
+  log_type: string | null;
+  log_message: string | null;
   created_at: string;
 }
 
