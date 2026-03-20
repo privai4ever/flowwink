@@ -1974,6 +1974,8 @@ export async function executeBuiltInTool(
     case 'memory_read': return handleMemoryRead(supabase, fnArgs);
     case 'objective_update_progress': return handleObjectiveUpdateProgress(supabase, fnArgs);
     case 'objective_complete': return handleObjectiveComplete(supabase, fnArgs);
+    case 'objective_delete': return handleObjectiveDelete(supabase, fnArgs);
+    case 'memory_delete': return handleMemoryDelete(supabase, fnArgs);
     case 'skill_create': return handleSkillCreate(supabase, fnArgs);
     case 'skill_update': return handleSkillUpdate(supabase, fnArgs);
     case 'skill_list': return handleSkillList(supabase, fnArgs);
