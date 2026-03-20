@@ -112,14 +112,25 @@ export function AdminSidebar() {
     }
   }, []);
 
+  // Save scroll position before navigation
   useEffect(() => {
-    // Use rAF to ensure DOM has settled before restoring scroll
-    const frame = requestAnimationFrame(() => {
-      if (sidebarScrollRef.current) {
+    const el = sidebarScrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      scrollPositionRef.current = el.scrollTop;
+    };
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Restore scroll position after route change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (sidebarScrollRef.current && scrollPositionRef.current > 0) {
         sidebarScrollRef.current.scrollTop = scrollPositionRef.current;
       }
-    });
-    return () => cancelAnimationFrame(frame);
+    }, 50);
+    return () => clearTimeout(timer);
   }, [location.pathname]);
   
   const adminName = branding?.adminName || 'FlowWink';
