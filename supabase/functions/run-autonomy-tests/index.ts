@@ -167,7 +167,7 @@ async function layer1Tests(): Promise<TestResult[]> {
     const agents = { direct_action_rules: "Custom." };
     const p = buildSystemPrompt({ ...baseInput, agents, soulPrompt: buildWorkspacePrompt({}, {}, agents) });
     assertContains(p, "GROUNDING & DATA INTEGRITY");
-    assertContains(p, "NEVER fabricate");
+    assertContains(p, "do NOT invent or fabricate");
   }));
 
   // 6-layer ordering
