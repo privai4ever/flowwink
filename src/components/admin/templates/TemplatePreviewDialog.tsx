@@ -400,18 +400,6 @@ export function TemplatePreviewDialog({
               hasExisting={existingContent.hasChatSettings}
             />
 
-            {/* FlowPilot Objectives - only show if template has them */}
-            {template.flowpilot?.objectives?.length ? (
-              <SettingRow
-                icon={<Target className="h-4 w-4" />}
-                label="FlowPilot Objectives"
-                templateValue={`${template.flowpilot.objectives.length} objective${template.flowpilot.objectives.length > 1 ? 's' : ''}`}
-                existingValue="Existing objectives"
-                enabled={options.resetObjectives}
-                onToggle={(v) => updateOption('resetObjectives', v)}
-                hasExisting={true}
-              />
-            ) : null}
 
             {/* Header */}
             <SettingRow

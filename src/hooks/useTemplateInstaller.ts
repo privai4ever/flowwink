@@ -258,7 +258,7 @@ export function useTemplateInstaller() {
       products: !!template.products?.length,
       consultants: !!template.consultants?.length,
       modules: !!template.requiredModules?.length,
-      resetObjectives: !!template.flowpilot?.objectives?.length,
+      resetObjectives: false,
       clearMedia: false,
       downloadImages: !!(templateImageInfo && templateImageInfo.uniqueUrls.length > 0),
       publishPages: true,
