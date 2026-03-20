@@ -53,7 +53,7 @@ import BookingAvailabilityPage from "./pages/admin/BookingAvailabilityPage";
 import ProfilePage from "./pages/admin/ProfilePage";
 import KbArticleEditorPage from "./pages/admin/KbArticleEditorPage";
 import IntegrationsStatusPage from "./pages/admin/IntegrationsStatusPage";
-import CopilotPage from "./pages/admin/CopilotPage";
+import FlowPilotPage from "./pages/admin/FlowPilotPage";
 import LiveSupportPage from "./pages/admin/LiveSupportPage";
 import TemplateExportPage from "./pages/admin/TemplateExportPage";
 import TemplateLivePreviewPage from "./pages/admin/TemplateLivePreviewPage";
@@ -192,7 +192,7 @@ const router = createBrowserRouter([
       { path: "/admin/knowledge-base", element: <KnowledgeBaseAdminPage /> },
       { path: "/admin/knowledge-base/new", element: <KbArticleEditorPage /> },
       { path: "/admin/knowledge-base/:id", element: <KbArticleEditorPage /> },
-      { path: "/admin/copilot", element: <CopilotPage /> },
+      { path: "/admin/flowpilot", element: <FlowPilotPage /> },
       { path: "/admin/skills", element: withPageFallback(<SkillHubPage />) },
       { path: "/admin/live-support", element: <LiveSupportPage /> },
       { path: "/admin/template-export", element: <TemplateExportPage /> },
