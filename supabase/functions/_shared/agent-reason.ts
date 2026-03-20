@@ -875,6 +875,20 @@ async function handleObjectiveComplete(supabase: any, args: { objective_id: stri
   return { status: 'completed', objective_id: args.objective_id };
 }
 
+async function handleObjectiveDelete(supabase: any, args: { objective_id: string }) {
+  // Remove linked activities first
+  await supabase.from('agent_objective_activities').delete().eq('objective_id', args.objective_id);
+  const { error } = await supabase.from('agent_objectives').delete().eq('id', args.objective_id);
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'deleted', objective_id: args.objective_id };
+}
+
+async function handleMemoryDelete(supabase: any, args: { key: string }) {
+  const { error } = await supabase.from('agent_memory').delete().eq('key', args.key);
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'deleted', key: args.key };
+}
+
 // ─── Plan Decomposition (ported from ClawCMS) ─────────────────────────────────
 
 async function decomposeObjectiveIntoPlan(
