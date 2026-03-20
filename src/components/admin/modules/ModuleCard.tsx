@@ -214,7 +214,7 @@ export function ModuleCard({
             </div>
 
             {/* Info button */}
-            {(hasApi || stats) && (
+            {(hasApi || stats || moduleId === 'browserControl' || moduleId === 'flowpilot') && (
               <Button
                 variant="ghost"
                 size="sm"

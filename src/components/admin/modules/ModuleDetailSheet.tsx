@@ -515,6 +515,14 @@ export function ModuleDetailSheet({
               </>
             )}
 
+            {/* FlowPilot Details */}
+            {moduleId === 'flowpilot' && (
+              <>
+                <Separator />
+                <FlowPilotDetails />
+              </>
+            )}
+
 
             <div className="rounded-lg border p-3 bg-muted/20">
               <div className="flex items-center gap-2 mb-2">
