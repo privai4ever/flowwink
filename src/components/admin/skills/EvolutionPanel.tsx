@@ -41,7 +41,7 @@ function useEvolutionData() {
       const { data } = await supabase
         .from('agent_memory')
         .select('*')
-        .or('key.ilike.%soul_%,key.ilike.%identity_%')
+        .in('key', ['soul', 'identity'])
         .order('updated_at', { ascending: false })
         .limit(10);
       return data || [];
