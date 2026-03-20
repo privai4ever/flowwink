@@ -275,6 +275,16 @@ export const defaultModulesSettings: ModulesSettings = {
     adminUI: true,
     optionalIntegrations: ['firecrawl'],
   },
+  flowpilot: {
+    enabled: true,
+    name: 'FlowPilot',
+    description: 'Autonomous AI operator — skills, objectives, automations and workflows',
+    icon: 'Sparkles',
+    category: 'system',
+    core: true,
+    autonomy: 'agent-capable',
+    adminUI: true,
+  },
 };
 
 // Map sidebar items to module IDs
