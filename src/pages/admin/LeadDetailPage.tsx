@@ -49,6 +49,7 @@ export default function LeadDetailPage() {
   const addNote = useAddLeadNote();
   const qualifyLead = useQualifyLead();
   const addActivity = useAddLeadActivity();
+  const deleteLead = useDeleteLead();
   const [note, setNote] = useState('');
   const [companyOpen, setCompanyOpen] = useState(false);
   const [showNewCompanyForm, setShowNewCompanyForm] = useState(false);
