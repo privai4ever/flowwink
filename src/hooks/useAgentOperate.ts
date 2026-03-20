@@ -324,6 +324,7 @@ export function useAgentOperate() {
 
   // ─── Send message with SSE streaming ────────────────────────────────
 
+  const sendMessage = useCallback(async (content: string) => {
     const userMsg: OperateMessage = {
       id: crypto.randomUUID(),
       role: 'user',
