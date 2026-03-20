@@ -127,6 +127,10 @@ export default function SkillHubPage() {
           <TabsTrigger value="automations">Automations</TabsTrigger>
           <TabsTrigger value="workflows">Workflows</TabsTrigger>
           <TabsTrigger value="evolution">Evolution</TabsTrigger>
+          <TabsTrigger value="autonomy" className="flex items-center gap-1.5">
+            <Timer className="h-3.5 w-3.5" />
+            Autonomy
+          </TabsTrigger>
         </TabsList>
 
         {/* Skills Tab */}
