@@ -48,6 +48,29 @@ export default function SkillHubPage() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [scopeFilter, setScopeFilter] = useState('all');
 
+  // Autonomy schedule
+  const { data: autonomySettings } = useAutonomyScheduleSettings();
+  const updateAutonomy = useUpdateAutonomyScheduleSettings();
+  const [autonomyData, setAutonomyData] = useState<AutonomyScheduleSettings>(defaultAutonomyScheduleSettings);
+  const [autonomySaving, setAutonomySaving] = useState(false);
+
+  useEffect(() => {
+    if (autonomySettings) setAutonomyData(autonomySettings);
+  }, [autonomySettings]);
+
+  const handleSaveAutonomy = async () => {
+    setAutonomySaving(true);
+    try {
+      await updateAutonomy.mutateAsync(autonomyData);
+      await supabase.functions.invoke('update-autonomy-cron');
+      toast.success('Autonomy schedule saved');
+    } catch {
+      toast.error('Failed to save autonomy schedule');
+    } finally {
+      setAutonomySaving(false);
+    }
+  };
+
   const filtered = useMemo(() => {
     return skills.filter((s) => {
       if (categoryFilter !== 'all' && s.category !== categoryFilter) return false;
