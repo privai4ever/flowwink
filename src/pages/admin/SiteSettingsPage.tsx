@@ -319,9 +319,6 @@ export default function SiteSettingsPage() {
     }
   }, [systemAiSettings]);
 
-  useEffect(() => {
-    if (autonomySettings) setAutonomyData(autonomySettings);
-  }, [autonomySettings]);
 
   const isLoading = seoLoading || performanceLoading || scriptsLoading || cookieLoading || maintenanceLoading || generalLoading || aeoLoading || systemAiLoading || autonomyLoading;
   const isSaving = updateSeo.isPending || updatePerformance.isPending || updateScripts.isPending || updateCookieBanner.isPending || updateMaintenance.isPending || updateGeneral.isPending || updateAeo.isPending || updateSystemAi.isPending || updateAutonomy.isPending;
