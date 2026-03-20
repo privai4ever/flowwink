@@ -170,11 +170,6 @@ serve(async (req) => {
           }
         }
 
-        const wfResult = await wfResponse.json();
-        if (!wfResponse.ok || wfResult.error) {
-          status = "failed";
-          lastError = wfResult.error || `HTTP ${wfResponse.status}`;
-        }
       } catch (err) {
         status = "failed";
         lastError = (err as Error).message || "Workflow execution error";
