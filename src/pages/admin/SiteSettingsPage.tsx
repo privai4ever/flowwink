@@ -169,7 +169,7 @@ export default function SiteSettingsPage() {
   const { data: generalSettings, isLoading: generalLoading } = useGeneralSettings();
   const { data: aeoSettings, isLoading: aeoLoading } = useAeoSettings();
   const { data: systemAiSettings, isLoading: systemAiLoading } = useSystemAiSettings();
-  const { data: autonomySettings, isLoading: autonomyLoading } = useAutonomyScheduleSettings();
+  
   const { data: allPages } = usePages();
   
   const updateSeo = useUpdateSeoSettings();
