@@ -77,7 +77,7 @@ export default function SkillHubPage() {
           </Badge>
           <Button 
             variant="outline" size="sm" className="gap-1.5"
-            onClick={() => navigate('/admin/flowpilot')}
+            onClick={() => navigate('/admin/copilot')}
           >
             <Zap className="h-3.5 w-3.5" />
             Open FlowPilot

@@ -16,7 +16,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isCopilotMode = location.pathname === '/admin/flowpilot';
+  const isCopilotMode = location.pathname === '/admin/copilot';
 
   // Auto-seed FlowPilot on first admin session (idempotent)
   useFlowPilotBootstrap();
