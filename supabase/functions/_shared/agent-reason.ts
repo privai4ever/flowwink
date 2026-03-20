@@ -279,25 +279,60 @@ export function buildSystemPrompt(input: PromptCompilerInput): string {
 
   const parts: string[] = [];
 
-  // Layer 1: Identity
+  // Layer 1: Mode identity (hardcoded, short)
   if (mode === 'heartbeat') {
     parts.push(`You are FlowPilot running in AUTONOMOUS HEARTBEAT mode. No human is watching.`);
   } else {
     parts.push(`You are FlowPilot — an autonomous, self-improving AI agent that operates a CMS platform.`);
   }
 
-  // Layer 2: Soul & Identity
+  // Layer 2: SOUL + IDENTITY (from DB, evolvable via soul_update)
   parts.push(soulPrompt);
 
-  // Layer 2.5: CMS Schema Awareness
+  // Layer 3: AGENTS / CORE_INSTRUCTIONS
+  // If no agents document exists in DB, fall back to hardcoded CORE_INSTRUCTIONS.
+  // The agents document is injected via soulPrompt (buildWorkspacePrompt).
+  // When agents doc is present, soulPrompt already contains operational rules,
+  // but we still need CORE_INSTRUCTIONS as a baseline for tool descriptions.
+  if (!input.agents) {
+    parts.push(CORE_INSTRUCTIONS);
+  } else {
+    // Agents doc is present — only inject the tool catalog portion of CORE_INSTRUCTIONS
+    // (the agents doc already covers policies/rules)
+    parts.push(`You can use MULTIPLE tools in a single turn and CHAIN tool calls across iterations.
+When a task requires multiple steps, execute them sequentially — don't just describe a plan.
+
+TOOLS & SKILLS:
+- CMS skills: blog posts, leads, analytics, bookings, newsletters, etc.
+- PERSISTENT MEMORY (memory_write / memory_read — supports semantic vector search)
+- OBJECTIVES (objective_update_progress / objective_complete)
+- SELF-MODIFICATION: You can create, update, disable, and list your own skills and automations.
+- SELF-EVOLUTION: Use 'soul_update' to evolve your personality/values, 'agents_update' to evolve your operational rules.
+- REFLECTION: Use 'reflect' to analyze your performance — findings are auto-persisted as learnings.
+- WORKFLOWS: workflow_create, workflow_execute, workflow_list (multi-step chains with template vars)
+- A2A DELEGATION: delegate_task to route subtasks to specialized agents
+- SKILL PACKS: skill_pack_list, skill_pack_install (bundled capabilities)
+
+SKILL INSTRUCTIONS: Loaded lazily — you'll receive specific skill instructions after you use each skill.
+
+RULES:
+- When the user asks you to do something, USE the appropriate tools immediately.
+- You can call MULTIPLE tools in parallel when they're independent.
+- After tool results come back, you may call MORE tools if the task isn't done.
+- After all actions complete, summarize what you did concisely.
+- Use markdown formatting for clear, readable responses.
+- Be concise but thorough. Use emoji sparingly.`);
+  }
+
+  // Layer 4: CMS Schema Awareness
   if (input.cmsSchemaContext) {
     parts.push(input.cmsSchemaContext);
   }
 
-  // Layer 3: Core instructions (shared)
-  parts.push(CORE_INSTRUCTIONS);
+  // Layer 5: GROUNDING RULES (ALWAYS hardcoded — safety layer, cannot be overridden)
+  parts.push(GROUNDING_RULES);
 
-  // Layer 4: Mode-specific context
+  // Layer 6: Mode-specific context
   if (mode === 'heartbeat') {
     parts.push(`\nCONTEXT:`);
     parts.push(memoryContext);
@@ -314,21 +349,13 @@ export function buildSystemPrompt(input: PromptCompilerInput): string {
     parts.push(HEARTBEAT_PROTOCOL);
     parts.push(`\n- Max ${input.maxIterations || 8} tool iterations per heartbeat`);
 
-    // Layer 5: Day 1 Playbook (fresh sites only)
+    // Day 1 Playbook (fresh sites only)
     if (input.siteMaturity?.isFresh) {
       parts.push(DAY_1_PLAYBOOK);
     }
   } else {
     // Operate mode
     parts.push(memoryContext);
-    parts.push(`\nOBJECTIVES (GROUND TRUTH — never fabricate or invent objectives):
-The objectives listed below are the ONLY active objectives. When asked to list, show, or describe objectives, you MUST use ONLY the data below — never generate, guess, or infer objectives from context.
-- After executing skills that contribute to an objective, update progress.
-- When all success_criteria are met, mark as complete.
-- If no objectives are listed, say "No active objectives." — do NOT make any up.
-
-DATA INTEGRITY RULE (applies to ALL listing requests):
-When asked to list skills, automations, workflows, memory, or any system data — ALWAYS use the appropriate tool (skill_list, automation_list, workflow_list, memory_read) to fetch real data. NEVER list items from memory or training data. If a tool returns empty results, say so — do NOT invent entries.`);
     parts.push(objectiveContext);
   }
 
