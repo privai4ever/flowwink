@@ -194,8 +194,8 @@ export function FlowPilotDetails() {
         </div>
       </div>
 
-      {/* Re-bootstrap Button */}
-      <div>
+      {/* Actions */}
+      <div className="space-y-2">
         <Button
           onClick={handleRebootstrap}
           disabled={isBootstrapping}
@@ -209,8 +209,16 @@ export function FlowPilotDetails() {
             <><RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Re-run Bootstrap</>
           )}
         </Button>
+        <Button
+          onClick={() => navigate('/admin/autonomy-tests')}
+          variant="ghost"
+          size="sm"
+          className="w-full h-8 text-xs"
+        >
+          <FlaskConical className="h-3.5 w-3.5 mr-1.5" /> Autonomy Test Suite
+        </Button>
         <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
-          Safe to re-run — skills are upserted idempotently. Use if skills or cron jobs didn't initialize properly.
+          Bootstrap is idempotent. Test Suite validates OpenClaw conformance.
         </p>
       </div>
     </div>
