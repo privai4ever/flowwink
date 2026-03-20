@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +17,7 @@ import {
   FlaskConical,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import { formatDistanceToNow } from 'date-fns';
 
 interface BootstrapStats {
@@ -27,6 +29,7 @@ interface BootstrapStats {
 }
 
 export function FlowPilotDetails() {
+  const queryClient = useQueryClient();
   const [isBootstrapping, setIsBootstrapping] = useState(false);
   const navigate = useNavigate();
 
@@ -66,10 +69,98 @@ export function FlowPilotDetails() {
   const handleRebootstrap = async () => {
     setIsBootstrapping(true);
     try {
+      // Full bootstrap: skills, soul, objectives, automations, workflows, cron
       const { error } = await supabase.functions.invoke('setup-flowpilot', {
-        body: { template_flowpilot: 'default' },
+        body: {
+          seed_skills: true,
+          seed_soul: true,
+          template_flowpilot: {
+            objectives: [
+              {
+                goal: 'Establish content presence — publish 3 blog posts within the first week',
+                success_criteria: { published_posts: 3 },
+                constraints: { no_destructive_actions: true },
+              },
+              {
+                goal: 'Configure lead capture — ensure at least one form or chat is active on the site',
+                success_criteria: { lead_capture_active: true },
+              },
+              {
+                goal: 'Set up weekly digest — monitor site performance and report key metrics every Friday',
+                success_criteria: { weekly_digest_active: true },
+              },
+            ],
+            automations: [
+              {
+                name: 'Weekly Business Digest',
+                description: 'Every Friday afternoon, analyze performance and generate a business digest with key metrics, wins, and next week priorities.',
+                trigger_type: 'cron',
+                trigger_config: { cron: '0 16 * * 5', timezone: 'UTC' },
+                skill_name: 'weekly_business_digest',
+                skill_arguments: {},
+                enabled: true,
+              },
+            ],
+            workflows: [
+              {
+                name: 'Content Pipeline',
+                description: 'Research a topic, generate a blog post proposal, write and publish.',
+                steps: [
+                  { id: 'step-1', skill_name: 'research_content', skill_args: { query: '{{topic}}' } },
+                  { id: 'step-2', skill_name: 'generate_content_proposal', skill_args: { research_context: '{{step-1.output}}' } },
+                  { id: 'step-3', skill_name: 'write_blog_post', skill_args: { proposal: '{{step-2.output}}' }, on_failure: 'stop' },
+                ],
+                trigger_type: 'manual',
+                enabled: true,
+              },
+            ],
+          },
+        },
       });
       if (error) throw error;
+
+      // Seed AGENTS document if missing
+      try {
+        const { data: existingAgents } = await supabase
+          .from('agent_memory')
+          .select('id')
+          .eq('key', 'agents')
+          .maybeSingle();
+
+        if (!existingAgents) {
+          await supabase.from('agent_memory').insert({
+            key: 'agents',
+            value: {
+              version: '1.0',
+              direct_action_rules: 'When a user asks you to DO something (delete, update, create, fix, clean up), ALWAYS execute it directly using the appropriate skill — NEVER create an automation instead.',
+              self_improvement: 'If a user asks you to do something you can\'t, consider creating a new skill. When you notice repetitive tasks, SUGGEST an automation.',
+              memory_guidelines: 'Save user preferences, facts, and context with memory_write. Check memory before answering questions about the site.',
+              browser_rules: 'When a user provides a URL, ALWAYS call browser_fetch. NEVER guess URLs for social profiles.',
+            },
+            category: 'preference',
+            created_by: 'flowpilot',
+          });
+          logger.log('[ReBootstrap] AGENTS document seeded');
+        }
+      } catch (agentsErr) {
+        logger.warn('[ReBootstrap] AGENTS seed failed (non-fatal):', agentsErr);
+      }
+
+      // Fire initial heartbeat
+      try {
+        await supabase.functions.invoke('flowpilot-heartbeat', {
+          body: { time: new Date().toISOString(), trigger: 're-bootstrap' },
+        });
+      } catch (hbErr) {
+        logger.warn('[ReBootstrap] Heartbeat failed (non-fatal):', hbErr);
+      }
+
+      // Invalidate all relevant caches
+      queryClient.invalidateQueries({ queryKey: ['agent-skills'] });
+      queryClient.invalidateQueries({ queryKey: ['agent-objectives'] });
+      queryClient.invalidateQueries({ queryKey: ['agent-automations'] });
+      queryClient.invalidateQueries({ queryKey: ['flowpilot-bootstrap-check'] });
+
       toast.success('FlowPilot bootstrap completed');
       refetch();
     } catch (err) {
