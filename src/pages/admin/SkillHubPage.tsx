@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Plus, Zap } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Plus, Zap, Timer, Save, Loader2 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -21,7 +21,16 @@ import { AutomationHealthPanel } from '@/components/admin/skills/AutomationHealt
 import { EvolutionPanel } from '@/components/admin/skills/EvolutionPanel';
 import { WorkflowsPanel } from '@/components/admin/skills/WorkflowsPanel';
 import { SelfHealingAlert } from '@/components/admin/skills/SelfHealingAlert';
+import { AutonomyScheduleTab } from '@/components/admin/AutonomyScheduleTab';
 import { useSkills, useToggleSkill, useUpsertSkill, useDeleteSkill } from '@/hooks/useSkillHub';
+import {
+  useAutonomyScheduleSettings,
+  useUpdateAutonomyScheduleSettings,
+  AutonomyScheduleSettings,
+  defaultAutonomyScheduleSettings,
+} from '@/hooks/useSiteSettings';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import type { AgentSkill } from '@/types/agent';
 
 export default function SkillHubPage() {

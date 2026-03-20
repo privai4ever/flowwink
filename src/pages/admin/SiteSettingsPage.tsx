@@ -35,7 +35,6 @@ import {
   AeoSettings,
   SystemAiSettings,
   SchemaOrgType,
-  SchemaOrgType,
 } from '@/hooks/useSiteSettings';
 import { usePages } from '@/hooks/usePages';
 import { supabase } from '@/integrations/supabase/client';
