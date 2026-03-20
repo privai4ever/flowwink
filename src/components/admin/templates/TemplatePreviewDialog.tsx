@@ -18,7 +18,6 @@ import {
   Send,
   ImageIcon,
   Trash2,
-  Target,
   UserCheck,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
