@@ -81,8 +81,12 @@ interface PromptCompilerInput {
 function buildSystemPrompt(input: PromptCompilerInput): string {
   const { mode, soulPrompt, memoryContext, objectiveContext } = input;
 
-  if (mode === 'chat' && input.chatSystemPrompt) {
-    return input.chatSystemPrompt;
+  if (mode === 'chat') {
+    const chatParts: string[] = [];
+    chatParts.push(input.chatSystemPrompt || 'You are a helpful AI assistant.');
+    if (soulPrompt) chatParts.push(soulPrompt);
+    chatParts.push('\nIMPORTANT: Always respond in the same language as the user writes in.');
+    return chatParts.filter(Boolean).join('\n');
   }
 
   const parts: string[] = [];
