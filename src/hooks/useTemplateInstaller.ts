@@ -634,7 +634,7 @@ export function useTemplateInstaller() {
       if (appliedBlogCount > 0) description += `, ${appliedBlogCount} blog posts`;
       if (totalKbArticles > 0) description += `, ${totalKbArticles} KB articles`;
       if (moduleCount > 0) description += `. Enabled ${moduleCount} modules`;
-      description += '. FlowPilot initialized.';
+      description += '.';
 
       await queryClient.invalidateQueries({ queryKey: ['pages'] });
       await queryClient.invalidateQueries({ queryKey: ['deleted-pages'] });
