@@ -221,6 +221,21 @@ export default function SkillHubPage() {
         <TabsContent value="evolution">
           <EvolutionPanel />
         </TabsContent>
+
+        {/* Autonomy Tab */}
+        <TabsContent value="autonomy" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Autonomy Schedule</h2>
+              <p className="text-sm text-muted-foreground">Configure when FlowPilot runs its autonomous loops.</p>
+            </div>
+            <Button onClick={handleSaveAutonomy} disabled={autonomySaving} size="sm">
+              {autonomySaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+              Save schedule
+            </Button>
+          </div>
+          <AutonomyScheduleTab data={autonomyData} onChange={setAutonomyData} />
+        </TabsContent>
       </Tabs>
 
       {/* Editor */}
