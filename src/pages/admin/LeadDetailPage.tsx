@@ -246,6 +246,30 @@ export default function LeadDetailPage() {
                     <Sparkles className="h-4 w-4 mr-2" />
                     {qualifyLead.isPending ? 'Qualifying...' : 'AI Qualify'}
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete contact?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete {lead.name || lead.email} and all associated activity history. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteLead.mutate(lead.id, { onSuccess: () => navigate('/admin/contacts') })}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </CardContent>
