@@ -93,13 +93,13 @@ const DEFAULT_TOKEN_BUDGET = 50_000; // Max tokens per heartbeat session
 const BUILT_IN_TOOL_NAMES = new Set([
   'memory_write', 'memory_read',
   'objective_update_progress', 'objective_complete',
-  'skill_create', 'skill_update', 'skill_list', 'skill_disable',
+  'skill_create', 'skill_update', 'skill_list', 'skill_disable', 'skill_enable', 'skill_delete',
   'skill_instruct',
   'soul_update',
-  'automation_create', 'automation_list',
+  'automation_create', 'automation_list', 'automation_update', 'automation_delete',
   'reflect',
   'decompose_objective', 'advance_plan', 'propose_objective', 'execute_automation',
-  'workflow_create', 'workflow_execute', 'workflow_list',
+  'workflow_create', 'workflow_execute', 'workflow_list', 'workflow_update', 'workflow_delete',
   'delegate_task',
   'skill_pack_list', 'skill_pack_install',
 ]);
@@ -1251,7 +1251,37 @@ async function handleWorkflowList(supabase: any) {
   };
 }
 
-async function handleWorkflowExecute(
+async function handleWorkflowUpdate(supabase: any, args: { workflow_id?: string; workflow_name?: string; updates: Record<string, any> }) {
+  const safeFields = ['name', 'description', 'steps', 'trigger_type', 'trigger_config', 'enabled'];
+  const filtered: Record<string, any> = {};
+  for (const [k, v] of Object.entries(args.updates)) {
+    if (safeFields.includes(k)) filtered[k] = v;
+  }
+  if (Object.keys(filtered).length === 0) return { status: 'error', error: 'No valid fields to update' };
+  filtered.updated_at = new Date().toISOString();
+
+  let q = supabase.from('agent_workflows').update(filtered);
+  if (args.workflow_id) q = q.eq('id', args.workflow_id);
+  else if (args.workflow_name) q = q.eq('name', args.workflow_name);
+  else return { status: 'error', error: 'Provide workflow_id or workflow_name' };
+
+  const { data, error } = await q.select('id, name, enabled').single();
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'updated', workflow: data };
+}
+
+async function handleWorkflowDelete(supabase: any, args: { workflow_id?: string; workflow_name?: string }) {
+  let q = supabase.from('agent_workflows').delete();
+  if (args.workflow_id) q = q.eq('id', args.workflow_id);
+  else if (args.workflow_name) q = q.eq('name', args.workflow_name);
+  else return { status: 'error', error: 'Provide workflow_id or workflow_name' };
+
+  const { data, error } = await q.select('id, name').single();
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'deleted', workflow: data };
+}
+
+
   supabase: any, supabaseUrl: string, serviceKey: string,
   args: { workflow_id?: string; workflow_name?: string; input?: Record<string, any> },
 ) {
@@ -1529,6 +1559,20 @@ async function handleSkillDisable(supabase: any, args: { skill_name: string }) {
   return { status: 'disabled', skill: data };
 }
 
+async function handleSkillEnable(supabase: any, args: { skill_name: string }) {
+  const { data, error } = await supabase
+    .from('agent_skills').update({ enabled: true, updated_at: new Date().toISOString() }).eq('name', args.skill_name).select('id, name').single();
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'enabled', skill: data };
+}
+
+async function handleSkillDelete(supabase: any, args: { skill_name: string }) {
+  const { data, error } = await supabase
+    .from('agent_skills').delete().eq('name', args.skill_name).select('id, name').single();
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'deleted', skill: data };
+}
+
 async function handleSkillInstruct(supabase: any, args: { skill_name: string; instructions: string }) {
   const { data, error } = await supabase
     .from('agent_skills').update({ instructions: args.instructions, updated_at: new Date().toISOString() }).eq('name', args.skill_name).select('id, name, instructions').single();
@@ -1581,6 +1625,36 @@ async function handleAutomationList(supabase: any, args: { enabled_only?: boolea
   if (args.enabled_only) q = q.eq('enabled', true);
   const { data } = await q.order('created_at', { ascending: false });
   return { automations: data || [], count: data?.length || 0 };
+}
+
+async function handleAutomationUpdate(supabase: any, args: { automation_id?: string; automation_name?: string; updates: Record<string, any> }) {
+  const safeFields = ['name', 'description', 'trigger_type', 'trigger_config', 'skill_name', 'skill_arguments', 'enabled'];
+  const filtered: Record<string, any> = {};
+  for (const [k, v] of Object.entries(args.updates)) {
+    if (safeFields.includes(k)) filtered[k] = v;
+  }
+  if (Object.keys(filtered).length === 0) return { status: 'error', error: 'No valid fields to update' };
+  filtered.updated_at = new Date().toISOString();
+
+  let q = supabase.from('agent_automations').update(filtered);
+  if (args.automation_id) q = q.eq('id', args.automation_id);
+  else if (args.automation_name) q = q.eq('name', args.automation_name);
+  else return { status: 'error', error: 'Provide automation_id or automation_name' };
+
+  const { data, error } = await q.select('id, name, enabled').single();
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'updated', automation: data };
+}
+
+async function handleAutomationDelete(supabase: any, args: { automation_id?: string; automation_name?: string }) {
+  let q = supabase.from('agent_automations').delete();
+  if (args.automation_id) q = q.eq('id', args.automation_id);
+  else if (args.automation_name) q = q.eq('name', args.automation_name);
+  else return { status: 'error', error: 'Provide automation_id or automation_name' };
+
+  const { data, error } = await q.select('id, name').single();
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'deleted', automation: data };
 }
 
 // ─── Reflection ───────────────────────────────────────────────────────────────
@@ -1705,9 +1779,13 @@ const SELF_MOD_TOOLS = [
   { type: 'function', function: { name: 'skill_update', description: 'Update an existing skill.', parameters: { type: 'object', properties: { skill_name: { type: 'string' }, updates: { type: 'object' } }, required: ['skill_name', 'updates'] } } },
   { type: 'function', function: { name: 'skill_list', description: 'List all registered skills.', parameters: { type: 'object', properties: { category: { type: 'string' }, scope: { type: 'string' }, include_disabled: { type: 'boolean' } } } } },
   { type: 'function', function: { name: 'skill_disable', description: 'Disable a skill.', parameters: { type: 'object', properties: { skill_name: { type: 'string' } }, required: ['skill_name'] } } },
+  { type: 'function', function: { name: 'skill_enable', description: 'Re-enable a disabled skill.', parameters: { type: 'object', properties: { skill_name: { type: 'string' } }, required: ['skill_name'] } } },
+  { type: 'function', function: { name: 'skill_delete', description: 'Permanently delete a skill from the registry.', parameters: { type: 'object', properties: { skill_name: { type: 'string' } }, required: ['skill_name'] } } },
   { type: 'function', function: { name: 'skill_instruct', description: 'Add rich instructions/knowledge to a skill.', parameters: { type: 'object', properties: { skill_name: { type: 'string' }, instructions: { type: 'string' } }, required: ['skill_name', 'instructions'] } } },
   { type: 'function', function: { name: 'automation_create', description: 'Create a new automation. Disabled by default for safety.', parameters: { type: 'object', properties: { name: { type: 'string' }, description: { type: 'string' }, trigger_type: { type: 'string', enum: ['cron', 'event', 'signal'] }, trigger_config: { type: 'object' }, skill_name: { type: 'string' }, skill_arguments: { type: 'object' }, enabled: { type: 'boolean' } }, required: ['name', 'trigger_type', 'trigger_config', 'skill_name'] } } },
   { type: 'function', function: { name: 'automation_list', description: 'List all automations.', parameters: { type: 'object', properties: { enabled_only: { type: 'boolean' } } } } },
+  { type: 'function', function: { name: 'automation_update', description: 'Update an existing automation by ID or name.', parameters: { type: 'object', properties: { automation_id: { type: 'string' }, automation_name: { type: 'string' }, updates: { type: 'object', description: 'Fields to update: name, description, trigger_type, trigger_config, skill_name, skill_arguments, enabled' } }, required: ['updates'] } } },
+  { type: 'function', function: { name: 'automation_delete', description: 'Permanently delete an automation by ID or name.', parameters: { type: 'object', properties: { automation_id: { type: 'string' }, automation_name: { type: 'string' } } } } },
 ];
 
 const REFLECT_TOOL = [
@@ -1779,6 +1857,34 @@ const WORKFLOW_TOOLS = [
       name: 'workflow_list',
       description: 'List all registered workflows with run history and status.',
       parameters: { type: 'object', properties: {} },
+    },
+  },
+  {
+    type: 'function', function: {
+      name: 'workflow_update',
+      description: 'Update an existing workflow by ID or name.',
+      parameters: {
+        type: 'object',
+        properties: {
+          workflow_id: { type: 'string' },
+          workflow_name: { type: 'string' },
+          updates: { type: 'object', description: 'Fields to update: name, description, steps, trigger_type, trigger_config, enabled' },
+        },
+        required: ['updates'],
+      },
+    },
+  },
+  {
+    type: 'function', function: {
+      name: 'workflow_delete',
+      description: 'Permanently delete a workflow by ID or name.',
+      parameters: {
+        type: 'object',
+        properties: {
+          workflow_id: { type: 'string' },
+          workflow_name: { type: 'string' },
+        },
+      },
     },
   },
 ];
@@ -1857,10 +1963,14 @@ export async function executeBuiltInTool(
     case 'skill_update': return handleSkillUpdate(supabase, fnArgs);
     case 'skill_list': return handleSkillList(supabase, fnArgs);
     case 'skill_disable': return handleSkillDisable(supabase, fnArgs);
+    case 'skill_enable': return handleSkillEnable(supabase, fnArgs);
+    case 'skill_delete': return handleSkillDelete(supabase, fnArgs);
     case 'skill_instruct': return handleSkillInstruct(supabase, fnArgs);
     case 'soul_update': return handleSoulUpdate(supabase, fnArgs);
     case 'automation_create': return handleAutomationCreate(supabase, fnArgs);
     case 'automation_list': return handleAutomationList(supabase, fnArgs);
+    case 'automation_update': return handleAutomationUpdate(supabase, fnArgs);
+    case 'automation_delete': return handleAutomationDelete(supabase, fnArgs);
     case 'reflect': return handleReflect(supabase, fnArgs);
     case 'decompose_objective': return handleDecomposeObjective(supabase, fnArgs);
     case 'advance_plan': return handleAdvancePlan(supabase, supabaseUrl, serviceKey, fnArgs);
@@ -1869,6 +1979,8 @@ export async function executeBuiltInTool(
     case 'workflow_create': return handleWorkflowCreate(supabase, fnArgs);
     case 'workflow_execute': return handleWorkflowExecute(supabase, supabaseUrl, serviceKey, fnArgs);
     case 'workflow_list': return handleWorkflowList(supabase);
+    case 'workflow_update': return handleWorkflowUpdate(supabase, fnArgs);
+    case 'workflow_delete': return handleWorkflowDelete(supabase, fnArgs);
     case 'delegate_task': return handleDelegateTask(supabase, supabaseUrl, serviceKey, fnArgs);
     case 'skill_pack_list': return handleSkillPackList(supabase);
     case 'skill_pack_install': return handleSkillPackInstall(supabase, fnArgs);
