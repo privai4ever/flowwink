@@ -325,6 +325,27 @@ export function useAgentOperate() {
   // ─── Send message with SSE streaming ────────────────────────────────
 
   const sendMessage = useCallback(async (content: string) => {
+    // ─── Intercept builtin slash commands — render real data, skip AI ──
+    const trimmed = content.trim().replace(/^\//, '');
+    const builtinResult = await handleBuiltinCommand(trimmed);
+    if (builtinResult) {
+      const userMsg: OperateMessage = {
+        id: crypto.randomUUID(),
+        role: 'user',
+        content,
+        createdAt: new Date(),
+      };
+      const assistantMsg: OperateMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: builtinResult,
+        createdAt: new Date(),
+        toolStatus: { phase: 'done' },
+      };
+      setMessages(prev => [...prev, userMsg, assistantMsg]);
+      return;
+    }
+
     const userMsg: OperateMessage = {
       id: crypto.randomUUID(),
       role: 'user',
