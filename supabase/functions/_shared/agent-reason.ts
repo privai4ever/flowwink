@@ -305,7 +305,11 @@ export function buildSystemPrompt(input: PromptCompilerInput): string {
   } else {
     // Operate mode
     parts.push(memoryContext);
-    parts.push(`\nOBJECTIVES:\n- After executing skills that contribute to an objective, update progress.\n- When all success_criteria are met, mark as complete.`);
+    parts.push(`\nOBJECTIVES (GROUND TRUTH — never fabricate or invent objectives):
+The objectives listed below are the ONLY active objectives. When asked to list, show, or describe objectives, you MUST use ONLY the data below — never generate, guess, or infer objectives from context.
+- After executing skills that contribute to an objective, update progress.
+- When all success_criteria are met, mark as complete.
+- If no objectives are listed, say "No active objectives." — do NOT make any up.`);
     parts.push(objectiveContext);
   }
 
