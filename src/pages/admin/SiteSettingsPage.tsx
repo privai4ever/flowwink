@@ -180,7 +180,7 @@ export default function SiteSettingsPage() {
   const updateGeneral = useUpdateGeneralSettings();
   const updateAeo = useUpdateAeoSettings();
   const updateSystemAi = useUpdateSystemAiSettings();
-  const updateAutonomy = useUpdateAutonomyScheduleSettings();
+  
 
   const [generalData, setGeneralData] = useState<GeneralSettings>({
     homepageSlug: 'hem',
