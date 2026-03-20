@@ -91,8 +91,8 @@ const SUMMARY_THRESHOLD = 60_000;
 const DEFAULT_TOKEN_BUDGET = 50_000; // Max tokens per heartbeat session
 
 const BUILT_IN_TOOL_NAMES = new Set([
-  'memory_write', 'memory_read',
-  'objective_update_progress', 'objective_complete',
+  'memory_write', 'memory_read', 'memory_delete',
+  'objective_update_progress', 'objective_complete', 'objective_delete',
   'skill_create', 'skill_update', 'skill_list', 'skill_disable', 'skill_enable', 'skill_delete',
   'skill_instruct',
   'soul_update',
@@ -873,6 +873,20 @@ async function handleObjectiveComplete(supabase: any, args: { objective_id: stri
     .eq('id', args.objective_id);
   if (error) return { status: 'error', error: error.message };
   return { status: 'completed', objective_id: args.objective_id };
+}
+
+async function handleObjectiveDelete(supabase: any, args: { objective_id: string }) {
+  // Remove linked activities first
+  await supabase.from('agent_objective_activities').delete().eq('objective_id', args.objective_id);
+  const { error } = await supabase.from('agent_objectives').delete().eq('id', args.objective_id);
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'deleted', objective_id: args.objective_id };
+}
+
+async function handleMemoryDelete(supabase: any, args: { key: string }) {
+  const { error } = await supabase.from('agent_memory').delete().eq('key', args.key);
+  if (error) return { status: 'error', error: error.message };
+  return { status: 'deleted', key: args.key };
 }
 
 // ─── Plan Decomposition (ported from ClawCMS) ─────────────────────────────────
@@ -1767,11 +1781,13 @@ export async function loadSkillInstructions(_supabase: any): Promise<string> {
 const MEMORY_TOOLS = [
   { type: 'function', function: { name: 'memory_write', description: 'Save something to your persistent memory. Generates vector embedding for semantic search.', parameters: { type: 'object', properties: { key: { type: 'string', description: 'Short identifier' }, value: { type: 'string', description: 'The information to remember' }, category: { type: 'string', enum: ['preference', 'context', 'fact'] } }, required: ['key', 'value'] } } },
   { type: 'function', function: { name: 'memory_read', description: 'Search your persistent memory. Supports semantic (vector) search — describe what you\'re looking for naturally.', parameters: { type: 'object', properties: { key: { type: 'string', description: 'Keyword search term' }, category: { type: 'string', enum: ['preference', 'context', 'fact'] }, semantic_query: { type: 'string', description: 'Natural language query for semantic vector search (more accurate than keyword)' } } } } },
+  { type: 'function', function: { name: 'memory_delete', description: 'Delete a memory entry by key.', parameters: { type: 'object', properties: { key: { type: 'string', description: 'The memory key to delete' } }, required: ['key'] } } },
 ];
 
 const OBJECTIVE_TOOLS = [
   { type: 'function', function: { name: 'objective_update_progress', description: 'Update progress on an active objective.', parameters: { type: 'object', properties: { objective_id: { type: 'string' }, progress: { type: 'object', description: 'Updated progress object' } }, required: ['objective_id', 'progress'] } } },
   { type: 'function', function: { name: 'objective_complete', description: 'Mark an objective as completed.', parameters: { type: 'object', properties: { objective_id: { type: 'string' } }, required: ['objective_id'] } } },
+  { type: 'function', function: { name: 'objective_delete', description: 'Permanently delete an objective and its linked activities.', parameters: { type: 'object', properties: { objective_id: { type: 'string' } }, required: ['objective_id'] } } },
 ];
 
 const SELF_MOD_TOOLS = [
@@ -1959,6 +1975,8 @@ export async function executeBuiltInTool(
     case 'memory_read': return handleMemoryRead(supabase, fnArgs);
     case 'objective_update_progress': return handleObjectiveUpdateProgress(supabase, fnArgs);
     case 'objective_complete': return handleObjectiveComplete(supabase, fnArgs);
+    case 'objective_delete': return handleObjectiveDelete(supabase, fnArgs);
+    case 'memory_delete': return handleMemoryDelete(supabase, fnArgs);
     case 'skill_create': return handleSkillCreate(supabase, fnArgs);
     case 'skill_update': return handleSkillUpdate(supabase, fnArgs);
     case 'skill_list': return handleSkillList(supabase, fnArgs);
