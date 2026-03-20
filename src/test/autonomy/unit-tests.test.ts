@@ -81,8 +81,12 @@ interface PromptCompilerInput {
 function buildSystemPrompt(input: PromptCompilerInput): string {
   const { mode, soulPrompt, memoryContext, objectiveContext } = input;
 
-  if (mode === 'chat' && input.chatSystemPrompt) {
-    return input.chatSystemPrompt;
+  if (mode === 'chat') {
+    const chatParts: string[] = [];
+    chatParts.push(input.chatSystemPrompt || 'You are a helpful AI assistant.');
+    if (soulPrompt) chatParts.push(soulPrompt);
+    chatParts.push('\nIMPORTANT: Always respond in the same language as the user writes in.');
+    return chatParts.filter(Boolean).join('\n');
   }
 
   const parts: string[] = [];
@@ -257,13 +261,15 @@ describe("Prompt Compiler (buildSystemPrompt)", () => {
     expect(prompt).toContain("TOKEN BUDGET: 50000 tokens max");
   });
 
-  it("chat mode uses chatSystemPrompt override", () => {
+  it("chat mode uses chatSystemPrompt as base layer", () => {
     const prompt = buildSystemPrompt({
       ...baseInput,
       mode: 'chat',
       chatSystemPrompt: 'You are a helpful assistant.',
     });
-    expect(prompt).toBe('You are a helpful assistant.');
+    expect(prompt).toContain('You are a helpful assistant.');
+    // Chat mode now adds soul + grounding layers on top
+    expect(prompt).toContain('SOUL: Test');
   });
 
   it("does not leak heartbeat state into operate mode", () => {
