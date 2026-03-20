@@ -49,6 +49,7 @@ export interface ModulesSettings {
   federation: ModuleConfig;
   paidGrowth: ModuleConfig;
   companyInsights: ModuleConfig;
+  flowpilot: ModuleConfig;
 }
 
 export const defaultModulesSettings: ModulesSettings = {
