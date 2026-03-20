@@ -1890,6 +1890,7 @@ const REFLECT_TOOL = [
 
 const SOUL_TOOL = [
   { type: 'function', function: { name: 'soul_update', description: 'Update your personality, values, tone, or philosophy.', parameters: { type: 'object', properties: { field: { type: 'string', enum: ['purpose', 'values', 'tone', 'philosophy'] }, value: { type: 'string', description: 'New value' } }, required: ['field', 'value'] } } },
+  { type: 'function', function: { name: 'agents_update', description: 'Update your operational rules, policies, and conventions (AGENTS document). Fields: direct_action_rules, self_improvement, memory_guidelines, browser_rules, workflow_conventions, a2a_conventions, skill_pack_rules, custom_rules.', parameters: { type: 'object', properties: { field: { type: 'string', enum: ['direct_action_rules', 'self_improvement', 'memory_guidelines', 'browser_rules', 'workflow_conventions', 'a2a_conventions', 'skill_pack_rules', 'custom_rules'] }, value: { type: 'string', description: 'New value for this operational rule section' } }, required: ['field', 'value'] } } },
 ];
 
 const PLANNING_TOOLS = [
