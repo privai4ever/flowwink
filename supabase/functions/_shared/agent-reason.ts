@@ -273,11 +273,31 @@ EXECUTION RULES:
 export function buildSystemPrompt(input: PromptCompilerInput): string {
   const { mode, soulPrompt, memoryContext, objectiveContext } = input;
 
-  if (mode === 'chat' && input.chatSystemPrompt) {
-    return input.chatSystemPrompt;
+  const parts: string[] = [];
+
+  // ─── Chat mode: layered prompt with soul + grounding ────────────────────────
+  if (mode === 'chat') {
+    // Layer 1: Base system prompt from admin config (or default)
+    parts.push(input.chatSystemPrompt || 'You are a helpful AI assistant for this website.');
+
+    // Layer 2: Soul + Identity personality (from DB — gives the chat personality)
+    if (soulPrompt) {
+      parts.push(soulPrompt);
+    }
+
+    // Layer 3: Language matching (always)
+    parts.push('\nIMPORTANT: Always respond in the same language as the user writes in. Match the user\'s language automatically.');
+
+    // Layer 4: Grounding rules for chat (lighter version — no internal tool catalog)
+    parts.push(`\nDATA INTEGRITY:
+- Only answer based on information you have been given (website content, knowledge base, tool results).
+- If you don't know the answer, say so honestly — do not fabricate information.
+- When using tools, rely on their results. Do not invent data that tools did not return.`);
+
+    return parts.filter(Boolean).join('\n');
   }
 
-  const parts: string[] = [];
+  // ─── Operate / Heartbeat modes ──────────────────────────────────────────────
 
   // Layer 1: Mode identity (hardcoded, short)
   if (mode === 'heartbeat') {
@@ -290,15 +310,9 @@ export function buildSystemPrompt(input: PromptCompilerInput): string {
   parts.push(soulPrompt);
 
   // Layer 3: AGENTS / CORE_INSTRUCTIONS
-  // If no agents document exists in DB, fall back to hardcoded CORE_INSTRUCTIONS.
-  // The agents document is injected via soulPrompt (buildWorkspacePrompt).
-  // When agents doc is present, soulPrompt already contains operational rules,
-  // but we still need CORE_INSTRUCTIONS as a baseline for tool descriptions.
   if (!input.agents) {
     parts.push(CORE_INSTRUCTIONS);
   } else {
-    // Agents doc is present — only inject the tool catalog portion of CORE_INSTRUCTIONS
-    // (the agents doc already covers policies/rules)
     parts.push(`You can use MULTIPLE tools in a single turn and CHAIN tool calls across iterations.
 When a task requires multiple steps, execute them sequentially — don't just describe a plan.
 
