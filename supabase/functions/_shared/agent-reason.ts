@@ -375,30 +375,60 @@ export async function resolveAiConfig(supabase: any, tier: AiTier = 'fast'): Pro
   return { apiKey, apiUrl, model };
 }
 
-// ─── Soul & Identity ──────────────────────────────────────────────────────────
+// ─── Soul, Identity & Agents (Workspace Files) ───────────────────────────────
 
+/** @deprecated Use loadWorkspaceFiles instead */
 export async function loadSoulIdentity(supabase: any): Promise<{ soul: any; identity: any }> {
+  const ws = await loadWorkspaceFiles(supabase);
+  return { soul: ws.soul, identity: ws.identity };
+}
+
+export async function loadWorkspaceFiles(supabase: any): Promise<{ soul: any; identity: any; agents: any }> {
   const { data } = await supabase
     .from('agent_memory')
     .select('key, value')
-    .in('key', ['soul', 'identity']);
+    .in('key', ['soul', 'identity', 'agents']);
 
   const soul = data?.find((m: any) => m.key === 'soul')?.value || {};
   const identity = data?.find((m: any) => m.key === 'identity')?.value || {};
-  return { soul, identity };
+  const agents = data?.find((m: any) => m.key === 'agents')?.value || null;
+  return { soul, identity, agents };
 }
 
+/** @deprecated Use buildWorkspacePrompt instead */
 export function buildSoulPrompt(soul: any, identity: any): string {
+  return buildWorkspacePrompt(soul, identity, null);
+}
+
+export function buildWorkspacePrompt(soul: any, identity: any, agents: any): string {
   let prompt = '';
+
+  // Layer 2a: Identity
   if (identity.name || identity.role) {
     prompt += `\n\nIDENTITY:\nName: ${identity.name || 'FlowPilot'}\nRole: ${identity.role || 'CMS operator'}`;
     if (identity.capabilities?.length) prompt += `\nCapabilities: ${identity.capabilities.join(', ')}`;
     if (identity.boundaries?.length) prompt += `\nBoundaries: ${identity.boundaries.join('; ')}`;
   }
+
+  // Layer 2b: Soul
   if (soul.purpose) prompt += `\n\nSOUL:\nPurpose: ${soul.purpose}`;
   if (soul.values?.length) prompt += `\nValues: ${soul.values.join('; ')}`;
   if (soul.tone) prompt += `\nTone: ${soul.tone}`;
   if (soul.philosophy) prompt += `\nPhilosophy: ${soul.philosophy}`;
+
+  // Layer 3: Agents (operational rules from DB — overrides CORE_INSTRUCTIONS if present)
+  if (agents) {
+    prompt += `\n\nOPERATIONAL RULES (AGENTS):`;
+    if (agents.direct_action_rules) prompt += `\n${agents.direct_action_rules}`;
+    if (agents.self_improvement) prompt += `\n${agents.self_improvement}`;
+    if (agents.memory_guidelines) prompt += `\n${agents.memory_guidelines}`;
+    if (agents.browser_rules) prompt += `\n${agents.browser_rules}`;
+    if (agents.workflow_conventions) prompt += `\n${agents.workflow_conventions}`;
+    if (agents.a2a_conventions) prompt += `\n${agents.a2a_conventions}`;
+    if (agents.skill_pack_rules) prompt += `\n${agents.skill_pack_rules}`;
+    if (agents.custom_rules) prompt += `\n${agents.custom_rules}`;
+  }
+
   return prompt;
 }
 
