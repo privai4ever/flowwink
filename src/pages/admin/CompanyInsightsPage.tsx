@@ -273,7 +273,7 @@ export default function CompanyInsightsPage() {
                     <Input
                       value={enrichId}
                       onChange={e => setEnrichId(e.target.value)}
-                      placeholder="Org number or company name"
+                      placeholder="Company name, registration number, or domain"
                       className="h-9"
                       onKeyDown={e => e.key === "Enter" && handleEnrichPublic()}
                     />
