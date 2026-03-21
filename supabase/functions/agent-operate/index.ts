@@ -14,6 +14,8 @@ import {
   executeBuiltInTool,
   isBuiltInTool,
   loadCMSSchema,
+  tryAcquireLock,
+  releaseLock,
 } from "../_shared/agent-reason.ts";
 
 /**
