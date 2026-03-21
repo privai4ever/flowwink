@@ -2310,19 +2310,58 @@ async function handleChainSkills(
 
 // ─── Outcome Evaluation ───────────────────────────────────────────────────────
 
-async function handleEvaluateOutcomes(supabase: any, args: { limit?: number; skill_filter?: string }) {
+/**
+ * Extract causal hints from an activity's input/output to enable
+ * skill-specific correlation (e.g. the slug of a blog post written).
+ */
+function extractCausalHints(activity: any): { slugs: string[]; emails: string[]; skillType: string } {
+  const inp = activity.input || {};
+  const out = activity.output || {};
+  const slugs: string[] = [];
+  const emails: string[] = [];
+
+  // Extract slugs from common fields
+  for (const obj of [inp, out, out?.result]) {
+    if (!obj || typeof obj !== 'object') continue;
+    if (obj.slug) slugs.push(obj.slug);
+    if (obj.page_slug) slugs.push(obj.page_slug);
+    if (obj.post_slug) slugs.push(obj.post_slug);
+    if (obj.email) emails.push(obj.email);
+    if (obj.lead_email) emails.push(obj.lead_email);
+  }
+
+  // Classify skill type for correlation strategy
+  const name = activity.skill_name || '';
+  let skillType = 'general';
+  if (name.match(/blog|post|content|page|seo/i)) skillType = 'content';
+  else if (name.match(/lead|crm|qualify|prospect|enrich/i)) skillType = 'crm';
+  else if (name.match(/newsletter|email|subscribe/i)) skillType = 'communication';
+  else if (name.match(/book|schedule/i)) skillType = 'booking';
+  else if (name.match(/deal|order|product/i)) skillType = 'commerce';
+
+  return { slugs, emails, skillType };
+}
+
+async function handleEvaluateOutcomes(supabase: any, args: { limit?: number; skill_filter?: string; include_too_early?: boolean }) {
   const limit = args.limit || 15;
   const since = new Date();
   since.setDate(since.getDate() - 7);
 
+  // Fetch unevaluated activities
   let query = supabase
     .from('agent_activity')
     .select('id, skill_name, input, output, status, created_at, duration_ms')
-    .is('outcome_status', null)
     .eq('status', 'success')
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: false })
     .limit(limit);
+
+  if (args.include_too_early) {
+    // Include both null AND too_early for re-evaluation
+    query = query.or('outcome_status.is.null,outcome_status.eq.too_early');
+  } else {
+    query = query.is('outcome_status', null);
+  }
 
   if (args.skill_filter) {
     query = query.eq('skill_name', args.skill_filter);
@@ -2330,23 +2369,72 @@ async function handleEvaluateOutcomes(supabase: any, args: { limit?: number; ski
 
   const { data: activities } = await query;
   if (!activities?.length) {
-    return { status: 'no_pending', message: 'No unevaluated actions in the last 7 days.' };
+    return { status: 'no_pending', message: 'No unevaluated actions found.' };
   }
 
-  // Enrich with correlation data — fetch recent metrics for context
-  const [viewsResult, leadsResult, subscriberResult] = await Promise.all([
+  // For each activity, build a temporal window (24-72h after the action)
+  const enrichedActivities = [];
+  for (const a of activities) {
+    const actionTime = new Date(a.created_at);
+    const windowStart = actionTime.toISOString();
+    const windowEnd = new Date(actionTime.getTime() + 72 * 60 * 60 * 1000).toISOString();
+    const hints = extractCausalHints(a);
+
+    const causal: Record<string, any> = { window: `${windowStart} → ${windowEnd}`, skill_type: hints.skillType };
+
+    // Skill-specific causal queries within the 72h window
+    if (hints.skillType === 'content' && hints.slugs.length) {
+      const { data: views } = await supabase.from('page_views').select('page_slug', { count: 'exact', head: false })
+        .in('page_slug', hints.slugs.map(s => `/${s}`).concat(hints.slugs.map(s => `/blog/${s}`)).concat(hints.slugs))
+        .gte('created_at', windowStart).lte('created_at', windowEnd).limit(200);
+      causal.page_views_72h = views?.length || 0;
+      causal.tracked_slugs = hints.slugs;
+    }
+
+    if (hints.skillType === 'crm' && hints.emails.length) {
+      const { data: leads } = await supabase.from('leads').select('id, score, status')
+        .in('email', hints.emails).limit(10);
+      causal.related_leads = leads?.map((l: any) => ({ score: l.score, status: l.status })) || [];
+    }
+
+    enrichedActivities.push({
+      id: a.id,
+      skill_name: a.skill_name,
+      created_at: a.created_at,
+      input_summary: JSON.stringify(a.input).slice(0, 300),
+      output_summary: JSON.stringify(a.output).slice(0, 300),
+      causal_data: causal,
+    });
+  }
+
+  // Fetch broad correlation context (all metrics in 7d window)
+  const [viewsResult, leadsResult, subscriberResult, dealsResult, bookingsResult, ordersResult, feedbackResult] = await Promise.all([
     supabase.from('page_views').select('page_slug', { count: 'exact', head: false })
       .gte('created_at', since.toISOString()).limit(500),
     supabase.from('leads').select('id, source, score, created_at')
       .gte('created_at', since.toISOString()).order('created_at', { ascending: false }).limit(50),
     supabase.from('newsletter_subscribers').select('id', { count: 'exact', head: true })
       .gte('created_at', since.toISOString()),
+    supabase.from('deals').select('stage, value_cents, created_at')
+      .gte('created_at', since.toISOString()).limit(50),
+    supabase.from('bookings').select('id, status, created_at')
+      .gte('created_at', since.toISOString()).limit(50),
+    supabase.from('order_items').select('id, price_cents, created_at')
+      .gte('created_at', since.toISOString()).limit(50),
+    supabase.from('chat_feedback').select('rating, created_at')
+      .gte('created_at', since.toISOString()).limit(50),
   ]);
 
-  // Build page view counts for correlation
+  // Page view counts
   const pageViewCounts: Record<string, number> = {};
   for (const pv of (viewsResult.data || [])) {
     pageViewCounts[pv.page_slug] = (pageViewCounts[pv.page_slug] || 0) + 1;
+  }
+
+  // Feedback summary
+  const feedbackSummary: Record<string, number> = {};
+  for (const f of (feedbackResult.data || [])) {
+    feedbackSummary[f.rating] = (feedbackSummary[f.rating] || 0) + 1;
   }
 
   const correlationContext = {
@@ -2355,20 +2443,62 @@ async function handleEvaluateOutcomes(supabase: any, args: { limit?: number; ski
     new_leads_7d: leadsResult.data?.length || 0,
     new_subscribers_7d: subscriberResult.count || 0,
     lead_sources: [...new Set((leadsResult.data || []).map((l: any) => l.source))],
+    new_deals_7d: dealsResult.data?.length || 0,
+    deal_value_7d: (dealsResult.data || []).reduce((s: number, d: any) => s + (d.value_cents || 0), 0),
+    bookings_7d: bookingsResult.data?.length || 0,
+    orders_7d: ordersResult.data?.length || 0,
+    order_revenue_7d: (ordersResult.data || []).reduce((s: number, o: any) => s + (o.price_cents || 0), 0),
+    chat_feedback_7d: feedbackSummary,
   };
+
+  // Build skill scorecard from historical evaluated outcomes
+  const { data: historicalOutcomes } = await supabase
+    .from('agent_activity')
+    .select('skill_name, outcome_status')
+    .not('outcome_status', 'is', null)
+    .neq('outcome_status', 'too_early')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  const scorecard: Record<string, { total: number; success: number; partial: number; neutral: number; negative: number; rate: number }> = {};
+  for (const o of (historicalOutcomes || [])) {
+    if (!o.skill_name) continue;
+    if (!scorecard[o.skill_name]) scorecard[o.skill_name] = { total: 0, success: 0, partial: 0, neutral: 0, negative: 0, rate: 0 };
+    const s = scorecard[o.skill_name];
+    s.total++;
+    if (o.outcome_status === 'success') s.success++;
+    else if (o.outcome_status === 'partial') s.partial++;
+    else if (o.outcome_status === 'neutral') s.neutral++;
+    else if (o.outcome_status === 'negative') s.negative++;
+  }
+  for (const s of Object.values(scorecard)) {
+    s.rate = s.total > 0 ? Math.round(((s.success + s.partial * 0.5) / s.total) * 100) : 0;
+  }
+
+  // Fetch recent learnings from memory so the agent reads its own diary
+  const { data: learnings } = await supabase
+    .from('agent_memory')
+    .select('key, value, created_at')
+    .like('key', 'outcome_learning:%')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const recentLearnings = (learnings || []).map((l: any) => ({
+    skill: l.value?.skill,
+    outcome: l.value?.outcome,
+    lesson: l.value?.lesson,
+    data: l.value?.data,
+    date: l.created_at?.slice(0, 10),
+  }));
 
   return {
     status: 'pending_evaluation',
-    count: activities.length,
-    activities: activities.map((a: any) => ({
-      id: a.id,
-      skill_name: a.skill_name,
-      created_at: a.created_at,
-      input_summary: JSON.stringify(a.input).slice(0, 300),
-      output_summary: JSON.stringify(a.output).slice(0, 300),
-    })),
+    count: enrichedActivities.length,
+    activities: enrichedActivities,
     correlation_data: correlationContext,
-    instructions: 'For each activity, assess its impact using the correlation_data. Then call record_outcome for each with your assessment.',
+    skill_scorecard: scorecard,
+    recent_learnings: recentLearnings.length ? recentLearnings : undefined,
+    instructions: 'For each activity, assess impact using its causal_data (skill-specific, 72h window) AND the broad correlation_data. Check the skill_scorecard to see historical patterns. Review recent_learnings to avoid repeating mistakes. Call record_outcome for each activity.',
   };
 }
 
@@ -2395,7 +2525,7 @@ async function handleRecordOutcome(supabase: any, args: {
 
   if (error) return { status: 'error', error: error.message };
 
-  // If this is a negative outcome, log a learning to memory
+  // Log learnings for negative/neutral outcomes
   if (args.outcome_status === 'negative' || args.outcome_status === 'neutral') {
     const skillName = data?.skill_name || 'unknown';
     await supabase.from('agent_memory').upsert({
@@ -2405,6 +2535,22 @@ async function handleRecordOutcome(supabase: any, args: {
         outcome: args.outcome_status,
         data: args.outcome_data,
         lesson: `${skillName} produced ${args.outcome_status} result. Review strategy.`,
+      },
+      category: 'context',
+      created_by: 'flowpilot',
+    }, { onConflict: 'key' });
+  }
+
+  // Log learnings for success outcomes too — what works is as important as what doesn't
+  if (args.outcome_status === 'success' && args.outcome_data) {
+    const skillName = data?.skill_name || 'unknown';
+    await supabase.from('agent_memory').upsert({
+      key: `outcome_success:${skillName}:${new Date().toISOString().slice(0, 10)}`,
+      value: {
+        skill: skillName,
+        outcome: 'success',
+        data: args.outcome_data,
+        lesson: `${skillName} produced successful result. Replicate this approach.`,
       },
       category: 'context',
       created_by: 'flowpilot',
