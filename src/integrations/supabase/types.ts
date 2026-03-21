@@ -222,6 +222,11 @@ export type Database = {
           error_message: string | null
           id: string
           input: Json | null
+          outcome_data: Json | null
+          outcome_evaluated_at: string | null
+          outcome_status:
+            | Database["public"]["Enums"]["activity_outcome_status"]
+            | null
           output: Json | null
           skill_id: string | null
           skill_name: string | null
@@ -236,6 +241,11 @@ export type Database = {
           error_message?: string | null
           id?: string
           input?: Json | null
+          outcome_data?: Json | null
+          outcome_evaluated_at?: string | null
+          outcome_status?:
+            | Database["public"]["Enums"]["activity_outcome_status"]
+            | null
           output?: Json | null
           skill_id?: string | null
           skill_name?: string | null
@@ -250,6 +260,11 @@ export type Database = {
           error_message?: string | null
           id?: string
           input?: Json | null
+          outcome_data?: Json | null
+          outcome_evaluated_at?: string | null
+          outcome_status?:
+            | Database["public"]["Enums"]["activity_outcome_status"]
+            | null
           output?: Json | null
           skill_id?: string | null
           skill_name?: string | null
@@ -491,6 +506,7 @@ export type Database = {
           requires_approval: boolean
           scope: Database["public"]["Enums"]["agent_scope"]
           tool_definition: Json
+          trust_level: Database["public"]["Enums"]["skill_trust_level"]
           updated_at: string
         }
         Insert: {
@@ -505,6 +521,7 @@ export type Database = {
           requires_approval?: boolean
           scope?: Database["public"]["Enums"]["agent_scope"]
           tool_definition?: Json
+          trust_level?: Database["public"]["Enums"]["skill_trust_level"]
           updated_at?: string
         }
         Update: {
@@ -519,6 +536,7 @@ export type Database = {
           requires_approval?: boolean
           scope?: Database["public"]["Enums"]["agent_scope"]
           tool_definition?: Json
+          trust_level?: Database["public"]["Enums"]["skill_trust_level"]
           updated_at?: string
         }
         Relationships: []
@@ -3126,6 +3144,12 @@ export type Database = {
       a2a_activity_status: "success" | "error" | "pending"
       a2a_direction: "inbound" | "outbound"
       a2a_peer_status: "active" | "paused" | "revoked"
+      activity_outcome_status:
+        | "pending"
+        | "success"
+        | "partial"
+        | "no_effect"
+        | "negative"
       agent_activity_status:
         | "success"
         | "failed"
@@ -3152,6 +3176,7 @@ export type Database = {
       lead_status: "lead" | "opportunity" | "customer" | "lost"
       page_status: "draft" | "reviewing" | "published" | "archived"
       product_type: "one_time" | "recurring"
+      skill_trust_level: "auto" | "notify" | "approve"
       webhook_event:
         | "page.published"
         | "page.updated"
@@ -3314,6 +3339,13 @@ export const Constants = {
       a2a_activity_status: ["success", "error", "pending"],
       a2a_direction: ["inbound", "outbound"],
       a2a_peer_status: ["active", "paused", "revoked"],
+      activity_outcome_status: [
+        "pending",
+        "success",
+        "partial",
+        "no_effect",
+        "negative",
+      ],
       agent_activity_status: [
         "success",
         "failed",
@@ -3342,6 +3374,7 @@ export const Constants = {
       lead_status: ["lead", "opportunity", "customer", "lost"],
       page_status: ["draft", "reviewing", "published", "archived"],
       product_type: ["one_time", "recurring"],
+      skill_trust_level: ["auto", "notify", "approve"],
       webhook_event: [
         "page.published",
         "page.updated",
