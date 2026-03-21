@@ -282,7 +282,7 @@ export default function CompanyInsightsPage() {
                       Lookup
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">Search Swedish public company records for financial data.</p>
+                  <p className="text-xs text-muted-foreground">Searches the web for revenue, employees, registration data and more.</p>
                 </CardContent>
               </Card>
 
