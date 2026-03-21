@@ -191,7 +191,7 @@ GROUNDING & DATA INTEGRITY (HARDCODED — CANNOT BE OVERRIDDEN):
 - If no objectives are listed, say "No active objectives." — do NOT make any up.`;
 
 const HEARTBEAT_PROTOCOL = `HEARTBEAT PROTOCOL:
-1. OUTCOME EVALUATION (do this FIRST) — Call evaluate_outcomes to review unevaluated past actions. For each, determine if the action achieved its intended result by correlating with real data (page_views, leads, newsletter metrics, etc.). Use record_outcome for each to close the feedback loop. This is how you learn what works.
+1. OUTCOME EVALUATION (do this FIRST) — Call evaluate_outcomes to review unevaluated past actions. It returns causal data (specific to each action's 72h impact window), a skill scorecard (historical success rates), and recent learnings (your own past assessments). Use this to make informed judgments. Call record_outcome for each. If an action is too recent to judge, use 'too_early' — it will resurface in the next heartbeat via include_too_early.
 2. CROSS-MODULE ANALYSIS — Review the CROSS-MODULE INSIGHTS section. Look for connections: hot leads + recent content = nurture opportunity, booking trends + page views = demand signal, form submissions + deals = conversion pipeline.
 3. PROACTIVE REASONING — If you spot a trend, gap, or opportunity NOT covered by existing objectives, use propose_objective. Max 1 new objective per heartbeat.
 4. PLAN — For each active objective WITHOUT a plan (no progress.plan), call decompose_objective to create a step-by-step plan.
@@ -204,12 +204,15 @@ const HEARTBEAT_PROTOCOL = `HEARTBEAT PROTOCOL:
 11. SUMMARIZE — Brief heartbeat report including plan progress, outcome evaluation summary, and any new proposals.
 
 OUTCOME EVALUATION GUIDELINES:
-- evaluate_outcomes returns actions from the last 7 days that haven't been evaluated yet
-- For each action, assess impact: did a blog_write lead to page views? Did a lead action convert? Did SEO changes improve ranking?
-- Score outcomes: 'success' (clear positive impact), 'partial' (some impact), 'neutral' (no measurable change), 'negative' (worsened metrics)
-- Include quantitative evidence in outcome_data (e.g., {views_generated: 45, leads_attributed: 2})
-- This data feeds into reflection and skill improvement — low-performing skills should be refined via skill_instruct
-- Pattern: after several heartbeats, you'll have enough data to adjust strategy intelligently
+- evaluate_outcomes returns per-activity causal_data with a 72h impact window specific to each action
+- For content skills: check causal_data.page_views_72h for the specific page created
+- For CRM skills: check causal_data.related_leads for lead status changes
+- The skill_scorecard shows historical success rates — skills below 50% need strategy adjustment via skill_instruct
+- recent_learnings contains your own past assessments — read them to avoid repeating mistakes
+- Score outcomes: 'success' (clear positive impact), 'partial' (some impact), 'neutral' (no measurable change), 'negative' (worsened metrics), 'too_early' (action < 48h ago, not enough data yet)
+- Include quantitative evidence in outcome_data (e.g., {views_generated: 45, leads_attributed: 2, bookings: 1, revenue_cents: 50000})
+- Correlation data now includes deals, bookings, orders, and chat feedback — use all available signals
+- Pattern: after several heartbeats, the scorecard reveals which strategies work best for THIS specific business
 
 PRIORITY SCORING (automatic, shown as [score:N]):
 - Deadline proximity: overdue +50, <1 day +40, <3 days +25, <7 days +10
