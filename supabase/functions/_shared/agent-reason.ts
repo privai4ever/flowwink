@@ -2793,6 +2793,7 @@ export async function executeBuiltInTool(
     case 'skill_instruct': return handleSkillInstruct(supabase, fnArgs);
     case 'soul_update': return handleSoulUpdate(supabase, fnArgs);
     case 'agents_update': return handleAgentsUpdate(supabase, fnArgs);
+    case 'heartbeat_protocol_update': return handleHeartbeatProtocolUpdate(supabase, fnArgs);
     case 'automation_create': return handleAutomationCreate(supabase, fnArgs);
     case 'automation_list': return handleAutomationList(supabase, fnArgs);
     case 'automation_update': return handleAutomationUpdate(supabase, fnArgs);
