@@ -1553,6 +1553,7 @@ async function handleSkillPackInstall(supabase: any, args: { pack_name: string }
         handler: skill.handler,
         category: skill.category || 'automation',
         scope: skill.scope || 'internal',
+        trust_level: skill.trust_level || (skill.requires_approval ? 'approve' : 'auto'),
         requires_approval: skill.requires_approval ?? false,
         enabled: skill.enabled ?? true,
         instructions: skill.instructions || null,
