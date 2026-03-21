@@ -503,6 +503,7 @@ export type Database = {
           id: string
           instructions: string | null
           name: string
+          origin: Database["public"]["Enums"]["skill_origin"]
           requires_approval: boolean
           scope: Database["public"]["Enums"]["agent_scope"]
           tool_definition: Json
@@ -518,6 +519,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           name: string
+          origin?: Database["public"]["Enums"]["skill_origin"]
           requires_approval?: boolean
           scope?: Database["public"]["Enums"]["agent_scope"]
           tool_definition?: Json
@@ -533,6 +535,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           name?: string
+          origin?: Database["public"]["Enums"]["skill_origin"]
           requires_approval?: boolean
           scope?: Database["public"]["Enums"]["agent_scope"]
           tool_definition?: Json
@@ -3176,6 +3179,7 @@ export type Database = {
       lead_status: "lead" | "opportunity" | "customer" | "lost"
       page_status: "draft" | "reviewing" | "published" | "archived"
       product_type: "one_time" | "recurring"
+      skill_origin: "bundled" | "managed" | "agent" | "user"
       skill_trust_level: "auto" | "notify" | "approve"
       webhook_event:
         | "page.published"
@@ -3374,6 +3378,7 @@ export const Constants = {
       lead_status: ["lead", "opportunity", "customer", "lost"],
       page_status: ["draft", "reviewing", "published", "archived"],
       product_type: ["one_time", "recurring"],
+      skill_origin: ["bundled", "managed", "agent", "user"],
       skill_trust_level: ["auto", "notify", "approve"],
       webhook_event: [
         "page.published",

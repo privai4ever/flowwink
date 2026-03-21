@@ -48,16 +48,16 @@ function useEvolutionData() {
     },
   });
 
-  // Self-created skills (recently created, likely by agent)
+  // Self-created skills (origin = 'agent')
   const selfCreatedSkills = useQuery({
     queryKey: ['evolution-self-skills'],
     queryFn: async () => {
       const { data } = await supabase
         .from('agent_skills')
         .select('*')
-        .eq('trust_level', 'approve')
+        .eq('origin', 'agent')
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(20);
       return data || [];
     },
   });
