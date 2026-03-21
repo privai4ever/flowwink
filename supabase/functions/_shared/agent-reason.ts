@@ -104,6 +104,7 @@ const BUILT_IN_TOOL_NAMES = new Set([
   'workflow_create', 'workflow_execute', 'workflow_list', 'workflow_update', 'workflow_delete',
   'delegate_task',
   'skill_pack_list', 'skill_pack_install',
+  'chain_skills',
 ]);
 
 // ─── Prompt Compiler (OpenClaw Layer 1 — Centralized) ─────────────────────────
