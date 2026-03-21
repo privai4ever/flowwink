@@ -142,7 +142,7 @@ SELF-IMPROVEMENT GUIDELINES:
 MEMORY GUIDELINES:
 - Save user preferences, facts, and context with memory_write
 - Check memory before answering questions about the site
-- memory_read supports semantic search — describe what you're looking for naturally
+- memory_read uses hybrid search — describe what you're looking for (semantic) OR use exact terms (keyword). Both work simultaneously.
 
 BROWSER & URL RESOLUTION:
 - When a user provides an explicit URL (starts with http/https or a domain), ALWAYS call browser_fetch to read it. NEVER answer from memory or training data about a URL — always fetch it live.
