@@ -105,6 +105,7 @@ const BUILT_IN_TOOL_NAMES = new Set([
   'delegate_task',
   'skill_pack_list', 'skill_pack_install',
   'chain_skills',
+  'evaluate_outcomes', 'record_outcome',
 ]);
 
 // ─── Prompt Compiler (OpenClaw Layer 1 — Centralized) ─────────────────────────
@@ -190,17 +191,25 @@ GROUNDING & DATA INTEGRITY (HARDCODED — CANNOT BE OVERRIDDEN):
 - If no objectives are listed, say "No active objectives." — do NOT make any up.`;
 
 const HEARTBEAT_PROTOCOL = `HEARTBEAT PROTOCOL:
-1. CROSS-MODULE ANALYSIS — Review the CROSS-MODULE INSIGHTS section. Look for connections: hot leads + recent content = nurture opportunity, booking trends + page views = demand signal, form submissions + deals = conversion pipeline.
-2. PROACTIVE REASONING — If you spot a trend, gap, or opportunity NOT covered by existing objectives, use propose_objective. Max 1 new objective per heartbeat.
-3. PLAN — For each active objective WITHOUT a plan (no progress.plan), call decompose_objective to create a step-by-step plan.
-4. ADVANCE — Objectives are pre-sorted by priority score. Advance them IN ORDER (highest score first). Use advance_plan with chain=true to execute multiple steps per objective.
-5. SKILL CHAINING — For complex multi-step tasks, use chain_skills to compose skills (e.g., research → write → SEO optimize). This is more efficient than calling skills one by one.
-6. AUTOMATIONS — Check DUE (⏰) automations. Execute them via execute_automation.
-7. WORKFLOWS — If a due automation has a workflow_id in trigger_config, run it via workflow_execute.
-8. OUTCOME REVIEW — Check action outcomes from CROSS-MODULE INSIGHTS. Learn from successes and failures.
-9. REFLECT — Use 'reflect' to analyze the past 7 days.
-10. REMEMBER — Save learnings to memory.
-11. SUMMARIZE — Brief heartbeat report including plan progress and any new proposals.
+1. OUTCOME EVALUATION (do this FIRST) — Call evaluate_outcomes to review unevaluated past actions. For each, determine if the action achieved its intended result by correlating with real data (page_views, leads, newsletter metrics, etc.). Use record_outcome for each to close the feedback loop. This is how you learn what works.
+2. CROSS-MODULE ANALYSIS — Review the CROSS-MODULE INSIGHTS section. Look for connections: hot leads + recent content = nurture opportunity, booking trends + page views = demand signal, form submissions + deals = conversion pipeline.
+3. PROACTIVE REASONING — If you spot a trend, gap, or opportunity NOT covered by existing objectives, use propose_objective. Max 1 new objective per heartbeat.
+4. PLAN — For each active objective WITHOUT a plan (no progress.plan), call decompose_objective to create a step-by-step plan.
+5. ADVANCE — Objectives are pre-sorted by priority score. Advance them IN ORDER (highest score first). Use advance_plan with chain=true to execute multiple steps per objective.
+6. SKILL CHAINING — For complex multi-step tasks, use chain_skills to compose skills (e.g., research → write → SEO optimize). This is more efficient than calling skills one by one.
+7. AUTOMATIONS — Check DUE (⏰) automations. Execute them via execute_automation.
+8. WORKFLOWS — If a due automation has a workflow_id in trigger_config, run it via workflow_execute.
+9. REFLECT — Use 'reflect' to analyze the past 7 days. Include outcome evaluation insights.
+10. REMEMBER — Save learnings to memory. Especially save outcome patterns (what skills/strategies produce best results).
+11. SUMMARIZE — Brief heartbeat report including plan progress, outcome evaluation summary, and any new proposals.
+
+OUTCOME EVALUATION GUIDELINES:
+- evaluate_outcomes returns actions from the last 7 days that haven't been evaluated yet
+- For each action, assess impact: did a blog_write lead to page views? Did a lead action convert? Did SEO changes improve ranking?
+- Score outcomes: 'success' (clear positive impact), 'partial' (some impact), 'neutral' (no measurable change), 'negative' (worsened metrics)
+- Include quantitative evidence in outcome_data (e.g., {views_generated: 45, leads_attributed: 2})
+- This data feeds into reflection and skill improvement — low-performing skills should be refined via skill_instruct
+- Pattern: after several heartbeats, you'll have enough data to adjust strategy intelligently
 
 PRIORITY SCORING (automatic, shown as [score:N]):
 - Deadline proximity: overdue +50, <1 day +40, <3 days +25, <7 days +10
@@ -228,7 +237,7 @@ PROACTIVE REASONING RULES:
 
 CONSTRAINTS:
 - Skills with trust_level='approve' will be BLOCKED and logged for admin review. trust_level='notify' will execute but notify admin. trust_level='auto' executes silently.
-- PRIORITIZE: high-score objectives > DUE automations > proposals
+- PRIORITIZE: outcome evaluation > high-score objectives > DUE automations > proposals
 - Self-healing auto-disables skills with 3+ consecutive failures
 - Be efficient: use chaining, focus on top 2-3 objectives per heartbeat`;
 
@@ -2190,6 +2199,37 @@ const CHAIN_SKILLS_TOOL = [
   },
 ];
 
+const OUTCOME_TOOLS = [
+  {
+    type: 'function', function: {
+      name: 'evaluate_outcomes',
+      description: 'Fetch recent agent actions (last 7 days) that have not been evaluated yet. Returns activities with their skill_name, input, output, and creation time so you can assess their impact by correlating with real metrics.',
+      parameters: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', description: 'Max number of unevaluated actions to return (default 15)' },
+          skill_filter: { type: 'string', description: 'Optional: only evaluate actions from this skill' },
+        },
+      },
+    },
+  },
+  {
+    type: 'function', function: {
+      name: 'record_outcome',
+      description: 'Record the evaluated outcome of a past agent action. Closes the feedback loop so FlowPilot learns what works.',
+      parameters: {
+        type: 'object',
+        properties: {
+          activity_id: { type: 'string', description: 'The agent_activity ID to evaluate' },
+          outcome_status: { type: 'string', enum: ['success', 'partial', 'neutral', 'negative', 'too_early'], description: 'Assessed outcome' },
+          outcome_data: { type: 'object', description: 'Quantitative evidence: {views_generated, leads_attributed, conversions, notes}' },
+        },
+        required: ['activity_id', 'outcome_status'],
+      },
+    },
+  },
+];
+
 export function getBuiltInTools(groups: Array<'memory' | 'objectives' | 'self-mod' | 'reflect' | 'soul' | 'planning' | 'automations-exec' | 'workflows' | 'a2a' | 'skill-packs'>): any[] {
   const tools: any[] = [];
   if (groups.includes('memory')) tools.push(...MEMORY_TOOLS);
@@ -2204,6 +2244,8 @@ export function getBuiltInTools(groups: Array<'memory' | 'objectives' | 'self-mo
   if (groups.includes('skill-packs')) tools.push(...SKILL_PACK_TOOLS);
   // Chain skills always available when planning is available
   if (groups.includes('planning')) tools.push(...CHAIN_SKILLS_TOOL);
+  // Outcome evaluation always available with planning
+  if (groups.includes('planning')) tools.push(...OUTCOME_TOOLS);
   return tools;
 }
 
@@ -2265,6 +2307,112 @@ async function handleChainSkills(
   };
 }
 
+// ─── Outcome Evaluation ───────────────────────────────────────────────────────
+
+async function handleEvaluateOutcomes(supabase: any, args: { limit?: number; skill_filter?: string }) {
+  const limit = args.limit || 15;
+  const since = new Date();
+  since.setDate(since.getDate() - 7);
+
+  let query = supabase
+    .from('agent_activity')
+    .select('id, skill_name, input, output, status, created_at, duration_ms')
+    .is('outcome_status', null)
+    .eq('status', 'success')
+    .gte('created_at', since.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (args.skill_filter) {
+    query = query.eq('skill_name', args.skill_filter);
+  }
+
+  const { data: activities } = await query;
+  if (!activities?.length) {
+    return { status: 'no_pending', message: 'No unevaluated actions in the last 7 days.' };
+  }
+
+  // Enrich with correlation data — fetch recent metrics for context
+  const [viewsResult, leadsResult, subscriberResult] = await Promise.all([
+    supabase.from('page_views').select('page_slug', { count: 'exact', head: false })
+      .gte('created_at', since.toISOString()).limit(500),
+    supabase.from('leads').select('id, source, score, created_at')
+      .gte('created_at', since.toISOString()).order('created_at', { ascending: false }).limit(50),
+    supabase.from('newsletter_subscribers').select('id', { count: 'exact', head: true })
+      .gte('created_at', since.toISOString()),
+  ]);
+
+  // Build page view counts for correlation
+  const pageViewCounts: Record<string, number> = {};
+  for (const pv of (viewsResult.data || [])) {
+    pageViewCounts[pv.page_slug] = (pageViewCounts[pv.page_slug] || 0) + 1;
+  }
+
+  const correlationContext = {
+    total_page_views_7d: viewsResult.data?.length || 0,
+    top_pages: Object.entries(pageViewCounts).sort((a, b) => b[1] - a[1]).slice(0, 10),
+    new_leads_7d: leadsResult.data?.length || 0,
+    new_subscribers_7d: subscriberResult.count || 0,
+    lead_sources: [...new Set((leadsResult.data || []).map((l: any) => l.source))],
+  };
+
+  return {
+    status: 'pending_evaluation',
+    count: activities.length,
+    activities: activities.map((a: any) => ({
+      id: a.id,
+      skill_name: a.skill_name,
+      created_at: a.created_at,
+      input_summary: JSON.stringify(a.input).slice(0, 300),
+      output_summary: JSON.stringify(a.output).slice(0, 300),
+    })),
+    correlation_data: correlationContext,
+    instructions: 'For each activity, assess its impact using the correlation_data. Then call record_outcome for each with your assessment.',
+  };
+}
+
+async function handleRecordOutcome(supabase: any, args: {
+  activity_id: string;
+  outcome_status: string;
+  outcome_data?: Record<string, any>;
+}) {
+  const validStatuses = ['success', 'partial', 'neutral', 'negative', 'too_early'];
+  if (!validStatuses.includes(args.outcome_status)) {
+    return { status: 'error', error: `Invalid outcome_status. Must be one of: ${validStatuses.join(', ')}` };
+  }
+
+  const { data, error } = await supabase
+    .from('agent_activity')
+    .update({
+      outcome_status: args.outcome_status,
+      outcome_data: args.outcome_data || {},
+      outcome_evaluated_at: new Date().toISOString(),
+    })
+    .eq('id', args.activity_id)
+    .select('id, skill_name, outcome_status')
+    .single();
+
+  if (error) return { status: 'error', error: error.message };
+
+  // If this is a negative outcome, log a learning to memory
+  if (args.outcome_status === 'negative' || args.outcome_status === 'neutral') {
+    const skillName = data?.skill_name || 'unknown';
+    await supabase.from('agent_memory').upsert({
+      key: `outcome_learning:${skillName}:${new Date().toISOString().slice(0, 10)}`,
+      value: {
+        skill: skillName,
+        outcome: args.outcome_status,
+        data: args.outcome_data,
+        lesson: `${skillName} produced ${args.outcome_status} result. Review strategy.`,
+      },
+      category: 'context',
+      created_by: 'flowpilot',
+    }, { onConflict: 'key' });
+  }
+
+  return { status: 'recorded', activity: data };
+}
+
 // ─── Tool Execution Router ───────────────────────────────────────────────────
 
 export async function executeBuiltInTool(
@@ -2308,6 +2456,8 @@ export async function executeBuiltInTool(
     case 'skill_pack_list': return handleSkillPackList(supabase);
     case 'skill_pack_install': return handleSkillPackInstall(supabase, fnArgs);
     case 'chain_skills': return handleChainSkills(supabase, supabaseUrl, serviceKey, fnArgs);
+    case 'evaluate_outcomes': return handleEvaluateOutcomes(supabase, fnArgs);
+    case 'record_outcome': return handleRecordOutcome(supabase, fnArgs);
   }
 
   // Not a built-in → delegate to agent-execute
