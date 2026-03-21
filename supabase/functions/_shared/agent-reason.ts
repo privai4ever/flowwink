@@ -134,7 +134,7 @@ SELF-IMPROVEMENT GUIDELINES:
 - Use 'skill_instruct' to enrich skills with context, examples, and edge cases.
 - Use 'soul_update' when you learn something fundamental about your role.
 - Use 'agents_update' when you learn something about how you should operate (rules, policies, conventions).
-- When creating skills, set requires_approval=true for anything destructive.
+- When creating skills, set trust_level: 'approve' for destructive actions, 'notify' for safe-but-important, 'auto' for low-risk read/analytics.
 - New automations are disabled by default — tell the user to enable them when ready.
 - Handler types: module:name (DB ops), edge:function (edge functions), db:table (queries), webhook:url (external)
 
@@ -221,7 +221,7 @@ PROACTIVE REASONING RULES:
 - When proposing, set constraints.priority ('critical'|'high'|'medium'|'low')
 
 CONSTRAINTS:
-- Skills marked requires_approval will be BLOCKED and logged for admin review
+- Skills with trust_level='approve' will be BLOCKED and logged for admin review. trust_level='notify' will execute but notify admin. trust_level='auto' executes silently.
 - PRIORITIZE: high-score objectives > DUE automations > proposals
 - Self-healing auto-disables skills with 3+ consecutive failures
 - Be efficient: use chaining, focus on top 2-3 objectives per heartbeat`;
@@ -1250,8 +1250,9 @@ async function handleExecuteAutomation(supabase: any, supabaseUrl: string, servi
 
   if (auto.skill_name) {
     const { data: skill } = await supabase.from('agent_skills')
-      .select('requires_approval').eq('name', auto.skill_name).maybeSingle();
-    if (skill?.requires_approval) {
+      .select('trust_level, requires_approval').eq('name', auto.skill_name).maybeSingle();
+    const trustLevel = skill?.trust_level || (skill?.requires_approval ? 'approve' : 'auto');
+    if (trustLevel === 'approve') {
       await supabase.from('agent_activity').insert({
         agent: 'flowpilot', skill_name: auto.skill_name,
         input: { automation_id: args.automation_id, arguments: auto.skill_arguments },
@@ -1552,6 +1553,7 @@ async function handleSkillPackInstall(supabase: any, args: { pack_name: string }
         handler: skill.handler,
         category: skill.category || 'automation',
         scope: skill.scope || 'internal',
+        trust_level: skill.trust_level || (skill.requires_approval ? 'approve' : 'auto'),
         requires_approval: skill.requires_approval ?? false,
         enabled: skill.enabled ?? true,
         instructions: skill.instructions || null,
@@ -1635,17 +1637,18 @@ async function handleSkillCreate(supabase: any, args: any) {
     handler: args.handler,
     category: args.category || 'automation',
     scope: args.scope || 'internal',
-    requires_approval: args.requires_approval ?? true,
+    trust_level: args.trust_level || 'approve',
+    requires_approval: (args.trust_level || 'approve') === 'approve',
     enabled: true,
     tool_definition: args.tool_definition,
-  }).select('id, name, handler, enabled').single();
+  }).select('id, name, handler, enabled, trust_level').single();
 
   if (error) return { status: 'error', error: error.message };
   return { status: 'created', skill: data };
 }
 
 async function handleSkillUpdate(supabase: any, args: { skill_name: string; updates: Record<string, any> }) {
-  const safeFields = ['description', 'handler', 'category', 'scope', 'requires_approval', 'enabled', 'tool_definition', 'instructions'];
+  const safeFields = ['description', 'handler', 'category', 'scope', 'trust_level', 'requires_approval', 'enabled', 'tool_definition', 'instructions'];
   const filtered: Record<string, any> = {};
   for (const [k, v] of Object.entries(args.updates)) {
     if (safeFields.includes(k)) filtered[k] = v;
@@ -1660,7 +1663,7 @@ async function handleSkillUpdate(supabase: any, args: { skill_name: string; upda
 }
 
 async function handleSkillList(supabase: any, args: { category?: string; scope?: string; include_disabled?: boolean }) {
-  let q = supabase.from('agent_skills').select('id, name, description, category, scope, handler, enabled, requires_approval');
+  let q = supabase.from('agent_skills').select('id, name, description, category, scope, handler, enabled, trust_level, requires_approval');
   if (!args.include_disabled) q = q.eq('enabled', true);
   if (args.category) q = q.eq('category', args.category);
   if (args.scope) q = q.eq('scope', args.scope);
@@ -1912,7 +1915,7 @@ const OBJECTIVE_TOOLS = [
 ];
 
 const SELF_MOD_TOOLS = [
-  { type: 'function', function: { name: 'skill_create', description: 'Create a new skill in your registry.', parameters: { type: 'object', properties: { name: { type: 'string' }, description: { type: 'string' }, handler: { type: 'string' }, category: { type: 'string', enum: ['content', 'crm', 'communication', 'automation', 'search', 'analytics'] }, scope: { type: 'string', enum: ['internal', 'external', 'both'] }, requires_approval: { type: 'boolean' }, tool_definition: { type: 'object' } }, required: ['name', 'description', 'handler', 'tool_definition'] } } },
+  { type: 'function', function: { name: 'skill_create', description: 'Create a new skill in your registry.', parameters: { type: 'object', properties: { name: { type: 'string' }, description: { type: 'string' }, handler: { type: 'string' }, category: { type: 'string', enum: ['content', 'crm', 'communication', 'automation', 'search', 'analytics'] }, scope: { type: 'string', enum: ['internal', 'external', 'both'] }, trust_level: { type: 'string', enum: ['auto', 'notify', 'approve'], description: 'auto=silent execution, notify=execute+notify admin, approve=block until approved' }, tool_definition: { type: 'object' } }, required: ['name', 'description', 'handler', 'tool_definition'] } } },
   { type: 'function', function: { name: 'skill_update', description: 'Update an existing skill.', parameters: { type: 'object', properties: { skill_name: { type: 'string' }, updates: { type: 'object' } }, required: ['skill_name', 'updates'] } } },
   { type: 'function', function: { name: 'skill_list', description: 'List all registered skills.', parameters: { type: 'object', properties: { category: { type: 'string' }, scope: { type: 'string' }, include_disabled: { type: 'boolean' } } } } },
   { type: 'function', function: { name: 'skill_disable', description: 'Disable a skill.', parameters: { type: 'object', properties: { skill_name: { type: 'string' } }, required: ['skill_name'] } } },

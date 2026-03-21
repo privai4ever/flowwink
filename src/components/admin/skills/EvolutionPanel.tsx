@@ -55,7 +55,7 @@ function useEvolutionData() {
       const { data } = await supabase
         .from('agent_skills')
         .select('*')
-        .eq('requires_approval', true)
+        .eq('trust_level', 'approve')
         .order('created_at', { ascending: false })
         .limit(10);
       return data || [];

@@ -66,8 +66,10 @@ serve(async (req) => {
       });
     }
 
-    // 3. Check requires_approval
-    if (skill.requires_approval) {
+    // 3. Check trust level (auto → execute, notify → execute + notify, approve → block)
+    const trustLevel = skill.trust_level || (skill.requires_approval ? 'approve' : 'auto');
+
+    if (trustLevel === 'approve') {
       const activityId = await logActivity(supabase, {
         agent: agent_type, skill_id: skill.id, skill_name: skill.name,
         input: args, output: {}, status: 'pending_approval',
@@ -78,6 +80,7 @@ serve(async (req) => {
         status: 'pending_approval',
         activity_id: activityId,
         skill: skill.name,
+        trust_level: 'approve',
         message: `Action '${skill.name}' requires admin approval before executing.`,
         input: args,
       }), {
@@ -138,12 +141,45 @@ serve(async (req) => {
       duration_ms: Date.now() - startTime,
     });
 
+    // 5b. Initialize outcome tracking (pending evaluation)
+    if (activityId) {
+      await supabase.from('agent_activity').update({
+        outcome_status: 'pending',
+      }).eq('id', activityId);
+    }
+
     // 6. Auto-track objective progress
     if (activityId) {
       await trackObjectiveProgress(supabase, skill.name, activityId);
     }
 
-    return new Response(JSON.stringify({ status: 'success', result }), {
+    // 7. For 'notify' trust level, send proactive notification to admin chat
+    if (trustLevel === 'notify' && activityId) {
+      try {
+        // Find active admin conversation for notification
+        const { data: conv } = await supabase.from('chat_conversations')
+          .select('id')
+          .not('user_id', 'is', null)
+          .eq('conversation_status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (conv?.id) {
+          await supabase.from('chat_messages').insert({
+            conversation_id: conv.id,
+            role: 'assistant',
+            source: 'proactive',
+            content: `✅ Executed **${skill.name}** autonomously.\n\n${JSON.stringify(args, null, 2).slice(0, 500)}`,
+            metadata: { trust_level: 'notify', activity_id: activityId, skill_name: skill.name },
+          });
+        }
+      } catch (notifyErr) {
+        console.warn('[agent-execute] Notify failed (non-fatal):', notifyErr);
+      }
+    }
+
+    return new Response(JSON.stringify({ status: 'success', result, trust_level: trustLevel }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
