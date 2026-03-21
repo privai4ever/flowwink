@@ -544,6 +544,91 @@ Data counts: ${pages.count ?? 0} pages, ${posts.count ?? 0} blog posts, ${leads.
   }
 }
 
+// ─── Cross-Module Insights ────────────────────────────────────────────────────
+
+export async function loadCrossModuleInsights(supabase: any): Promise<string> {
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  try {
+    const [
+      dealsByStage, hotLeads, recentBookings,
+      topPages, newsletterPerf, formSubs, recentOutcomes,
+    ] = await Promise.all([
+      supabase.from('deals').select('stage, value_cents, currency')
+        .in('stage', ['proposal', 'negotiation', 'qualification']),
+      supabase.from('leads').select('name, email, score, status, updated_at')
+        .gte('score', 30).eq('status', 'lead').order('score', { ascending: false }).limit(5),
+      supabase.from('bookings').select('status, start_time, customer_name')
+        .gte('start_time', new Date().toISOString()).order('start_time').limit(10),
+      supabase.from('page_views').select('page_slug, page_title')
+        .gte('created_at', weekAgo.toISOString()).limit(500),
+      supabase.from('newsletter_email_opens').select('id', { count: 'exact', head: true })
+        .gte('created_at', weekAgo.toISOString()),
+      supabase.from('form_submissions').select('form_name, created_at')
+        .gte('created_at', weekAgo.toISOString()).order('created_at', { ascending: false }).limit(10),
+      supabase.from('agent_activity').select('skill_name, outcome_status, outcome_data')
+        .not('outcome_status', 'is', null).gte('created_at', weekAgo.toISOString())
+        .order('created_at', { ascending: false }).limit(20),
+    ]);
+
+    const parts: string[] = ['\n\nCROSS-MODULE INSIGHTS (7 days):'];
+
+    // CRM Pipeline
+    if (dealsByStage.data?.length) {
+      const pipeline: Record<string, { count: number; value: number }> = {};
+      for (const d of dealsByStage.data) {
+        if (!pipeline[d.stage]) pipeline[d.stage] = { count: 0, value: 0 };
+        pipeline[d.stage].count++;
+        pipeline[d.stage].value += d.value_cents;
+      }
+      parts.push('📊 CRM Pipeline:');
+      for (const [stage, info] of Object.entries(pipeline)) {
+        parts.push(`  - ${stage}: ${info.count} deals (${(info.value / 100).toFixed(0)} total value)`);
+      }
+    }
+
+    if (hotLeads.data?.length) {
+      parts.push(`🔥 Hot leads (score≥30): ${hotLeads.data.map((l: any) => `${l.name || l.email} (${l.score}pts)`).join(', ')}`);
+    }
+
+    if (recentBookings.data?.length) {
+      const upcoming = recentBookings.data.filter((b: any) => b.status === 'confirmed');
+      parts.push(`📅 Upcoming bookings: ${upcoming.length} confirmed`);
+    }
+
+    if (topPages.data?.length) {
+      const pageCounts: Record<string, number> = {};
+      for (const pv of topPages.data) {
+        pageCounts[pv.page_slug] = (pageCounts[pv.page_slug] || 0) + 1;
+      }
+      const sorted = Object.entries(pageCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      if (sorted.length) {
+        parts.push(`📈 Top pages: ${sorted.map(([slug, count]) => `${slug} (${count})`).join(', ')}`);
+      }
+    }
+
+    parts.push(`📧 Newsletter opens (7d): ${newsletterPerf.count ?? 0}`);
+
+    if (formSubs.data?.length) {
+      parts.push(`📝 Form submissions (7d): ${formSubs.data.length}`);
+    }
+
+    if (recentOutcomes.data?.length) {
+      const outcomes: Record<string, number> = {};
+      for (const o of recentOutcomes.data) {
+        outcomes[o.outcome_status] = (outcomes[o.outcome_status] || 0) + 1;
+      }
+      parts.push(`🎯 Action outcomes: ${Object.entries(outcomes).map(([s, c]) => `${s}:${c}`).join(', ')}`);
+    }
+
+    return parts.join('\n');
+  } catch (err) {
+    console.error('[cross-module] Failed to load insights:', err);
+    return '';
+  }
+}
+
 // ─── Site Maturity Detection ──────────────────────────────────────────────────
 
 export async function detectSiteMaturity(supabase: any): Promise<SiteMaturity> {
