@@ -37,6 +37,8 @@ export interface PromptCompilerInput {
   heartbeatState?: string;
   tokenBudget?: number;
   siteMaturity?: SiteMaturity;
+  /** Custom heartbeat protocol loaded from agent_memory. Falls back to HEARTBEAT_PROTOCOL constant. */
+  customHeartbeatProtocol?: string;
   // Chat-specific
   chatSystemPrompt?: string;
 }
