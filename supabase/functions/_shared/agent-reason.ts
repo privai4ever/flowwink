@@ -2350,6 +2350,8 @@ export async function executeBuiltInTool(
     case 'skill_pack_list': return handleSkillPackList(supabase);
     case 'skill_pack_install': return handleSkillPackInstall(supabase, fnArgs);
     case 'chain_skills': return handleChainSkills(supabase, supabaseUrl, serviceKey, fnArgs);
+    case 'evaluate_outcomes': return handleEvaluateOutcomes(supabase, fnArgs);
+    case 'record_outcome': return handleRecordOutcome(supabase, fnArgs);
   }
 
   // Not a built-in → delegate to agent-execute
