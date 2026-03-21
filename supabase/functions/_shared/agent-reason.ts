@@ -1759,7 +1759,8 @@ async function handleSkillCreate(supabase: any, args: any) {
     requires_approval: (args.trust_level || 'approve') === 'approve',
     enabled: true,
     tool_definition: args.tool_definition,
-  }).select('id, name, handler, enabled, trust_level').single();
+    origin: 'agent',
+  }).select('id, name, handler, enabled, trust_level, origin').single();
 
   if (error) return { status: 'error', error: error.message };
   return { status: 'created', skill: data };
