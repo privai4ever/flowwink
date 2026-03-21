@@ -2157,6 +2157,33 @@ const SKILL_PACK_TOOLS = [
   },
 ];
 
+const CHAIN_SKILLS_TOOL = [
+  {
+    type: 'function', function: {
+      name: 'chain_skills',
+      description: 'Execute multiple skills in sequence, piping each result as context to the next. Use for multi-step recipes like: research → write → optimize. Returns all results.',
+      parameters: {
+        type: 'object',
+        properties: {
+          steps: {
+            type: 'array',
+            description: 'Ordered array of skills to chain. Each step gets previous results injected into args as _previous_result.',
+            items: {
+              type: 'object',
+              properties: {
+                skill_name: { type: 'string', description: 'Skill to execute' },
+                args: { type: 'object', description: 'Arguments for the skill. Use {{prev.field}} to reference previous step output.' },
+              },
+            },
+          },
+          stop_on_error: { type: 'boolean', description: 'Stop chain on first error (default: true)' },
+        },
+        required: ['steps'],
+      },
+    },
+  },
+];
+
 export function getBuiltInTools(groups: Array<'memory' | 'objectives' | 'self-mod' | 'reflect' | 'soul' | 'planning' | 'automations-exec' | 'workflows' | 'a2a' | 'skill-packs'>): any[] {
   const tools: any[] = [];
   if (groups.includes('memory')) tools.push(...MEMORY_TOOLS);
@@ -2169,6 +2196,8 @@ export function getBuiltInTools(groups: Array<'memory' | 'objectives' | 'self-mo
   if (groups.includes('workflows')) tools.push(...WORKFLOW_TOOLS);
   if (groups.includes('a2a')) tools.push(...A2A_TOOLS);
   if (groups.includes('skill-packs')) tools.push(...SKILL_PACK_TOOLS);
+  // Chain skills always available when planning is available
+  if (groups.includes('planning')) tools.push(...CHAIN_SKILLS_TOOL);
   return tools;
 }
 
