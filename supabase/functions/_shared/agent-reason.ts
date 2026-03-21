@@ -37,6 +37,8 @@ export interface PromptCompilerInput {
   heartbeatState?: string;
   tokenBudget?: number;
   siteMaturity?: SiteMaturity;
+  /** Custom heartbeat protocol loaded from agent_memory. Falls back to HEARTBEAT_PROTOCOL constant. */
+  customHeartbeatProtocol?: string;
   // Chat-specific
   chatSystemPrompt?: string;
 }
@@ -103,7 +105,7 @@ const BUILT_IN_TOOL_NAMES = new Set([
   'objective_update_progress', 'objective_complete', 'objective_delete',
   'skill_create', 'skill_update', 'skill_list', 'skill_disable', 'skill_enable', 'skill_delete',
   'skill_instruct',
-  'soul_update', 'agents_update',
+  'soul_update', 'agents_update', 'heartbeat_protocol_update',
   'automation_create', 'automation_list', 'automation_update', 'automation_delete',
   'reflect',
   'decompose_objective', 'advance_plan', 'propose_objective', 'execute_automation',
@@ -384,7 +386,8 @@ RULES:
       parts.push(`\nTOKEN BUDGET: ${input.tokenBudget} tokens max. Be efficient — stop early if approaching the limit.`);
     }
     parts.push('');
-    parts.push(HEARTBEAT_PROTOCOL);
+    // Use custom heartbeat protocol from memory if available, else default
+    parts.push(input.customHeartbeatProtocol || HEARTBEAT_PROTOCOL);
     parts.push(`\n- Max ${input.maxIterations || 8} tool iterations per heartbeat`);
 
     // Day 1 Playbook (fresh sites only)
@@ -700,6 +703,56 @@ export async function detectSiteMaturity(supabase: any): Promise<SiteMaturity> {
     contentResearch,
     contentProposals,
   };
+}
+
+// ─── Editable Heartbeat Protocol (OpenClaw Layer) ─────────────────────────────
+
+/**
+ * Load custom heartbeat protocol from agent_memory.
+ * Key: 'heartbeat_protocol' — if present, replaces the hardcoded HEARTBEAT_PROTOCOL.
+ * This allows admins to customize the agent's autonomous behavior via Skill Hub.
+ */
+export async function loadHeartbeatProtocol(supabase: any): Promise<string | null> {
+  const { data } = await supabase
+    .from('agent_memory')
+    .select('value')
+    .eq('key', 'heartbeat_protocol')
+    .maybeSingle();
+
+  if (!data?.value) return null;
+
+  // Value can be a string or { protocol: string }
+  const val = data.value;
+  if (typeof val === 'string') return val;
+  if (typeof val === 'object' && val.protocol) return val.protocol;
+  return null;
+}
+
+/**
+ * Save a custom heartbeat protocol to agent_memory.
+ */
+export async function saveHeartbeatProtocol(supabase: any, protocol: string): Promise<void> {
+  const { data: existing } = await supabase
+    .from('agent_memory').select('id').eq('key', 'heartbeat_protocol').maybeSingle();
+
+  const record = {
+    value: { protocol, updated_at: new Date().toISOString() },
+    category: 'context' as const,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (existing) {
+    await supabase.from('agent_memory').update(record).eq('id', existing.id);
+  } else {
+    await supabase.from('agent_memory').insert({ key: 'heartbeat_protocol', created_by: 'flowpilot', ...record });
+  }
+}
+
+/**
+ * Get the default (hardcoded) heartbeat protocol. Useful for reset.
+ */
+export function getDefaultHeartbeatProtocol(): string {
+  return HEARTBEAT_PROTOCOL;
 }
 
 // ─── Persistent Heartbeat State ───────────────────────────────────────────────
@@ -1992,6 +2045,25 @@ async function handleAgentsUpdate(supabase: any, args: { field: string; value: a
   return { status: 'updated', field: args.field, agents: updatedAgents };
 }
 
+// ─── Heartbeat Protocol Update ────────────────────────────────────────────────
+
+async function handleHeartbeatProtocolUpdate(supabase: any, args: { action: string; protocol?: string }) {
+  if (args.action === 'get') {
+    const custom = await loadHeartbeatProtocol(supabase);
+    return { status: 'ok', protocol: custom || getDefaultHeartbeatProtocol(), is_custom: !!custom };
+  }
+  if (args.action === 'reset') {
+    await supabase.from('agent_memory').delete().eq('key', 'heartbeat_protocol');
+    return { status: 'reset', message: 'Heartbeat protocol restored to default' };
+  }
+  if (args.action === 'set') {
+    if (!args.protocol) return { status: 'error', error: 'protocol text is required for action=set' };
+    await saveHeartbeatProtocol(supabase, args.protocol);
+    return { status: 'updated', message: 'Custom heartbeat protocol saved. Will be used on next heartbeat.' };
+  }
+  return { status: 'error', error: `Unknown action: ${args.action}` };
+}
+
 // ─── Automation CRUD ──────────────────────────────────────────────────────────
 
 async function handleAutomationCreate(supabase: any, args: any) {
@@ -2190,6 +2262,7 @@ const REFLECT_TOOL = [
 const SOUL_TOOL = [
   { type: 'function', function: { name: 'soul_update', description: 'Update your personality, values, tone, or philosophy.', parameters: { type: 'object', properties: { field: { type: 'string', enum: ['purpose', 'values', 'tone', 'philosophy'] }, value: { type: 'string', description: 'New value' } }, required: ['field', 'value'] } } },
   { type: 'function', function: { name: 'agents_update', description: 'Update your operational rules, policies, and conventions (AGENTS document). Fields: direct_action_rules, self_improvement, memory_guidelines, browser_rules, workflow_conventions, a2a_conventions, skill_pack_rules, custom_rules.', parameters: { type: 'object', properties: { field: { type: 'string', enum: ['direct_action_rules', 'self_improvement', 'memory_guidelines', 'browser_rules', 'workflow_conventions', 'a2a_conventions', 'skill_pack_rules', 'custom_rules'] }, value: { type: 'string', description: 'New value for this operational rule section' } }, required: ['field', 'value'] } } },
+  { type: 'function', function: { name: 'heartbeat_protocol_update', description: 'Update the heartbeat protocol — the step-by-step procedure FlowPilot follows during autonomous heartbeat runs. Use to add/remove/reorder steps, or adjust priorities. Pass action="get" to read the current protocol, action="set" with protocol text to update, or action="reset" to restore default.', parameters: { type: 'object', properties: { action: { type: 'string', enum: ['get', 'set', 'reset'] }, protocol: { type: 'string', description: 'New protocol text (required for action=set)' } }, required: ['action'] } } },
 ];
 
 const PLANNING_TOOLS = [
@@ -2739,6 +2812,7 @@ export async function executeBuiltInTool(
     case 'skill_instruct': return handleSkillInstruct(supabase, fnArgs);
     case 'soul_update': return handleSoulUpdate(supabase, fnArgs);
     case 'agents_update': return handleAgentsUpdate(supabase, fnArgs);
+    case 'heartbeat_protocol_update': return handleHeartbeatProtocolUpdate(supabase, fnArgs);
     case 'automation_create': return handleAutomationCreate(supabase, fnArgs);
     case 'automation_list': return handleAutomationList(supabase, fnArgs);
     case 'automation_update': return handleAutomationUpdate(supabase, fnArgs);
