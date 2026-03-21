@@ -384,7 +384,8 @@ RULES:
       parts.push(`\nTOKEN BUDGET: ${input.tokenBudget} tokens max. Be efficient — stop early if approaching the limit.`);
     }
     parts.push('');
-    parts.push(HEARTBEAT_PROTOCOL);
+    // Use custom heartbeat protocol from memory if available, else default
+    parts.push(input.customHeartbeatProtocol || HEARTBEAT_PROTOCOL);
     parts.push(`\n- Max ${input.maxIterations || 8} tool iterations per heartbeat`);
 
     // Day 1 Playbook (fresh sites only)
