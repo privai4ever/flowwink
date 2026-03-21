@@ -221,7 +221,7 @@ PROACTIVE REASONING RULES:
 - When proposing, set constraints.priority ('critical'|'high'|'medium'|'low')
 
 CONSTRAINTS:
-- Skills marked requires_approval will be BLOCKED and logged for admin review
+- Skills with trust_level='approve' will be BLOCKED and logged for admin review. trust_level='notify' will execute but notify admin. trust_level='auto' executes silently.
 - PRIORITIZE: high-score objectives > DUE automations > proposals
 - Self-healing auto-disables skills with 3+ consecutive failures
 - Be efficient: use chaining, focus on top 2-3 objectives per heartbeat`;
