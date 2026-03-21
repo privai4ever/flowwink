@@ -66,8 +66,10 @@ serve(async (req) => {
       });
     }
 
-    // 3. Check requires_approval
-    if (skill.requires_approval) {
+    // 3. Check trust level (auto → execute, notify → execute + notify, approve → block)
+    const trustLevel = skill.trust_level || (skill.requires_approval ? 'approve' : 'auto');
+
+    if (trustLevel === 'approve') {
       const activityId = await logActivity(supabase, {
         agent: agent_type, skill_id: skill.id, skill_name: skill.name,
         input: args, output: {}, status: 'pending_approval',
@@ -78,6 +80,7 @@ serve(async (req) => {
         status: 'pending_approval',
         activity_id: activityId,
         skill: skill.name,
+        trust_level: 'approve',
         message: `Action '${skill.name}' requires admin approval before executing.`,
         input: args,
       }), {
