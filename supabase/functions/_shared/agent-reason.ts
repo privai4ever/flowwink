@@ -2199,6 +2199,37 @@ const CHAIN_SKILLS_TOOL = [
   },
 ];
 
+const OUTCOME_TOOLS = [
+  {
+    type: 'function', function: {
+      name: 'evaluate_outcomes',
+      description: 'Fetch recent agent actions (last 7 days) that have not been evaluated yet. Returns activities with their skill_name, input, output, and creation time so you can assess their impact by correlating with real metrics.',
+      parameters: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', description: 'Max number of unevaluated actions to return (default 15)' },
+          skill_filter: { type: 'string', description: 'Optional: only evaluate actions from this skill' },
+        },
+      },
+    },
+  },
+  {
+    type: 'function', function: {
+      name: 'record_outcome',
+      description: 'Record the evaluated outcome of a past agent action. Closes the feedback loop so FlowPilot learns what works.',
+      parameters: {
+        type: 'object',
+        properties: {
+          activity_id: { type: 'string', description: 'The agent_activity ID to evaluate' },
+          outcome_status: { type: 'string', enum: ['success', 'partial', 'neutral', 'negative', 'too_early'], description: 'Assessed outcome' },
+          outcome_data: { type: 'object', description: 'Quantitative evidence: {views_generated, leads_attributed, conversions, notes}' },
+        },
+        required: ['activity_id', 'outcome_status'],
+      },
+    },
+  },
+];
+
 export function getBuiltInTools(groups: Array<'memory' | 'objectives' | 'self-mod' | 'reflect' | 'soul' | 'planning' | 'automations-exec' | 'workflows' | 'a2a' | 'skill-packs'>): any[] {
   const tools: any[] = [];
   if (groups.includes('memory')) tools.push(...MEMORY_TOOLS);
