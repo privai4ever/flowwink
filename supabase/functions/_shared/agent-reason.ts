@@ -822,11 +822,32 @@ async function handleMemoryWrite(supabase: any, args: { key: string; value: any;
 }
 
 async function handleMemoryRead(supabase: any, args: { key?: string; category?: string; semantic_query?: string }) {
-  // If semantic query provided, use vector search
-  if (args.semantic_query || args.key) {
-    const searchText = args.semantic_query || args.key || '';
+  const searchText = args.semantic_query || args.key || '';
+  
+  if (searchText) {
+    // Generate embedding for vector component
     const embedding = await generateEmbedding(supabase, searchText);
 
+    // Use hybrid search (70% vector + 30% keyword via pg_trgm)
+    const { data: hybridResults, error } = await supabase.rpc('search_memories_hybrid', {
+      query_text: searchText,
+      query_embedding: embedding || null,
+      match_threshold: 0.25,
+      match_count: 10,
+      filter_category: args.category || null,
+    });
+
+    if (!error && hybridResults?.length) {
+      return {
+        memories: hybridResults.map((r: any) => ({
+          key: r.key, value: r.value, category: r.category, 
+          similarity: r.similarity, search_type: r.search_type,
+        })),
+        search_type: 'hybrid',
+      };
+    }
+
+    // Fallback: pure vector search if hybrid function fails
     if (embedding) {
       const { data: semanticResults } = await supabase.rpc('search_memories_semantic', {
         query_embedding: embedding,
@@ -846,7 +867,7 @@ async function handleMemoryRead(supabase: any, args: { key?: string; category?: 
     }
   }
 
-  // Fallback: keyword search
+  // Final fallback: basic keyword search
   let q = supabase.from('agent_memory').select('key, value, category, updated_at');
   if (args.key) q = q.ilike('key', `%${args.key}%`);
   if (args.category) q = q.eq('category', args.category);
