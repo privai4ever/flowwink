@@ -141,7 +141,7 @@ serve(async (req) => {
       memoryContext: memoryCtx,
       objectiveContext: objectiveCtx,
       activityContext: activityCtx,
-      statsContext: statsCtx,
+      statsContext: statsCtx + (crossModuleCtx || ''),
       automationContext: automationCtx,
       healingReport: healingReport,
       cmsSchemaContext: cmsSchemaCtx,
