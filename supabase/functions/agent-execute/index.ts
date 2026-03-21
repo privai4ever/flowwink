@@ -141,12 +141,45 @@ serve(async (req) => {
       duration_ms: Date.now() - startTime,
     });
 
+    // 5b. Initialize outcome tracking (pending evaluation)
+    if (activityId) {
+      await supabase.from('agent_activity').update({
+        outcome_status: 'pending',
+      }).eq('id', activityId);
+    }
+
     // 6. Auto-track objective progress
     if (activityId) {
       await trackObjectiveProgress(supabase, skill.name, activityId);
     }
 
-    return new Response(JSON.stringify({ status: 'success', result }), {
+    // 7. For 'notify' trust level, send proactive notification to admin chat
+    if (trustLevel === 'notify' && activityId) {
+      try {
+        // Find active admin conversation for notification
+        const { data: conv } = await supabase.from('chat_conversations')
+          .select('id')
+          .not('user_id', 'is', null)
+          .eq('conversation_status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (conv?.id) {
+          await supabase.from('chat_messages').insert({
+            conversation_id: conv.id,
+            role: 'assistant',
+            source: 'proactive',
+            content: `✅ Executed **${skill.name}** autonomously.\n\n${JSON.stringify(args, null, 2).slice(0, 500)}`,
+            metadata: { trust_level: 'notify', activity_id: activityId, skill_name: skill.name },
+          });
+        }
+      } catch (notifyErr) {
+        console.warn('[agent-execute] Notify failed (non-fatal):', notifyErr);
+      }
+    }
+
+    return new Response(JSON.stringify({ status: 'success', result, trust_level: trustLevel }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
