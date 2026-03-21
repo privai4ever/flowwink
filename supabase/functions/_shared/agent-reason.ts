@@ -2203,12 +2203,13 @@ const OUTCOME_TOOLS = [
   {
     type: 'function', function: {
       name: 'evaluate_outcomes',
-      description: 'Fetch recent agent actions (last 7 days) that have not been evaluated yet. Returns activities with their skill_name, input, output, and creation time so you can assess their impact by correlating with real metrics.',
+      description: 'Fetch recent agent actions that have not been evaluated yet. Returns activities enriched with CAUSAL correlation data specific to each action (e.g. page views for the exact blog post written, leads from the specific source). Also includes a skill scorecard showing historical success rates and past learnings.',
       parameters: {
         type: 'object',
         properties: {
           limit: { type: 'number', description: 'Max number of unevaluated actions to return (default 15)' },
           skill_filter: { type: 'string', description: 'Optional: only evaluate actions from this skill' },
+          include_too_early: { type: 'boolean', description: 'Re-evaluate actions previously marked as too_early (default false)' },
         },
       },
     },
@@ -2222,7 +2223,7 @@ const OUTCOME_TOOLS = [
         properties: {
           activity_id: { type: 'string', description: 'The agent_activity ID to evaluate' },
           outcome_status: { type: 'string', enum: ['success', 'partial', 'neutral', 'negative', 'too_early'], description: 'Assessed outcome' },
-          outcome_data: { type: 'object', description: 'Quantitative evidence: {views_generated, leads_attributed, conversions, notes}' },
+          outcome_data: { type: 'object', description: 'Quantitative evidence: {views_generated, leads_attributed, conversions, bookings, revenue_cents, notes}' },
         },
         required: ['activity_id', 'outcome_status'],
       },
