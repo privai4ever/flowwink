@@ -345,6 +345,8 @@ Deno.serve(async (req) => {
           ? `All ${enabledAutos.length} enabled automations reference valid skills`
           : `${brokenAutos.length} automations reference missing/disabled skills`,
       details: brokenAutos.map((a: any) => `${a.name} → skill "${a.skill_name}" not found`),
+      fixable: brokenAutos.length > 0,
+      fixAction: "fix-broken-automations",
     });
 
     // ═══════════════════════════════════════════
