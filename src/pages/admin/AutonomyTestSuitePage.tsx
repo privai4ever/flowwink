@@ -36,6 +36,7 @@ const LAYER_LABELS: Record<number, { label: string; description: string }> = {
   2: { label: 'Integration', description: 'Edge function API: execute, heartbeat, CORS' },
   3: { label: 'Scenarios', description: 'DB state: checkout, memory isolation, stale locks' },
   4: { label: 'Autonomy Health', description: 'Live system: skills seeded, soul, objectives, skill execution, heartbeat ran' },
+  5: { label: 'Wiring', description: 'End-to-end: soul→prompt, memory→context, skill→tools, lock→skip' },
 };
 
 export default function AutonomyTestSuitePage() {
