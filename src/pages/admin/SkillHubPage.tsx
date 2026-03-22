@@ -18,6 +18,7 @@ import { ActivityTable } from '@/components/admin/skills/ActivityTable';
 import { ObjectivesPanel } from '@/components/admin/skills/ObjectivesPanel';
 import { AutomationsPanel } from '@/components/admin/skills/AutomationsPanel';
 import { AutomationHealthPanel } from '@/components/admin/skills/AutomationHealthPanel';
+import { SystemIntegrityPanel } from '@/components/admin/skills/SystemIntegrityPanel';
 import { EvolutionPanel } from '@/components/admin/skills/EvolutionPanel';
 import { WorkflowsPanel } from '@/components/admin/skills/WorkflowsPanel';
 import { SelfHealingAlert } from '@/components/admin/skills/SelfHealingAlert';
@@ -198,7 +199,8 @@ export default function SkillHubPage() {
         </TabsContent>
 
         {/* Health Tab */}
-        <TabsContent value="health">
+        <TabsContent value="health" className="space-y-6">
+          <SystemIntegrityPanel />
           <AutomationHealthPanel />
         </TabsContent>
 
