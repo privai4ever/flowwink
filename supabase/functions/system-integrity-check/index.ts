@@ -28,10 +28,12 @@ Deno.serve(async (req) => {
     const sb = createClient(supabaseUrl, serviceKey);
 
     // ═══════════════════════════════════════════
-    // HANDLE FIX ACTIONS (POST with action)
+    // HANDLE FIX ACTIONS (POST with action body)
     // ═══════════════════════════════════════════
-    if (req.method === "POST") {
-      const body = await req.json();
+    let body: any = {};
+    try { body = await req.json(); } catch { /* empty body = scan mode */ }
+    
+    if (body?.action) {
       const { action, targets } = body;
       const fixResults: { action: string; success: boolean; message: string }[] = [];
 
