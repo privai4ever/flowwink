@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 interface TestResult {
   name: string;
-  layer: 1 | 2 | 3 | 4 | 5;
+  layer: 1 | 2 | 3 | 4 | 5 | 6;
   status: 'pass' | 'fail' | 'skip';
   duration_ms: number;
   error?: string;
@@ -37,12 +37,13 @@ const LAYER_LABELS: Record<number, { label: string; description: string }> = {
   3: { label: 'Scenarios', description: 'DB state: checkout, memory isolation, stale locks' },
   4: { label: 'Autonomy Health', description: 'Live system: skills seeded, soul, objectives, skill execution, heartbeat ran' },
   5: { label: 'Wiring', description: 'End-to-end: soul→prompt, memory→context, skill→tools, lock→skip' },
+  6: { label: 'Behavior', description: 'OMATS Stage 3: personality, idle discipline, task completion, grounding' },
 };
 
 export default function AutonomyTestSuitePage() {
   const [isRunning, setIsRunning] = useState(false);
   const [lastRun, setLastRun] = useState<TestRun | null>(null);
-  const [selectedLayers, setSelectedLayers] = useState<string[]>(['1', '2', '3', '4', '5']);
+  const [selectedLayers, setSelectedLayers] = useState<string[]>(['1', '2', '3', '4', '5', '6']);
 
   const runTests = useCallback(async () => {
     setIsRunning(true);
