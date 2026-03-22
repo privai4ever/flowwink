@@ -210,7 +210,7 @@ serve(async (req) => {
       memoryContext: memoryCtx,
       objectiveContext: objectiveCtx,
       activityContext: activityCtx,
-      statsContext: statsCtx + (crossModuleCtx || ''),
+      statsContext: statsCtx + (crossModuleCtx || '') + integrityContext,
       automationContext: automationCtx,
       healingReport: healingReport,
       cmsSchemaContext: cmsSchemaCtx,
