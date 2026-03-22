@@ -475,7 +475,7 @@ async function layer5Tests(supabase: any, supabaseUrl: string, serviceKey: strin
       updated_at: new Date().toISOString(),
     });
 
-    if (upsertErr) throw new Error(`Upsert failed: ${upsertErr.message}`);
+    if (insertErr) throw new Error(`Insert failed: ${insertErr.message}`);
 
     try {
       // Small delay to ensure DB commit is visible
