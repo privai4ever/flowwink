@@ -932,6 +932,7 @@ serve(async (req) => {
     if (layerFilter.includes(3)) tasks.push(layer3Tests(supabase));
     if (layerFilter.includes(4)) tasks.push(layer4Tests(supabase, supabaseUrl, serviceKey));
     if (layerFilter.includes(5)) tasks.push(layer5Tests(supabase, supabaseUrl, serviceKey));
+    if (layerFilter.includes(6)) tasks.push(layer6Tests(supabase, supabaseUrl, serviceKey));
 
     const layerResults = await Promise.all(tasks);
     for (const lr of layerResults) allResults.push(...lr);

@@ -43,7 +43,7 @@ const LAYER_LABELS: Record<number, { label: string; description: string }> = {
 export default function AutonomyTestSuitePage() {
   const [isRunning, setIsRunning] = useState(false);
   const [lastRun, setLastRun] = useState<TestRun | null>(null);
-  const [selectedLayers, setSelectedLayers] = useState<string[]>(['1', '2', '3', '4', '5']);
+  const [selectedLayers, setSelectedLayers] = useState<string[]>(['1', '2', '3', '4', '5', '6']);
 
   const runTests = useCallback(async () => {
     setIsRunning(true);
