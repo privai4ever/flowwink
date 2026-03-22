@@ -302,6 +302,8 @@ Deno.serve(async (req) => {
           ? "Soul, Identity, and Agents keys all present"
           : `Missing critical memory keys — agent may lack personality/rules`,
       details: missingKeys.map((k) => `Missing: ${k}`),
+      fixable: missingKeys.length > 0,
+      fixAction: "fix-missing-memory-keys",
     });
 
     // Check heartbeat protocol
