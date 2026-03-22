@@ -263,6 +263,60 @@ async function buildKnowledgeBase(
   return `\n\n## Website Content (Knowledge Base)\n${sections.join('\n\n')}`;
 }
 
+// ─── Visitor Context (USER.md equivalent) ────────────────────────────────────
+
+/**
+ * Load returning visitor context from previous conversations.
+ * Builds a compact profile from past conversation metadata and visitor_profile.
+ */
+async function loadVisitorContext(
+  supabase: any, identifier: string, currentConversationId?: string,
+): Promise<string> {
+  // Find past conversations by email or session
+  const { data: pastConversations } = await supabase
+    .from('chat_conversations')
+    .select('id, title, created_at, visitor_profile, customer_name, customer_email')
+    .or(`customer_email.eq.${identifier},session_id.eq.${identifier}`)
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (!pastConversations?.length) return '';
+
+  // Filter out current conversation
+  const previous = currentConversationId
+    ? pastConversations.filter((c: any) => c.id !== currentConversationId)
+    : pastConversations;
+
+  if (previous.length === 0) return '';
+
+  // Build visitor context
+  const parts: string[] = ['\n\n## Returning Visitor Context'];
+
+  // Use latest visitor_profile if available
+  const latestProfile = previous.find((c: any) => c.visitor_profile && Object.keys(c.visitor_profile).length > 0);
+  if (latestProfile?.visitor_profile) {
+    const profile = latestProfile.visitor_profile;
+    if (profile.name) parts.push(`Name: ${profile.name}`);
+    if (profile.preferences) parts.push(`Preferences: ${profile.preferences}`);
+    if (profile.interests) parts.push(`Interests: ${profile.interests}`);
+    if (profile.notes) parts.push(`Notes: ${profile.notes}`);
+  }
+
+  // Summarize past conversations
+  const convSummaries = previous.slice(0, 3).map((c: any) => {
+    const date = new Date(c.created_at).toLocaleDateString();
+    return `- ${date}: ${c.title || 'Untitled conversation'}`;
+  });
+
+  if (convSummaries.length > 0) {
+    parts.push(`\nPrevious conversations (${previous.length} total):`);
+    parts.push(convSummaries.join('\n'));
+    parts.push('\nUse this context to provide personalized, continuity-aware responses. Reference past interactions naturally when relevant.');
+  }
+
+  return parts.join('\n');
+}
+
 // ─── Chat tool execution ─────────────────────────────────────────────────────
 
 async function executeChatTool(
