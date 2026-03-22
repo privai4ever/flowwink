@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
         for (const key of (targets || Object.keys(defaults))) {
           if (!defaults[key]) continue;
           const { error } = await sb.from("agent_memory").upsert(
-            { key, value: defaults[key], category: "core", created_by: "system" },
+            { key, value: defaults[key], category: "context", created_by: "flowpilot" },
             { onConflict: "key" }
           );
           fixResults.push({
