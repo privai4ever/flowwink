@@ -150,8 +150,8 @@ export default function AutonomyTestSuitePage() {
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mt-2">
-                {[1, 2, 3, 4, 5].map((layer) => (
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-2 mt-2">
+                {[1, 2, 3, 4, 5, 6].map((layer) => (
                   <p key={layer} className="text-xs text-muted-foreground">
                     <span className="font-medium">L{layer}:</span> {LAYER_LABELS[layer].description}
                   </p>
