@@ -569,6 +569,7 @@ serve(async (req) => {
     }
 
     if (knowledgeBase) chatPrompt += knowledgeBase;
+    if (visitorContext) chatPrompt += visitorContext;
 
     // Sentiment detection
     if (settings?.sentimentDetectionEnabled && settings?.humanHandoffEnabled) {
