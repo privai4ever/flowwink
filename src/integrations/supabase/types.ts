@@ -525,6 +525,7 @@ export type Database = {
           instructions: string | null
           name: string
           origin: Database["public"]["Enums"]["skill_origin"]
+          requires: Json | null
           requires_approval: boolean
           scope: Database["public"]["Enums"]["agent_scope"]
           tool_definition: Json
@@ -541,6 +542,7 @@ export type Database = {
           instructions?: string | null
           name: string
           origin?: Database["public"]["Enums"]["skill_origin"]
+          requires?: Json | null
           requires_approval?: boolean
           scope?: Database["public"]["Enums"]["agent_scope"]
           tool_definition?: Json
@@ -557,6 +559,7 @@ export type Database = {
           instructions?: string | null
           name?: string
           origin?: Database["public"]["Enums"]["skill_origin"]
+          requires?: Json | null
           requires_approval?: boolean
           scope?: Database["public"]["Enums"]["agent_scope"]
           tool_definition?: Json
@@ -1120,6 +1123,7 @@ export type Database = {
           title: string | null
           updated_at: string
           user_id: string | null
+          visitor_profile: Json | null
         }
         Insert: {
           assigned_agent_id?: string | null
@@ -1136,6 +1140,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           user_id?: string | null
+          visitor_profile?: Json | null
         }
         Update: {
           assigned_agent_id?: string | null
@@ -1152,6 +1157,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           user_id?: string | null
+          visitor_profile?: Json | null
         }
         Relationships: [
           {

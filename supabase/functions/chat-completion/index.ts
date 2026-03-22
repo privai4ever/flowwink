@@ -122,6 +122,22 @@ const CHAT_TOOLS: Record<string, any> = {
       },
     },
   },
+  save_visitor_profile: {
+    type: "function",
+    function: {
+      name: "save_visitor_profile",
+      description: "Save visitor preferences, interests, or other context to remember them in future conversations. Call when you learn something useful about the visitor.",
+      parameters: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Visitor's name if provided" },
+          preferences: { type: "string", description: "Preferences learned during conversation" },
+          interests: { type: "string", description: "Topics or products the visitor is interested in" },
+          notes: { type: "string", description: "Any other useful context to remember" },
+        },
+      },
+    },
+  },
 };
 
 // ─── Content extraction helpers ───────────────────────────────────────────────
@@ -263,6 +279,60 @@ async function buildKnowledgeBase(
   return `\n\n## Website Content (Knowledge Base)\n${sections.join('\n\n')}`;
 }
 
+// ─── Visitor Context (USER.md equivalent) ────────────────────────────────────
+
+/**
+ * Load returning visitor context from previous conversations.
+ * Builds a compact profile from past conversation metadata and visitor_profile.
+ */
+async function loadVisitorContext(
+  supabase: any, identifier: string, currentConversationId?: string,
+): Promise<string> {
+  // Find past conversations by email or session
+  const { data: pastConversations } = await supabase
+    .from('chat_conversations')
+    .select('id, title, created_at, visitor_profile, customer_name, customer_email')
+    .or(`customer_email.eq.${identifier},session_id.eq.${identifier}`)
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (!pastConversations?.length) return '';
+
+  // Filter out current conversation
+  const previous = currentConversationId
+    ? pastConversations.filter((c: any) => c.id !== currentConversationId)
+    : pastConversations;
+
+  if (previous.length === 0) return '';
+
+  // Build visitor context
+  const parts: string[] = ['\n\n## Returning Visitor Context'];
+
+  // Use latest visitor_profile if available
+  const latestProfile = previous.find((c: any) => c.visitor_profile && Object.keys(c.visitor_profile).length > 0);
+  if (latestProfile?.visitor_profile) {
+    const profile = latestProfile.visitor_profile;
+    if (profile.name) parts.push(`Name: ${profile.name}`);
+    if (profile.preferences) parts.push(`Preferences: ${profile.preferences}`);
+    if (profile.interests) parts.push(`Interests: ${profile.interests}`);
+    if (profile.notes) parts.push(`Notes: ${profile.notes}`);
+  }
+
+  // Summarize past conversations
+  const convSummaries = previous.slice(0, 3).map((c: any) => {
+    const date = new Date(c.created_at).toLocaleDateString();
+    return `- ${date}: ${c.title || 'Untitled conversation'}`;
+  });
+
+  if (convSummaries.length > 0) {
+    parts.push(`\nPrevious conversations (${previous.length} total):`);
+    parts.push(convSummaries.join('\n'));
+    parts.push('\nUse this context to provide personalized, continuity-aware responses. Reference past interactions naturally when relevant.');
+  }
+
+  return parts.join('\n');
+}
+
 // ─── Chat tool execution ─────────────────────────────────────────────────────
 
 async function executeChatTool(
@@ -316,6 +386,34 @@ async function executeChatTool(
     }
 
     default: {
+      // Check for visitor profile save
+      if (toolName === 'save_visitor_profile') {
+        if (!conversationId) return 'Cannot save profile without a conversation.';
+        try {
+          // Merge with existing profile
+          const { data: conv } = await supabase
+            .from('chat_conversations')
+            .select('visitor_profile')
+            .eq('id', conversationId).single();
+
+          const existing = conv?.visitor_profile || {};
+          const merged = { ...existing };
+          if (args.name) merged.name = args.name;
+          if (args.preferences) merged.preferences = args.preferences;
+          if (args.interests) merged.interests = args.interests;
+          if (args.notes) merged.notes = [existing.notes, args.notes].filter(Boolean).join('; ');
+
+          await supabase
+            .from('chat_conversations')
+            .update({ visitor_profile: merged })
+            .eq('id', conversationId);
+
+          return 'Visitor profile saved. I\'ll remember this for future conversations.';
+        } catch (err: any) {
+          return `Could not save profile: ${err.message}`;
+        }
+      }
+
       // Agent skill — delegate to agent-execute
       try {
         const resp = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
@@ -539,11 +637,12 @@ serve(async (req) => {
     // Resolve provider
     const provider = resolveProvider(settings, integrations);
 
-    // Load context in parallel: workspace files (soul/identity) + knowledge base + skills
+    // Load context in parallel: workspace files, knowledge base, skills, visitor history
     const shouldLoadKB = settings?.includeContentAsContext || settings?.includeKbArticles;
     const shouldLoadSkills = settings?.toolCallingEnabled && provider.supportsToolCalling;
+    const visitorIdentifier = customerEmail || sessionId;
 
-    const [{ soul, identity, agents }, knowledgeBase, skillTools] = await Promise.all([
+    const [{ soul, identity, agents }, knowledgeBase, skillTools, visitorContext] = await Promise.all([
       loadWorkspaceFiles(supabase),
       shouldLoadKB
         ? buildKnowledgeBase(
@@ -554,6 +653,7 @@ serve(async (req) => {
           )
         : Promise.resolve(''),
       shouldLoadSkills ? loadSkillTools(supabase, 'external') : Promise.resolve([]),
+      visitorIdentifier ? loadVisitorContext(supabase, visitorIdentifier, conversationId) : Promise.resolve(''),
     ]);
 
     // Build system prompt with knowledge base context
@@ -567,6 +667,7 @@ serve(async (req) => {
     }
 
     if (knowledgeBase) chatPrompt += knowledgeBase;
+    if (visitorContext) chatPrompt += visitorContext;
 
     // Sentiment detection
     if (settings?.sentimentDetectionEnabled && settings?.humanHandoffEnabled) {
@@ -597,6 +698,11 @@ serve(async (req) => {
         tools.push(CHAT_TOOLS.create_escalation);
         chatToolNames.add('handoff_to_human');
         chatToolNames.add('create_escalation');
+      }
+      // Visitor profile saving (always available when tools are enabled)
+      if (conversationId) {
+        tools.push(CHAT_TOOLS.save_visitor_profile);
+        chatToolNames.add('save_visitor_profile');
       }
       // External skills from DB registry
       tools.push(...skillTools);
