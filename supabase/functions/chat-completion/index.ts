@@ -699,6 +699,11 @@ serve(async (req) => {
         chatToolNames.add('handoff_to_human');
         chatToolNames.add('create_escalation');
       }
+      // Visitor profile saving (always available when tools are enabled)
+      if (conversationId) {
+        tools.push(CHAT_TOOLS.save_visitor_profile);
+        chatToolNames.add('save_visitor_profile');
+      }
       // External skills from DB registry
       tools.push(...skillTools);
     }
