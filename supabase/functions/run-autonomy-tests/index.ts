@@ -466,16 +466,21 @@ async function layer5Tests(supabase: any, supabaseUrl: string, serviceKey: strin
   // 2. Memory → Context Pipeline: Saved memory appears in loadMemories output
   results.push(await runTest("WIRE: Memory → Context pipeline", 5 as any, async () => {
     const testKey = `TEST_WIRE_${Date.now()}`;
-    await supabase.from('agent_memory').upsert({
+    const { error: upsertErr } = await supabase.from('agent_memory').upsert({
       key: testKey,
       value: { data: 'wiring_test_value_42' },
       category: 'preference',
       created_by: 'flowpilot',
+      updated_at: new Date().toISOString(),
     }, { onConflict: 'key' });
 
+    if (upsertErr) throw new Error(`Upsert failed: ${upsertErr.message}`);
+
     try {
+      // Small delay to ensure DB commit is visible
+      await new Promise(r => setTimeout(r, 200));
       const memoryCtx = await loadMemories(supabase);
-      assertContains(memoryCtx, testKey, `Memory key "${testKey}" not found in loadMemories output`);
+      assertContains(memoryCtx, testKey, `Memory key "${testKey}" not found in loadMemories output (got ${memoryCtx.length} chars). This means loadMemories may filter or limit results before including recent entries.`);
     } finally {
       await supabase.from('agent_memory').delete().eq('key', testKey);
     }
