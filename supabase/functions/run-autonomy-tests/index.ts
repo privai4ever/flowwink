@@ -13,6 +13,13 @@ import {
   loadHeartbeatState,
   saveHeartbeatState,
   loadMemories,
+  loadObjectives,
+  loadWorkspaceFiles,
+  loadSkillTools,
+  getBuiltInTools,
+  tryAcquireLock,
+  releaseLock,
+  loadHeartbeatProtocol,
 } from "../_shared/agent-reason.ts";
 import type { PromptCompilerInput, TokenUsage, HeartbeatState } from "../_shared/agent-reason.ts";
 
