@@ -212,6 +212,12 @@ Every documented behavior maps to a specific test layer in `run-autonomy-tests`:
 | Idle discipline | L6 | `BEHAVIOR: Idle discipline` |
 | Task completion | L6 | `BEHAVIOR: Task completion` |
 | Grounding rules | L6 | `BEHAVIOR: Grounding rules prevent fabrication` |
+| Trace ID forwarding | L7 | `ROBUST: trace_id forwarded to agent-execute activities` |
+| Handler error propagation | L7 | `ROBUST: handler errors logged as failed status` |
+| Cron field compatibility | L7 | `ROBUST: Dispatcher handles both cron field names` |
+| Enum adherence | L7 | `ROBUST: outcome_status only uses valid enum values` |
+| Bootstrap state | L7 | `ROBUST: agents memory key seeded by bootstrap` |
+| Outcome evaluation query | L7 | `ROBUST: evaluate_outcomes picks up NULL outcome activities` |
 
 ## Deployment Checklist
 
