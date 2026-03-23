@@ -383,6 +383,37 @@ async function layer3Tests(supabase: any): Promise<TestResult[]> {
     await supabase.from("agent_activity").delete().eq("id", data.id);
   }));
 
+  // Agent Locks TTL (documented: agent_locks table with TTL-based expiry)
+  results.push(await runTest("Agent lock: acquire and release via try_acquire/release", 3, async () => {
+    const testLane = `test_lock_${Date.now()}`;
+    const acquired = await tryAcquireLock(supabase, testLane, 'test_runner', 10);
+    assertEqual(acquired, true, "Should acquire fresh lock");
+
+    try {
+      // Second acquire should fail (lock held)
+      const second = await tryAcquireLock(supabase, testLane, 'test_runner_2', 10);
+      assertEqual(second, false, "Should not acquire already-held lock");
+    } finally {
+      await releaseLock(supabase, testLane);
+    }
+
+    // After release, should acquire again
+    const reacquired = await tryAcquireLock(supabase, testLane, 'test_runner_3', 10);
+    assertEqual(reacquired, true, "Should acquire after release");
+    await releaseLock(supabase, testLane);
+  }));
+
+  // Site Maturity Detection (documented: ≤2 posts + 0 leads = Fresh)
+  results.push(await runTest("detectSiteMaturity: returns valid SiteMaturity shape", 3, async () => {
+    const maturity = await detectSiteMaturity(supabase);
+    assertExists(maturity, "detectSiteMaturity returned null");
+    assertEqual(typeof maturity.isFresh, 'boolean', "isFresh should be boolean");
+    assertEqual(typeof maturity.blogPosts, 'number', "blogPosts should be number");
+    assertEqual(typeof maturity.leads, 'number', "leads should be number");
+    assertEqual(typeof maturity.subscribers, 'number', "subscribers should be number");
+    assertEqual(typeof maturity.pageViews, 'number', "pageViews should be number");
+  }));
+
   return results;
 }
 
