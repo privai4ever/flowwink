@@ -12,6 +12,8 @@ interface ExecuteRequest {
   arguments: Record<string, unknown>;
   agent_type: 'flowpilot' | 'chat';
   conversation_id?: string;
+  /** Trace ID from the parent reason() loop for end-to-end observability */
+  trace_id?: string;
   objective_context?: {
     goal: string;
     step: string;
@@ -31,7 +33,7 @@ serve(async (req) => {
 
   try {
     const body: ExecuteRequest = await req.json();
-    const { skill_id, skill_name, arguments: args, agent_type, conversation_id, objective_context } = body;
+    const { skill_id, skill_name, arguments: args, agent_type, conversation_id, objective_context, trace_id } = body;
 
     if (!skill_id && !skill_name) {
       return new Response(JSON.stringify({ error: 'skill_id or skill_name required' }), {
@@ -103,7 +105,12 @@ serve(async (req) => {
         },
         body: JSON.stringify(args),
       });
-      result = await response.json();
+      const edgeResult = await response.json();
+      // Propagate HTTP errors from edge functions so activity is correctly logged as failed
+      if (!response.ok && !edgeResult.error) {
+        edgeResult.error = `Edge function '${fnName}' returned HTTP ${response.status}`;
+      }
+      result = edgeResult;
 
     } else if (handler.startsWith('module:')) {
       // Module registry — route through the module's table
@@ -130,15 +137,18 @@ serve(async (req) => {
       result = { error: `Unknown handler type: ${handler}` };
     }
 
-    // 5. Log activity (with objective context if provided)
-    const activityInput = objective_context
-      ? { ...args, _objective_context: objective_context }
-      : args;
+    // 5. Log activity (with objective context and trace_id if provided)
+    const activityInput: Record<string, unknown> = { ...args };
+    if (objective_context) activityInput._objective_context = objective_context;
+    if (trace_id) activityInput.trace_id = trace_id;
+    // Determine if the handler actually succeeded
+    const handlerFailed = !!(result as any)?.error;
     const activityId = await logActivity(supabase, {
       agent: agent_type, skill_id: skill.id, skill_name: skill.name,
       input: activityInput, output: result as Record<string, unknown>,
-      status: 'success', conversation_id,
+      status: handlerFailed ? 'failed' : 'success', conversation_id,
       duration_ms: Date.now() - startTime,
+      error_message: handlerFailed ? String((result as any).error).slice(0, 500) : undefined,
     });
 
     // 5b. Outcome tracking: leave outcome_status as NULL

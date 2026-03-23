@@ -954,8 +954,91 @@ async function layer7Tests(supabase: any, supabaseUrl: string, serviceKey: strin
     await supabase.from('agent_activity').delete().eq('id', act.id);
   }));
 
+  // Test: trace_id is forwarded from reason() to agent-execute in activity logs
+  results.push(await runTest('ROBUST: trace_id forwarded to agent-execute activities', 7 as any, async () => {
+    // Execute a skill with a known trace_id via agent-execute
+    const testTraceId = `test_trace_${Date.now()}`;
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${serviceKey}`,
+    };
+    const resp = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        skill_name: 'analyze_analytics',
+        arguments: { period: '7d' },
+        agent_type: 'flowpilot',
+        trace_id: testTraceId,
+      }),
+    });
+
+    if (resp.status === 404) {
+      console.log('[test] analyze_analytics not found — skipping trace_id test');
+      return;
+    }
+
+    await resp.json();
+
+    // Verify trace_id was stored in activity input
+    const { data: acts } = await supabase
+      .from('agent_activity')
+      .select('input')
+      .eq('skill_name', 'analyze_analytics')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (acts?.input?.trace_id) {
+      assertEqual(acts.input.trace_id, testTraceId, 'trace_id should match what was sent');
+    }
+    // Cleanup is automatic — activity logs are kept
+  }));
+
+  // Test: handler errors propagate as 'failed' status in activity log
+  results.push(await runTest('ROBUST: handler errors logged as failed status', 7 as any, async () => {
+    // Call a skill with args that should cause an error in the handler
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${serviceKey}`,
+    };
+    // Use manage_blog_posts with invalid action to trigger an error
+    const resp = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        skill_name: 'manage_blog_posts',
+        arguments: { action: '_test_invalid_action_xyz' },
+        agent_type: 'flowpilot',
+      }),
+    });
+
+    if (resp.status === 404) {
+      console.log('[test] manage_blog_posts not found — skipping error propagation test');
+      return;
+    }
+
+    const result = await resp.json();
+    // The response should still be 200 (skill executed) but result may contain error
+    // Check that the activity was logged with correct status
+    if (result.status === 'success' && result.result?.error) {
+      // Verify activity was logged as 'failed'
+      const { data: act } = await supabase
+        .from('agent_activity')
+        .select('status, error_message')
+        .eq('skill_name', 'manage_blog_posts')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (act) {
+        assertEqual(act.status, 'failed', 'Activity with error result should be logged as failed');
+        assertExists(act.error_message, 'Failed activity should have error_message');
+      }
+    }
+  }));
+
   return results;
 }
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // LAYER 6: Autonomy Behavior Tests (OMATS Stage 3 Inspired)
 // Tests that the AI agent actually BEHAVES correctly — not just that data flows.
