@@ -121,7 +121,7 @@ serve(async (req) => {
       .eq("trigger_type", "cron");
 
     for (const wf of (dueWorkflows || [])) {
-      const cronExpr = (wf.trigger_config as any)?.expression;
+      const cronExpr = (wf.trigger_config as any)?.expression || (wf.trigger_config as any)?.cron;
       if (!cronExpr) continue;
 
       // Check if workflow is due based on last_run_at + cron interval
