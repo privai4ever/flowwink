@@ -228,9 +228,12 @@ serve(async (req) => {
       maxIterations: maxIter,
       tier: 'reasoning',
       traceId,
-      builtInToolGroups: ['memory', 'objectives', 'self-mod', 'reflect', 'soul', 'planning', 'automations-exec', 'workflows', 'a2a', 'skill-packs'],
+      builtInToolGroups: ['memory', 'objectives', 'reflect', 'planning', 'automations-exec'],
       tokenBudget: TOKEN_BUDGET,
-    } as any);
+      // Essential categories for autonomous work (~42 skills instead of 91)
+      // CRM + communication skills are available via chain_skills if needed
+      skillCategories: ['content', 'analytics', 'system', 'growth'],
+    });
 
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error(`Heartbeat wall-clock timeout (${MAX_WALL_CLOCK_MS}ms)`)), MAX_WALL_CLOCK_MS)

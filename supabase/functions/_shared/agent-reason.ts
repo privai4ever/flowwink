@@ -2713,13 +2713,20 @@ export function isBuiltInTool(name: string): boolean {
 
 // ─── Load Skills from Registry ────────────────────────────────────────────────
 
-export async function loadSkillTools(supabase: any, scope: 'internal' | 'external'): Promise<any[]> {
+export async function loadSkillTools(supabase: any, scope: 'internal' | 'external', categories?: string[]): Promise<any[]> {
   const scopes = scope === 'internal' ? ['internal', 'both'] : ['external', 'both'];
-  const { data: skills } = await supabase
+  let query = supabase
     .from('agent_skills')
-    .select('name, tool_definition, scope, requires')
+    .select('name, tool_definition, scope, requires, category')
     .eq('enabled', true)
     .in('scope', scopes);
+  
+  // Category filter — drastically reduces token overhead for heartbeat
+  if (categories && categories.length > 0) {
+    query = query.in('category', categories);
+  }
+
+  const { data: skills } = await query;
 
   if (!skills?.length) return [];
 
@@ -2840,7 +2847,8 @@ export async function reason(
     const { apiKey, apiUrl, model } = await resolveAiConfig(supabase, config.tier || 'fast');
 
     const builtInTools = getBuiltInTools(config.builtInToolGroups || ['memory', 'objectives', 'reflect']);
-    const skillTools = await loadSkillTools(supabase, config.scope);
+    const skillTools = await loadSkillTools(supabase, config.scope, config.skillCategories);
+    console.log(`[reason] trace=${traceId} Loaded ${builtInTools.length} built-in + ${skillTools.length} skill tools${config.skillCategories ? ` (categories: ${config.skillCategories.join(',')})` : ' (ALL categories)'}`);
     const allTools = [...builtInTools, ...(config.additionalTools || []), ...skillTools];
 
     // Apply context pruning before starting the loop
@@ -2850,7 +2858,7 @@ export async function reason(
     let finalResponse = '';
     let totalTokenUsage: TokenUsage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
     const loadedInstructions = new Set<string>();
-    const tokenBudget = (config as any).tokenBudget || DEFAULT_TOKEN_BUDGET;
+    const tokenBudget = config.tokenBudget || DEFAULT_TOKEN_BUDGET;
     let consecutiveEmptyTurns = 0;
     let memoryFlushed = false; // OpenClaw §5.4 — track if we've already flushed
 
