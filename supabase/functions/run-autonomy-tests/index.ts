@@ -194,6 +194,33 @@ async function layer1Tests(): Promise<TestResult[]> {
     }
   }));
 
+  // Site Maturity → Prompt Injection
+  results.push(await runTest("buildSystemPrompt: Day 1 Playbook for fresh site", 1, async () => {
+    const freshSite: SiteMaturity = { isFresh: true, blogPosts: 0, leads: 0, subscribers: 0, pageViews: 0, contentResearch: 0, contentProposals: 0 };
+    const p = buildSystemPrompt({ ...baseInput, mode: 'heartbeat', siteMaturity: freshSite, maxIterations: 12 });
+    assertContains(p, "FRESH SITE DETECTED");
+    assertContains(p, "DAY 1 PLAYBOOK");
+  }));
+
+  results.push(await runTest("buildSystemPrompt: No Day 1 for mature site", 1, async () => {
+    const matureSite: SiteMaturity = { isFresh: false, blogPosts: 10, leads: 5, subscribers: 3, pageViews: 200, contentResearch: 2, contentProposals: 3 };
+    const p = buildSystemPrompt({ ...baseInput, mode: 'heartbeat', siteMaturity: matureSite, maxIterations: 8 });
+    if (p.includes("DAY 1 PLAYBOOK")) throw new Error("Day 1 Playbook should NOT appear for mature sites");
+  }));
+
+  results.push(await runTest("buildSystemPrompt: Day 1 not in operate mode", 1, async () => {
+    const freshSite: SiteMaturity = { isFresh: true, blogPosts: 0, leads: 0, subscribers: 0, pageViews: 0, contentResearch: 0, contentProposals: 0 };
+    const p = buildSystemPrompt({ ...baseInput, mode: 'operate', siteMaturity: freshSite });
+    if (p.includes("DAY 1 PLAYBOOK")) throw new Error("Day 1 Playbook should only appear in heartbeat mode");
+  }));
+
+  // Scope enforcement in tool loading
+  results.push(await runTest("buildSystemPrompt: heartbeat token budget defaults", 1, async () => {
+    const p80k = buildSystemPrompt({ ...baseInput, mode: 'heartbeat', tokenBudget: 80000, maxIterations: 12 });
+    assertContains(p80k, "TOKEN BUDGET: 80000");
+    assertContains(p80k, "Max 12 tool iterations");
+  }));
+
   return results;
 }
 
