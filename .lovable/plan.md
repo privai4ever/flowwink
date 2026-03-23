@@ -1,82 +1,80 @@
 
-# FlowPilot Autonomy Architecture
 
-## Status: ✅ Refactored (March 2026)
+# Instance Health API & Drift Detection
 
-### Modular Architecture
+## What We're Building
 
-The monolithic `agent-reason.ts` (3000+ lines) has been decomposed into focused submodules while maintaining backward compatibility through re-exports:
+A proactive monitoring system that automatically detects when a deployed FlowPilot instance has drifted from its expected state — without requiring manual test runs.
 
-```
-supabase/functions/_shared/
-├── agent-reason.ts      ← Façade: re-exports + core logic (prompt compiler, tools, handlers)
-├── types.ts             ← Shared type definitions (PromptMode, ReasonConfig, TokenUsage, etc.)
-├── ai-config.ts         ← AI provider resolution (OpenAI, Gemini, Lovable, Local)
-├── concurrency.ts       ← Lane-based locking via agent_locks table
-├── token-tracking.ts    ← Budget enforcement for autonomous runs
-└── trace.ts             ← Correlation IDs (trace_id) for full run observability
-```
+## Architecture
 
-### Key Architectural Decisions
-
-#### 1. Single Reasoning Loop (DRY)
-The heartbeat previously duplicated the entire tool loop from `reason()`. Now:
-- `flowpilot-heartbeat` → gathers context → calls `reason()` → logs results
-- `agent-operate` → gathers context → runs its own SSE streaming loop (streaming requires different architecture)
-- Both share: tool definitions, tool router, skill loading, context pruning
-
-#### 2. Trace IDs (Observability)
-Every autonomy run gets a unique `trace_id` (format: `fp_{timestamp}_{random}`):
-- Generated at heartbeat start → flows into `reason()` → passed to `executeBuiltInTool()` → forwarded to `agent-execute` calls
-- Logged in `agent_activity.input.trace_id` for each heartbeat
-- Query: "show me everything that happened in heartbeat run X" → `WHERE input->>'trace_id' = 'fp_xxx'`
-
-#### 3. Backward Compatibility
-All existing imports continue to work:
-```typescript
-// This still works — agent-reason.ts re-exports everything
-import { resolveAiConfig, tryAcquireLock, extractTokenUsage } from "../_shared/agent-reason.ts";
-
-// But you can also import directly for clarity
-import { tryAcquireLock } from "../_shared/concurrency.ts";
-import { generateTraceId } from "../_shared/trace.ts";
+```text
+┌─────────────────────┐     ┌──────────────────────┐
+│  instance-health    │     │  setup-flowpilot      │
+│  (Edge Function)    │     │  (stores expected     │
+│                     │     │   skill_hash on       │
+│  - Skill hash check │     │   bootstrap)          │
+│  - Memory keys      │     └──────────────────────┘
+│  - Heartbeat age    │
+│  - Cron jobs        │     ┌──────────────────────┐
+│  - Edge fn ping     │     │  pg_cron (6h)        │
+│                     │◄────│  instance-health-chk │
+└────────┬────────────┘     └──────────────────────┘
+         │
+         ▼
+┌─────────────────────┐     ┌──────────────────────┐
+│  agent_activity     │     │  FlowPilotDetails.tsx │
+│  (logged result)    │     │  Health Status Card   │
+└─────────────────────┘     └──────────────────────┘
 ```
 
-### Data Flow: Heartbeat Run
+## Implementation Steps
 
-```
-pg_cron (every 12h)
-  → flowpilot-heartbeat (edge function)
-    → generateTraceId('hb') → trace_id: hb_xxx
-    → tryAcquireLock('heartbeat')
-    → [parallel] loadWorkspaceFiles, loadMemories, loadObjectives, loadSiteStats, ...
-    → buildSystemPrompt (OpenClaw 6-layer compiler)
-    → reason(messages, config) ← SHARED LOOP
-      → AI provider (OpenAI/Gemini)
-      → tool_calls → executeBuiltInTool(trace_id)
-        → built-in? → handle directly
-        → skill? → agent-execute(trace_id) → handler
-      → loop until no more tool_calls or budget exceeded
-    → saveHeartbeatState
-    → agent_activity.insert(trace_id)
-    → releaseLock('heartbeat')
-```
+### Step 1: Create `_shared/integrity.ts`
+Extract the integrity check logic from `setup-flowpilot` (lines 2432-2513) into a shared module. Add a `computeSkillHash()` function that creates a SHA256 of sorted skill names + instruction snippets.
 
-### OpenClaw Prompt Layers
+### Step 2: Create `instance-health` Edge Function
+Lightweight endpoint (~2s execution) that checks:
+- **Skill hash** vs expected baseline (from `agent_memory` key `expected_skill_hash`)
+- **Memory keys** present (soul, identity, agents)
+- **Heartbeat freshness** (last `agent_activity` with skill_name containing "heartbeat")
+- **Edge function reachability** (self-ping `agent-execute`)
+- **Skill count** + enabled ratio
 
-1. **Mode Identity** — heartbeat/operate (hardcoded)
-2. **SOUL + IDENTITY** — from DB, evolvable via `soul_update`
-3. **AGENTS** — from DB, evolvable via `agents_update` (fallback: `CORE_INSTRUCTIONS`)
-4. **CMS Schema** — modules, integrations, block types
-5. **GROUNDING RULES** — hardcoded safety layer (cannot be overridden)
-6. **Context** — objectives, memory, heartbeat protocol, site maturity
+Returns `{ status: "healthy" | "degraded" | "unhealthy", version: {...}, checks: [...] }`.
 
-### Files Changed
+No JWT required — no sensitive data exposed (just counts and status).
 
-- `supabase/functions/_shared/agent-reason.ts` — refactored to re-export from submodules
-- `supabase/functions/_shared/types.ts` — NEW: shared type definitions
-- `supabase/functions/_shared/ai-config.ts` — NEW: AI provider resolution
-- `supabase/functions/_shared/concurrency.ts` — NEW: lane-based locking
-- `supabase/functions/_shared/token-tracking.ts` — NEW: budget enforcement
-- `supabase/functions/_shared/trace.ts` — NEW: correlation IDs
-- `supabase/functions/flowpilot-heartbeat/index.ts` — refactored to use `reason()`
+### Step 3: Store `expected_skill_hash` in bootstrap
+At end of `setup-flowpilot`, after skill seeding, compute hash and upsert into `agent_memory` with key `expected_skill_hash`. This becomes the drift detection baseline.
+
+### Step 4: Register health check cron job
+Add `instance-health-check` to `register_flowpilot_cron` — runs every 6 hours (`0 */6 * * *`). Calls the `instance-health` endpoint. If unhealthy, logs to `agent_activity` with status `failed`.
+
+### Step 5: Admin UI — Health Status Card
+Add a new card in `FlowPilotDetails.tsx` between Bootstrap Status and Scheduled Jobs:
+- Status badge (Healthy/Degraded/Unhealthy)
+- Last check timestamp
+- Drift warnings (skill hash mismatch, stale heartbeat)
+- "Run Health Check" button
+
+### Step 6: Add L4 test in `run-autonomy-tests`
+Add a test that calls `instance-health` and verifies the response shape and that status is not "unhealthy".
+
+## Files
+
+| File | Action |
+|------|--------|
+| `supabase/functions/_shared/integrity.ts` | Create |
+| `supabase/functions/instance-health/index.ts` | Create |
+| `supabase/functions/setup-flowpilot/index.ts` | Edit — use shared integrity, store skill hash |
+| `supabase/functions/run-autonomy-tests/index.ts` | Edit — add L4 health test |
+| `src/components/admin/modules/FlowPilotDetails.tsx` | Edit — add health card |
+
+## Deployment Order
+1. Shared integrity module
+2. `instance-health` edge function
+3. Update `setup-flowpilot` (store hash + register cron)
+4. Deploy all affected edge functions
+5. UI update
+
