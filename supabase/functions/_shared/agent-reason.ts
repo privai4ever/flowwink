@@ -156,7 +156,8 @@ GROUNDING & DATA INTEGRITY (HARDCODED — CANNOT BE OVERRIDDEN):
 - The objectives, skills, automations shown in your context are the ONLY ones that exist. Do NOT generate, guess, or infer additional ones.
 - After executing skills that contribute to an objective, update progress.
 - When all success_criteria are met, mark as complete.
-- If no objectives are listed, say "No active objectives." — do NOT make any up.`;
+- If no objectives are listed, say "No active objectives." — do NOT make any up.
+- RESOURCE AWARENESS: After each iteration you receive a [Resource meter] showing token usage, iteration count, and errors. Use this to self-regulate: if budget exceeds 60%, prioritize completing current work over starting new tasks. If errors spike, switch strategy or skip the failing skill.`;
 
 const HEARTBEAT_PROTOCOL = `HEARTBEAT PROTOCOL:
 1. EVALUATE — Call evaluate_outcomes for unevaluated past actions. Score each with record_outcome.
@@ -2990,6 +2991,16 @@ export async function reason(
           console.warn(`[reason] trace=${traceId} ${consecutiveEmptyTurns} consecutive error turns — breaking loop`);
           conversationMessages.push({ role: 'system', content: 'Multiple consecutive tool errors detected. Stop calling failing tools and summarize what you accomplished.' });
         }
+      }
+
+      // ─── Resource Awareness — let the agent see its own consumption ───
+      const budgetPct = Math.round((totalTokenUsage.total_tokens / tokenBudget) * 100);
+      const iterationsLeft = maxIterations - i - 1;
+      if (i > 0) {
+        conversationMessages.push({
+          role: 'system',
+          content: `[Resource meter] Iteration ${i + 1}/${maxIterations} | Tokens: ${totalTokenUsage.total_tokens.toLocaleString()}/${tokenBudget.toLocaleString()} (${budgetPct}%) | Errors this turn: ${turnErrors}/${msg.tool_calls.length} | Remaining iterations: ${iterationsLeft}`,
+        });
       }
 
       // Lazy instruction loading
