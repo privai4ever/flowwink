@@ -268,24 +268,24 @@ RULES:
 - Summarize concisely after actions complete.`);
   }
 
-  // Layer 4: CMS Schema Awareness
+  // Layer 4: CMS Schema Awareness (truncated — OpenClaw §4.3)
   if (input.cmsSchemaContext) {
-    parts.push(input.cmsSchemaContext);
+    parts.push(truncateSection(input.cmsSchemaContext, MAX_CMS_SCHEMA_CHARS));
   }
 
   // Layer 5: GROUNDING RULES (ALWAYS hardcoded — safety layer, cannot be overridden)
   parts.push(GROUNDING_RULES);
 
-  // Layer 6: Mode-specific context
+  // Layer 6: Mode-specific context (all sections truncated — OpenClaw §4.3)
   if (mode === 'heartbeat') {
     parts.push(`\nCONTEXT:`);
-    parts.push(memoryContext);
-    parts.push(objectiveContext);
-    if (input.automationContext) parts.push(input.automationContext);
-    if (input.activityContext) parts.push(input.activityContext);
-    if (input.statsContext) parts.push(input.statsContext);
-    if (input.healingReport) parts.push(input.healingReport);
-    if (input.heartbeatState) parts.push(input.heartbeatState);
+    parts.push(truncateSection(memoryContext, MAX_MEMORY_CHARS));
+    parts.push(truncateSection(objectiveContext, MAX_OBJECTIVES_CHARS));
+    if (input.automationContext) parts.push(truncateSection(input.automationContext, MAX_ACTIVITY_CHARS));
+    if (input.activityContext) parts.push(truncateSection(input.activityContext, MAX_ACTIVITY_CHARS));
+    if (input.statsContext) parts.push(truncateSection(input.statsContext, MAX_CROSS_MODULE_CHARS));
+    if (input.healingReport) parts.push(truncateSection(input.healingReport, 1_000));
+    if (input.heartbeatState) parts.push(truncateSection(input.heartbeatState, 1_000));
     if (input.tokenBudget) {
       parts.push(`\nTOKEN BUDGET: ${input.tokenBudget} tokens max. Be efficient — stop early if approaching the limit.`);
     }
