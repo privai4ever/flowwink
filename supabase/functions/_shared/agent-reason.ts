@@ -1617,9 +1617,12 @@ const SPECIALIST_PROMPTS: Record<string, string> = {
   email: 'You are an email marketing specialist. Focus on: subject lines, personalization, segmentation, deliverability, A/B testing, lifecycle campaigns. Optimize for open rates, click rates, and conversions.',
 };
 
+// Max messages to keep in a sub-agent session
+const MAX_SESSION_MESSAGES = 10;
+
 async function handleDelegateTask(
   supabase: any, _supabaseUrl: string, _serviceKey: string,
-  args: { agent_name: string; task: string; context?: Record<string, any> },
+  args: { agent_name: string; task: string; context?: Record<string, any>; session_id?: string },
 ) {
   const { agent_name, task, context = {} } = args;
 
@@ -1635,23 +1638,68 @@ async function handleDelegateTask(
     ? `\n\nContext:\n${JSON.stringify(context, null, 2)}`
     : '';
 
+  // ─── Persistent Sub-Agent Sessions ───
+  // Load previous conversation for this specialist (if any)
+  const sessionKey = args.session_id || `a2a_session:${agent_name}`;
+  const { data: sessionData } = await supabase.from('agent_memory')
+    .select('value').eq('key', sessionKey).maybeSingle();
+
+  const previousMessages: Array<{ role: string; content: string }> = sessionData?.value?.messages || [];
+
+  // Build conversation: system + previous history + new task
+  const messages: Array<{ role: string; content: string }> = [
+    { role: 'system', content: systemPrompt },
+    ...previousMessages.slice(-MAX_SESSION_MESSAGES),
+    { role: 'user', content: `${task}${contextStr}` },
+  ];
+
   try {
     const resp = await fetch(apiUrl, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `${task}${contextStr}` },
-        ],
+        messages,
         max_tokens: 1500,
       }),
     });
     if (!resp.ok) throw new Error(`AI error: ${resp.status}`);
     const data = await resp.json();
     const response = data.choices?.[0]?.message?.content || 'No response generated.';
-    return { status: 'completed', agent: agent_name, task, response };
+
+    // ─── Persist session for continuity ───
+    const updatedMessages = [
+      ...previousMessages.slice(-(MAX_SESSION_MESSAGES - 2)),
+      { role: 'user', content: task },
+      { role: 'assistant', content: response },
+    ];
+
+    const sessionRecord = {
+      value: {
+        messages: updatedMessages,
+        agent: agent_name,
+        last_task: task,
+        updated_at: new Date().toISOString(),
+        turn_count: (sessionData?.value?.turn_count || 0) + 1,
+      },
+      category: 'context',
+      updated_at: new Date().toISOString(),
+    };
+
+    if (sessionData) {
+      await supabase.from('agent_memory').update(sessionRecord).eq('key', sessionKey);
+    } else {
+      await supabase.from('agent_memory').insert({ key: sessionKey, ...sessionRecord, created_by: 'flowpilot' });
+    }
+
+    return {
+      status: 'completed',
+      agent: agent_name,
+      task,
+      response,
+      session_id: sessionKey,
+      turn_count: (sessionData?.value?.turn_count || 0) + 1,
+    };
   } catch (err: any) {
     return { status: 'error', agent: agent_name, error: err.message };
   }
