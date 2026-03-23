@@ -145,15 +145,15 @@ export default function AutonomyTestSuitePage() {
                 onValueChange={(val) => val.length > 0 && setSelectedLayers(val)}
                 className="justify-start"
               >
-                {[1, 2, 3, 4, 5, 6].map((layer) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((layer) => (
                   <ToggleGroupItem key={layer} value={String(layer)} className="gap-2 px-4">
                     {getLayerBadge(layer)}
                     <span className="text-sm">{LAYER_LABELS[layer].label}</span>
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-2 mt-2">
-                {[1, 2, 3, 4, 5, 6].map((layer) => (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((layer) => (
                   <p key={layer} className="text-xs text-muted-foreground">
                     <span className="font-medium">L{layer}:</span> {LAYER_LABELS[layer].description}
                   </p>
