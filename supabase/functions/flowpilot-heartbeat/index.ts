@@ -230,7 +230,10 @@ serve(async (req) => {
       traceId,
       builtInToolGroups: ['memory', 'objectives', 'self-mod', 'reflect', 'soul', 'planning', 'automations-exec', 'workflows', 'a2a', 'skill-packs'],
       tokenBudget: TOKEN_BUDGET,
-    } as any);
+      // Only load essential skill categories — reduces from ~91 to ~20 tools
+      // The agent can still chain to other skills via skill_instruct + chain_skills
+      skillCategories: ['content', 'analytics', 'system', 'automation', 'growth'],
+    });
 
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error(`Heartbeat wall-clock timeout (${MAX_WALL_CLOCK_MS}ms)`)), MAX_WALL_CLOCK_MS)
