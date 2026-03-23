@@ -2286,13 +2286,14 @@ const A2A_TOOLS = [
   {
     type: 'function', function: {
       name: 'delegate_task',
-      description: "Delegate a subtask to a specialized agent. Built-in: 'seo', 'content', 'sales', 'analytics', 'email'. Returns specialist's focused analysis.",
+      description: "Delegate a subtask to a specialized agent with persistent session memory. Built-in: 'seo', 'content', 'sales', 'analytics', 'email'. The specialist remembers previous interactions within the same session.",
       parameters: {
         type: 'object',
         properties: {
           agent_name: { type: 'string', description: "Specialist: 'seo' | 'content' | 'sales' | 'analytics' | 'email', or any custom name" },
           task: { type: 'string', description: 'The specific task for the specialist to handle' },
           context: { type: 'object', description: 'Optional context data to pass to the specialist' },
+          session_id: { type: 'string', description: 'Optional custom session key. Default: a2a_session:{agent_name}. Use a unique ID for isolated conversation threads.' },
         },
         required: ['agent_name', 'task'],
       },
