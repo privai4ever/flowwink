@@ -52,7 +52,8 @@ serve(async (req) => {
     for (const auto of (dueAutomations || [])) {
       // If next_run_at was NULL, just initialize it and skip execution
       if (!auto.next_run_at) {
-        const nextRun = calculateNextRun((auto.trigger_config as any)?.expression);
+        const cronExpr = (auto.trigger_config as any)?.expression || (auto.trigger_config as any)?.cron;
+        const nextRun = calculateNextRun(cronExpr);
         await supabase
           .from("agent_automations")
           .update({ next_run_at: nextRun })
