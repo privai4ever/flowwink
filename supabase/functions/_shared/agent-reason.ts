@@ -2743,7 +2743,45 @@ export function isBuiltInTool(name: string): boolean {
 
 // ─── Load Skills from Registry ────────────────────────────────────────────────
 
-export async function loadSkillTools(supabase: any, scope: 'internal' | 'external', categories?: string[]): Promise<any[]> {
+/** Three-tier skill budget degradation (OpenClaw §4.4)
+ * 
+ * Tier 1 — FULL (budget < 50%):   All tools with full descriptions + parameters
+ * Tier 2 — COMPACT (50–75%):      All tools but descriptions truncated to 80 chars, no parameter descriptions
+ * Tier 3 — DROP (> 75%):          Only top-used + recently-used skills (max 20), compact format
+ */
+export type SkillBudgetTier = 'full' | 'compact' | 'drop';
+
+export function resolveSkillBudgetTier(tokenBudget: number, tokensUsed: number): SkillBudgetTier {
+  const pct = tokensUsed / tokenBudget;
+  if (pct < 0.50) return 'full';
+  if (pct < 0.75) return 'compact';
+  return 'drop';
+}
+
+function compactToolDefinition(td: any): any {
+  const clone = JSON.parse(JSON.stringify(td));
+  const fn = clone.function;
+  if (!fn) return clone;
+  // Truncate description
+  if (fn.description && fn.description.length > 80) {
+    fn.description = fn.description.slice(0, 77) + '...';
+  }
+  // Strip parameter descriptions to save tokens
+  const props = fn.parameters?.properties;
+  if (props) {
+    for (const val of Object.values(props) as any[]) {
+      delete val.description;
+    }
+  }
+  return clone;
+}
+
+export async function loadSkillTools(
+  supabase: any,
+  scope: 'internal' | 'external',
+  categories?: string[],
+  budgetTier?: SkillBudgetTier,
+): Promise<any[]> {
   const scopes = scope === 'internal' ? ['internal', 'both'] : ['external', 'both'];
   let query = supabase
     .from('agent_skills')
@@ -2761,7 +2799,37 @@ export async function loadSkillTools(supabase: any, scope: 'internal' | 'externa
   if (!skills?.length) return [];
 
   // Skill gating: check prerequisites
-  const gatedSkills = await filterGatedSkills(supabase, skills);
+  let gatedSkills = await filterGatedSkills(supabase, skills);
+
+  // ─── Tier 3: DROP — only keep top-used skills ───
+  if (budgetTier === 'drop') {
+    // Fetch recent usage to determine which skills to keep
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 14);
+    const { data: recentUsage } = await supabase
+      .from('agent_activity')
+      .select('skill_name')
+      .gte('created_at', weekAgo.toISOString())
+      .eq('status', 'success')
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    const usageCounts: Record<string, number> = {};
+    for (const a of (recentUsage || [])) {
+      if (a.skill_name) usageCounts[a.skill_name] = (usageCounts[a.skill_name] || 0) + 1;
+    }
+
+    // Score each skill: usage count + category bonus for content/analytics
+    const scored = gatedSkills.map((s: any) => ({
+      ...s,
+      _score: (usageCounts[s.name] || 0) + (s.category === 'content' || s.category === 'analytics' ? 2 : 0),
+    }));
+    scored.sort((a: any, b: any) => b._score - a._score);
+    gatedSkills = scored.slice(0, 20);
+    console.log(`[skill-budget] DROP tier: reduced to ${gatedSkills.length} skills from ${skills.length}`);
+  }
+
+  const tier = budgetTier || 'full';
 
   return gatedSkills
     .filter((s: any) => s.tool_definition?.function)
@@ -2792,6 +2860,11 @@ export async function loadSkillTools(supabase: any, scope: 'internal' | 'externa
           delete params.required;
         }
       } catch { /* safety net */ }
+
+      // Apply compaction for compact/drop tiers
+      if (tier === 'compact' || tier === 'drop') {
+        return compactToolDefinition(td);
+      }
       return td;
     });
 }
