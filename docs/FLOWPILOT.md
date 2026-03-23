@@ -185,6 +185,34 @@ The nightly `flowpilot-learn` job:
 
 Skills created autonomously are tagged `origin: 'agent'` for transparency in the Engine Room UI.
 
+## Test Coverage Mapping
+
+Every documented behavior maps to a specific test layer in `run-autonomy-tests`:
+
+| Documented Feature | Test Layer | Test Name |
+|---|---|---|
+| Token tracking | L1 | `extractTokenUsage`, `accumulateTokens`, `isOverBudget` |
+| Soul/Identity → Prompt | L1 + L5 | `buildSoulPrompt`, `WIRE: Soul → Prompt pipeline` |
+| 6-layer prompt ordering | L1 | `6-Layer: correct order in operate` |
+| CMS schema injection | L1 + L5 | `buildSystemPrompt: CMS schema`, `WIRE: CMS schema → prompt` |
+| Site Maturity Detection | L1 + L3 + L5 | `Day 1 Playbook for fresh site`, `detectSiteMaturity shape`, `WIRE: Site maturity → heartbeat prompt` |
+| agent-execute API | L2 | `rejects missing skill`, `404 for nonexistent`, `objective_context accepted` |
+| Heartbeat state persistence | L3 + L5 | `Heartbeat state round-trips`, `WIRE: Heartbeat state → prompt` |
+| Atomic checkout / locking | L3 | `Atomic checkout prevents double-lock` |
+| Stale lock recovery | L3 | `Stale locks (>30min) are recovered` |
+| Agent Locks TTL | L3 | `Agent lock: acquire and release via try_acquire/release` |
+| Memory isolation | L3 | `heartbeat_state excluded from general memories` |
+| Skills seeded | L4 | `≥10 enabled skills` |
+| Soul exists | L4 | `FlowPilot soul exists` |
+| Cron registration | L4 | `pg_cron jobs registered` |
+| Scope enforcement | L4 | `Scope isolation — internal vs public skill sets` |
+| Bootstrap endpoint | L4 | `setup-flowpilot endpoint responds` |
+| Signal system | L5 | `WIRE: signal-dispatcher endpoint responds` |
+| Personality consistency | L6 | `BEHAVIOR: Personality consistency` |
+| Idle discipline | L6 | `BEHAVIOR: Idle discipline` |
+| Task completion | L6 | `BEHAVIOR: Task completion` |
+| Grounding rules | L6 | `BEHAVIOR: Grounding rules prevent fabrication` |
+
 ## Deployment Checklist
 
 For a fresh FlowWink deployment:
