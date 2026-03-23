@@ -38,7 +38,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const MAX_ITERATIONS = 8;
+const MAX_ITERATIONS = 12;
+const MAX_WALL_CLOCK_MS = 120_000; // 2 minutes — hard stop to prevent runaway (OpenClaw #3181)
 
 // ─── Context loaders (heartbeat-specific) ─────────────────────────────────────
 
