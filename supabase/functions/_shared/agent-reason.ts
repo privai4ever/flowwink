@@ -711,13 +711,18 @@ export async function loadMemories(supabase: any): Promise<string> {
   const { data } = await supabase
     .from('agent_memory')
     .select('key, value, category')
-    .not('key', 'in', '("soul","identity","agents","heartbeat_state")')
+    .not('key', 'in', '("soul","identity","agents","heartbeat_state","heartbeat_protocol")')
     .order('updated_at', { ascending: false })
-    .limit(30);
+    .limit(20);
 
   if (!data || data.length === 0) return '';
-  const lines = data.map((m: any) => `- [${m.category}] ${m.key}: ${JSON.stringify(m.value)}`);
-  return `\n\nYour memory (things you've learned about this site and its owner):\n${lines.join('\n')}`;
+  // Truncate values to save tokens — agent can memory_read for full detail
+  const lines = data.map((m: any) => {
+    const val = typeof m.value === 'string' ? m.value : JSON.stringify(m.value);
+    const truncated = val.length > 150 ? val.slice(0, 150) + '…' : val;
+    return `- [${m.category}] ${m.key}: ${truncated}`;
+  });
+  return `\n\nMemory (use memory_read for full values):\n${lines.join('\n')}`;
 }
 
 async function handleMemoryWrite(supabase: any, args: { key: string; value: any; category?: string }) {
