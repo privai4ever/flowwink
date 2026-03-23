@@ -65,7 +65,7 @@ const BUILT_IN_TOOL_NAMES = new Set([
   'memory_write', 'memory_read', 'memory_delete',
   'objective_update_progress', 'objective_complete', 'objective_delete',
   'skill_create', 'skill_update', 'skill_list', 'skill_disable', 'skill_enable', 'skill_delete',
-  'skill_instruct',
+  'skill_instruct', 'skill_read',
   'soul_update', 'agents_update', 'heartbeat_protocol_update',
   'automation_create', 'automation_list', 'automation_update', 'automation_delete',
   'reflect',
@@ -137,7 +137,7 @@ SKILL PACKS (Bundled capabilities):
 - Use skill_pack_list to see available packs (E-Commerce, Content Marketing, CRM Nurture)
 - Use skill_pack_install to install an entire pack of related skills in one operation
 
-SKILL INSTRUCTIONS: Loaded lazily — you'll receive specific skill instructions after you use each skill.
+SKILL INSTRUCTIONS: Loaded lazily. Use 'skill_read' BEFORE executing a skill to load its full instructions, context, and edge cases. This helps you make informed decisions about arguments and approach.
 
 RULES:
 - When the user asks you to do something, USE the appropriate tools immediately.
@@ -1855,6 +1855,33 @@ async function handleSkillInstruct(supabase: any, args: { skill_name: string; in
   return { status: 'updated', skill: data };
 }
 
+async function handleSkillRead(supabase: any, args: { skill_name: string }) {
+  const { data, error } = await supabase
+    .from('agent_skills')
+    .select('id, name, description, handler, category, scope, trust_level, instructions, tool_definition, requires, requires_approval')
+    .eq('name', args.skill_name)
+    .maybeSingle();
+
+  if (error) return { status: 'error', error: error.message };
+  if (!data) return { status: 'not_found', error: `Skill "${args.skill_name}" not found` };
+
+  return {
+    status: 'loaded',
+    skill: {
+      name: data.name,
+      description: data.description,
+      handler: data.handler,
+      category: data.category,
+      scope: data.scope,
+      trust_level: data.trust_level,
+      requires_approval: data.requires_approval,
+      instructions: data.instructions || '(no instructions — consider adding with skill_instruct)',
+      parameters: data.tool_definition?.function?.parameters || null,
+      prerequisites: data.requires || [],
+    },
+  };
+}
+
 // ─── Soul Update ──────────────────────────────────────────────────────────────
 
 async function handleSoulUpdate(supabase: any, args: { field: string; value: any }) {
@@ -2096,7 +2123,8 @@ const SELF_MOD_TOOLS = [
   { type: 'function', function: { name: 'skill_disable', description: 'Disable a skill.', parameters: { type: 'object', properties: { skill_name: { type: 'string' } }, required: ['skill_name'] } } },
   { type: 'function', function: { name: 'skill_enable', description: 'Re-enable a disabled skill.', parameters: { type: 'object', properties: { skill_name: { type: 'string' } }, required: ['skill_name'] } } },
   { type: 'function', function: { name: 'skill_delete', description: 'Permanently delete a skill from the registry.', parameters: { type: 'object', properties: { skill_name: { type: 'string' } }, required: ['skill_name'] } } },
-  { type: 'function', function: { name: 'skill_instruct', description: 'Add rich instructions/knowledge to a skill.', parameters: { type: 'object', properties: { skill_name: { type: 'string' }, instructions: { type: 'string' } }, required: ['skill_name', 'instructions'] } } },
+  { type: 'function', function: { name: 'skill_instruct', description: 'Add rich instructions/knowledge to a skill (WRITE operation).', parameters: { type: 'object', properties: { skill_name: { type: 'string' }, instructions: { type: 'string' } }, required: ['skill_name', 'instructions'] } } },
+  { type: 'function', function: { name: 'skill_read', description: 'Load full instructions, handler, and metadata for a skill BEFORE executing it. Use this to understand how a skill works, what arguments it expects, and edge cases — especially for complex or unfamiliar skills.', parameters: { type: 'object', properties: { skill_name: { type: 'string', description: 'Exact skill name to load instructions for' } }, required: ['skill_name'] } } },
   { type: 'function', function: { name: 'automation_create', description: 'Create a new automation. Disabled by default for safety.', parameters: { type: 'object', properties: { name: { type: 'string' }, description: { type: 'string' }, trigger_type: { type: 'string', enum: ['cron', 'event', 'signal'] }, trigger_config: { type: 'object' }, skill_name: { type: 'string' }, skill_arguments: { type: 'object' }, enabled: { type: 'boolean' } }, required: ['name', 'trigger_type', 'trigger_config', 'skill_name'] } } },
   { type: 'function', function: { name: 'automation_list', description: 'List all automations.', parameters: { type: 'object', properties: { enabled_only: { type: 'boolean' } } } } },
   { type: 'function', function: { name: 'automation_update', description: 'Update an existing automation by ID or name.', parameters: { type: 'object', properties: { automation_id: { type: 'string' }, automation_name: { type: 'string' }, updates: { type: 'object', description: 'Fields to update: name, description, trigger_type, trigger_config, skill_name, skill_arguments, enabled' } }, required: ['updates'] } } },
@@ -2662,6 +2690,7 @@ export async function executeBuiltInTool(
     case 'skill_enable': return handleSkillEnable(supabase, fnArgs);
     case 'skill_delete': return handleSkillDelete(supabase, fnArgs);
     case 'skill_instruct': return handleSkillInstruct(supabase, fnArgs);
+    case 'skill_read': return handleSkillRead(supabase, fnArgs);
     case 'soul_update': return handleSoulUpdate(supabase, fnArgs);
     case 'agents_update': return handleAgentsUpdate(supabase, fnArgs);
     case 'heartbeat_protocol_update': return handleHeartbeatProtocolUpdate(supabase, fnArgs);
