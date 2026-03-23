@@ -230,9 +230,9 @@ serve(async (req) => {
       traceId,
       builtInToolGroups: ['memory', 'objectives', 'self-mod', 'reflect', 'soul', 'planning', 'automations-exec', 'workflows', 'a2a', 'skill-packs'],
       tokenBudget: TOKEN_BUDGET,
-      // Only load essential skill categories — reduces from ~91 to ~20 tools
-      // The agent can still chain to other skills via skill_instruct + chain_skills
-      skillCategories: ['content', 'analytics', 'system', 'automation', 'growth'],
+      // Essential categories for autonomous work (~20 skills instead of 91)
+      // CRM + communication skills are available via chain_skills if needed
+      skillCategories: ['content', 'analytics', 'system', 'growth'],
     });
 
     const timeoutPromise = new Promise<never>((_, reject) =>
