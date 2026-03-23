@@ -2664,12 +2664,22 @@ export async function executeBuiltInTool(
   // Not a built-in → delegate to agent-execute with trace ID
   const body: Record<string, any> = { skill_name: fnName, arguments: fnArgs, agent_type: 'flowpilot' };
   if (traceId) body.trace_id = traceId;
-  const response = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${serviceKey}` },
-    body: JSON.stringify(body),
-  });
-  return response.json();
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${serviceKey}` },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error(`[reason] trace=${traceId} agent-execute ${fnName} HTTP ${response.status}: ${errText.slice(0, 200)}`);
+      return { error: `Skill ${fnName} failed: HTTP ${response.status}`, status: 'failed' };
+    }
+    return response.json();
+  } catch (err: any) {
+    console.error(`[reason] trace=${traceId} agent-execute ${fnName} fetch error:`, err.message);
+    return { error: `Skill ${fnName} unreachable: ${err.message}`, status: 'failed' };
+  }
 }
 
 export function isBuiltInTool(name: string): boolean {
