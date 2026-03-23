@@ -140,58 +140,19 @@ GROUNDING & DATA INTEGRITY (HARDCODED — CANNOT BE OVERRIDDEN):
 - If no objectives are listed, say "No active objectives." — do NOT make any up.`;
 
 const HEARTBEAT_PROTOCOL = `HEARTBEAT PROTOCOL:
-1. OUTCOME EVALUATION (do this FIRST) — Call evaluate_outcomes to review unevaluated past actions. It returns causal data (specific to each action's 72h impact window), a skill scorecard (historical success rates), and recent learnings (your own past assessments). Use this to make informed judgments. Call record_outcome for each. If an action is too recent to judge, use 'too_early' — it will resurface in the next heartbeat via include_too_early.
-2. CROSS-MODULE ANALYSIS — Review the CROSS-MODULE INSIGHTS section. Look for connections: hot leads + recent content = nurture opportunity, booking trends + page views = demand signal, form submissions + deals = conversion pipeline.
-3. PROACTIVE REASONING — If you spot a trend, gap, or opportunity NOT covered by existing objectives, use propose_objective. Max 1 new objective per heartbeat.
-4. PLAN — For each active objective WITHOUT a plan (no progress.plan), call decompose_objective to create a step-by-step plan.
-5. ADVANCE — Objectives are pre-sorted by priority score. Advance them IN ORDER (highest score first). Use advance_plan with chain=true to execute multiple steps per objective.
-6. SKILL CHAINING — For complex multi-step tasks, use chain_skills to compose skills (e.g., research → write → SEO optimize). This is more efficient than calling skills one by one.
-7. AUTOMATIONS — Check DUE (⏰) automations. Execute them via execute_automation.
-8. WORKFLOWS — If a due automation has a workflow_id in trigger_config, run it via workflow_execute.
-9. REFLECT — Use 'reflect' to analyze the past 7 days. Include outcome evaluation insights.
-10. REMEMBER — Save learnings to memory. Especially save outcome patterns (what skills/strategies produce best results).
-11. SUMMARIZE — Brief heartbeat report including plan progress, outcome evaluation summary, and any new proposals.
+1. EVALUATE — Call evaluate_outcomes for unevaluated past actions. Score each with record_outcome.
+2. PLAN — For active objectives WITHOUT a plan, call decompose_objective.
+3. ADVANCE — Execute objective steps IN PRIORITY ORDER (highest score first). Use advance_plan with chain=true.
+4. AUTOMATIONS — Execute DUE (⏰) automations via execute_automation.
+5. PROPOSE — If data warrants it, propose max 1 new objective via propose_objective.
+6. REFLECT — Call reflect to analyze the past 7 days. Save learnings to memory.
 
-OUTCOME EVALUATION GUIDELINES:
-- evaluate_outcomes returns per-activity causal_data with a 72h impact window specific to each action
-- For content skills: check causal_data.page_views_72h for the specific page created
-- For CRM skills: check causal_data.related_leads for lead status changes
-- The skill_scorecard shows historical success rates — skills below 50% need strategy adjustment via skill_instruct
-- recent_learnings contains your own past assessments — read them to avoid repeating mistakes
-- Score outcomes: 'success' (clear positive impact), 'partial' (some impact), 'neutral' (no measurable change), 'negative' (worsened metrics), 'too_early' (action < 48h ago, not enough data yet)
-- Include quantitative evidence in outcome_data (e.g., {views_generated: 45, leads_attributed: 2, bookings: 1, revenue_cents: 50000})
-- Correlation data now includes deals, bookings, orders, and chat feedback — use all available signals
-- Pattern: after several heartbeats, the scorecard reveals which strategies work best for THIS specific business
+OUTCOME SCORING: success | partial | neutral | negative | too_early (<48h)
+Include quantitative evidence in outcome_data when available.
 
-PRIORITY SCORING (automatic, shown as [score:N]):
-- Deadline proximity: overdue +50, <1 day +40, <3 days +25, <7 days +10
-- Priority field: critical +35, high +20, medium +10
-- Momentum: in-progress plans +15, near completion (>70%) +10
-- Staleness: no update >3 days +8, >7 days +12
-- Failures: plan has failed steps +10
-Advance the HIGHEST scored objectives first.
-
-MULTI-STEP PLANNING RULES:
-- Each objective should have a plan (3-7 steps). Use decompose_objective to create one.
-- advance_plan auto-chains up to 4 steps per call. Use it — don't call advance_plan repeatedly for the same objective.
-- For recipes that compose multiple skills, prefer chain_skills over manual sequential calls.
-- If a step fails, note it but continue to the next objective.
-- If ALL steps are done, mark the objective as completed via objective_complete.
-- Plans persist between heartbeats. FlowPilot picks up where it left off.
-
-PROACTIVE REASONING RULES:
-- Only propose objectives when stats or activity clearly warrant action
-- Never duplicate existing active objectives (checked automatically)
-- Include a clear "reason" explaining what data drove the proposal
-- Keep goals specific and actionable
-- When proposing, set constraints.priority ('critical'|'high'|'medium'|'low')
-- CROSS-MODULE CONNECTIONS: Look for patterns across CRM, content, bookings, and newsletter data
-
-CONSTRAINTS:
-- Skills with trust_level='approve' will be BLOCKED and logged for admin review. trust_level='notify' will execute but notify admin. trust_level='auto' executes silently.
-- PRIORITIZE: outcome evaluation > high-score objectives > DUE automations > proposals
-- Self-healing auto-disables skills with 3+ consecutive failures
-- Be efficient: use chaining, focus on top 2-3 objectives per heartbeat`;
+PRIORITY: evaluate > advance highest-score objectives > automations > proposals
+Be efficient: focus on top 2-3 objectives. Use chain_skills for multi-step tasks.
+Skills with trust_level='approve' are BLOCKED for admin review.`;
 
 const DAY_1_PLAYBOOK = `
 🚀 FRESH SITE DETECTED — DAY 1 PLAYBOOK ACTIVE
@@ -280,30 +241,12 @@ export function buildSystemPrompt(input: PromptCompilerInput): string {
   if (!input.agents) {
     parts.push(CORE_INSTRUCTIONS);
   } else {
-    parts.push(`You can use MULTIPLE tools in a single turn and CHAIN tool calls across iterations.
-When a task requires multiple steps, execute them sequentially — don't just describe a plan.
-
-TOOLS & SKILLS:
-- CMS skills: blog posts, leads, analytics, bookings, newsletters, etc.
-- PERSISTENT MEMORY (memory_write / memory_read — supports semantic vector search)
-- OBJECTIVES (objective_update_progress / objective_complete)
-- SELF-MODIFICATION: You can create, update, disable, and list your own skills and automations.
-- SELF-EVOLUTION: Use 'soul_update' to evolve your personality/values, 'agents_update' to evolve your operational rules.
-- REFLECTION: Use 'reflect' to analyze your performance — findings are auto-persisted as learnings.
-- WORKFLOWS: workflow_create, workflow_execute, workflow_list (multi-step chains with template vars)
-- SKILL CHAINING: chain_skills — compose multiple skills sequentially with output piping (research → write → optimize)
-- A2A DELEGATION: delegate_task to route subtasks to specialized agents
-- SKILL PACKS: skill_pack_list, skill_pack_install (bundled capabilities)
-
-SKILL INSTRUCTIONS: Loaded lazily — you'll receive specific skill instructions after you use each skill.
-
+    parts.push(`TOOLS: Use tools to ACT, not just plan. Chain multiple tool calls per turn.
+SKILLS: CMS, blog, leads, analytics, bookings, newsletters, memory, objectives, self-modification, workflows, skill chaining, A2A delegation, skill packs.
 RULES:
-- When the user asks you to do something, USE the appropriate tools immediately.
-- You can call MULTIPLE tools in parallel when they're independent.
-- After tool results come back, you may call MORE tools if the task isn't done.
-- After all actions complete, summarize what you did concisely.
-- Use markdown formatting for clear, readable responses.
-- Be concise but thorough. Use emoji sparingly.`);
+- USE tools immediately when asked. Call multiple in parallel when independent.
+- After tool results, call MORE tools if task isn't done.
+- Summarize concisely after actions complete.`);
   }
 
   // Layer 4: CMS Schema Awareness
@@ -711,13 +654,18 @@ export async function loadMemories(supabase: any): Promise<string> {
   const { data } = await supabase
     .from('agent_memory')
     .select('key, value, category')
-    .not('key', 'in', '("soul","identity","agents","heartbeat_state")')
+    .not('key', 'in', '("soul","identity","agents","heartbeat_state","heartbeat_protocol")')
     .order('updated_at', { ascending: false })
-    .limit(30);
+    .limit(20);
 
   if (!data || data.length === 0) return '';
-  const lines = data.map((m: any) => `- [${m.category}] ${m.key}: ${JSON.stringify(m.value)}`);
-  return `\n\nYour memory (things you've learned about this site and its owner):\n${lines.join('\n')}`;
+  // Truncate values to save tokens — agent can memory_read for full detail
+  const lines = data.map((m: any) => {
+    const val = typeof m.value === 'string' ? m.value : JSON.stringify(m.value);
+    const truncated = val.length > 150 ? val.slice(0, 150) + '…' : val;
+    return `- [${m.category}] ${m.key}: ${truncated}`;
+  });
+  return `\n\nMemory (use memory_read for full values):\n${lines.join('\n')}`;
 }
 
 async function handleMemoryWrite(supabase: any, args: { key: string; value: any; category?: string }) {
@@ -1121,7 +1069,10 @@ export async function loadObjectives(supabase: any, opts?: { unlockedOnly?: bool
       : ' | NO PLAN (needs decompose_objective)';
     const deadline = o.constraints?.deadline ? ` | ⏰ deadline: ${o.constraints.deadline}` : '';
     const priority = o.constraints?.priority ? ` | priority: ${o.constraints.priority}` : '';
-    return `- #${i + 1} [score:${o._priority_score}] [${o.id}] "${o.goal}"${planInfo}${deadline}${priority} | progress: ${JSON.stringify(o.progress)} | criteria: ${JSON.stringify(o.success_criteria)}`;
+    // Show next pending step instead of full progress dump
+    const nextStep = plan?.steps?.find((s: any) => s.status !== 'done');
+    const nextInfo = nextStep ? ` | next: "${nextStep.description || nextStep.action}"` : '';
+    return `- #${i + 1} [score:${o._priority_score}] [${o.id}] "${o.goal}"${planInfo}${nextInfo}${deadline}${priority}`;
   }).join('\n');
 }
 
