@@ -1390,93 +1390,94 @@ async function handleAdvancePlan(supabase: any, supabaseUrl: string, serviceKey:
     return { status: 'locked', message: 'Objective is currently being worked on by another process.' };
   }
 
-  for (let depth = 0; depth < maxSteps; depth++) {
-    const { data: obj, error } = await supabase.from('agent_objectives')
-      .select('id, goal, progress')
-      .eq('id', objective_id).single();
-    if (error || !obj) return { status: 'error', error: error?.message || 'Objective not found' };
+  try {
+    for (let depth = 0; depth < maxSteps; depth++) {
+      const { data: obj, error } = await supabase.from('agent_objectives')
+        .select('id, goal, progress')
+        .eq('id', objective_id).single();
+      if (error || !obj) return { status: 'error', error: error?.message || 'Objective not found' };
 
-    const progress = (obj.progress as Record<string, any>) || {};
-    const plan = progress.plan;
-    if (!plan?.steps?.length) return { status: 'no_plan', message: 'No plan found. Use decompose_objective first.', chain_results: chainResults };
+      const progress = (obj.progress as Record<string, any>) || {};
+      const plan = progress.plan;
+      if (!plan?.steps?.length) return { status: 'no_plan', message: 'No plan found. Use decompose_objective first.', chain_results: chainResults };
 
-    const nextStep = plan.steps.find((s: any) => s.status === 'pending');
-    if (!nextStep) {
-      if (!plan.completed) {
-        plan.completed = true;
-        progress.plan = plan;
-        progress.last_updated = new Date().toISOString();
-        await supabase.from('agent_objectives').update({ progress }).eq('id', objective_id);
+      const nextStep = plan.steps.find((s: any) => s.status === 'pending');
+      if (!nextStep) {
+        if (!plan.completed) {
+          plan.completed = true;
+          progress.plan = plan;
+          progress.last_updated = new Date().toISOString();
+          await supabase.from('agent_objectives').update({ progress }).eq('id', objective_id);
+        }
+        return { status: 'all_done', message: 'All plan steps completed.', chain_results: chainResults };
       }
-      return { status: 'all_done', message: 'All plan steps completed.', chain_results: chainResults };
+
+      nextStep.status = 'running';
+      plan.current_step = nextStep.order;
+      await supabase.from('agent_objectives').update({ progress }).eq('id', objective_id);
+
+      let result: any = { status: 'manual', message: 'No skill mapped — requires manual action.' };
+      if (nextStep.skill_name) {
+        try {
+          // Goal-Aware Execution: pass objective context to agent-execute
+          const objectiveContext = {
+            goal: obj.goal,
+            step: nextStep.description,
+            why: `Step ${nextStep.order} of plan for objective: ${obj.goal}`,
+          };
+          const resp = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${serviceKey}` },
+            body: JSON.stringify({
+              skill_name: nextStep.skill_name,
+              arguments: nextStep.skill_args || {},
+              agent_type: 'flowpilot',
+              objective_context: objectiveContext,
+            }),
+          });
+          result = await resp.json();
+        } catch (err: any) {
+          result = { error: err.message };
+        }
+      }
+
+      const success = !result.error && result.status !== 'failed';
+      nextStep.status = success ? 'done' : 'failed';
+      nextStep.result = result;
+      nextStep.completed_at = new Date().toISOString();
+
+      const allDone = plan.steps.every((s: any) => s.status === 'done');
+      const anyFailed = plan.steps.some((s: any) => s.status === 'failed');
+      plan.completed = allDone;
+      plan.has_failures = anyFailed;
+
+      progress.plan = plan;
+      progress.total_runs = (progress.total_runs || 0) + 1;
+      progress.last_updated = new Date().toISOString();
+      await supabase.from('agent_objectives').update({ progress }).eq('id', objective_id);
+
+      const remaining = plan.steps.filter((s: any) => s.status === 'pending').length;
+      chainResults.push({
+        step: nextStep.description,
+        skill: nextStep.skill_name,
+        status: success ? 'done' : 'failed',
+        remaining_steps: remaining,
+      });
+
+      if (!success || !nextStep.skill_name || allDone) break;
     }
 
-    nextStep.status = 'running';
-    plan.current_step = nextStep.order;
-    await supabase.from('agent_objectives').update({ progress }).eq('id', objective_id);
-
-    let result: any = { status: 'manual', message: 'No skill mapped — requires manual action.' };
-    if (nextStep.skill_name) {
-      try {
-        // Goal-Aware Execution: pass objective context to agent-execute
-        const objectiveContext = {
-          goal: obj.goal,
-          step: nextStep.description,
-          why: `Step ${nextStep.order} of plan for objective: ${obj.goal}`,
-        };
-        const resp = await fetch(`${supabaseUrl}/functions/v1/agent-execute`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${serviceKey}` },
-          body: JSON.stringify({
-            skill_name: nextStep.skill_name,
-            arguments: nextStep.skill_args || {},
-            agent_type: 'flowpilot',
-            objective_context: objectiveContext,
-          }),
-        });
-        result = await resp.json();
-      } catch (err: any) {
-        result = { error: err.message };
-      }
-    }
-
-    const success = !result.error && result.status !== 'failed';
-    nextStep.status = success ? 'done' : 'failed';
-    nextStep.result = result;
-    nextStep.completed_at = new Date().toISOString();
-
-    const allDone = plan.steps.every((s: any) => s.status === 'done');
-    const anyFailed = plan.steps.some((s: any) => s.status === 'failed');
-    plan.completed = allDone;
-    plan.has_failures = anyFailed;
-
-    progress.plan = plan;
-    progress.total_runs = (progress.total_runs || 0) + 1;
-    progress.last_updated = new Date().toISOString();
-    await supabase.from('agent_objectives').update({ progress }).eq('id', objective_id);
-
-    const remaining = plan.steps.filter((s: any) => s.status === 'pending').length;
-    chainResults.push({
-      step: nextStep.description,
-      skill: nextStep.skill_name,
-      status: success ? 'done' : 'failed',
-      remaining_steps: remaining,
-    });
-
-    if (!success || !nextStep.skill_name || allDone) break;
+    const lastResult = chainResults[chainResults.length - 1];
+    return {
+      status: chainResults.some(r => r.status === 'failed') ? 'chain_partial' : 'chain_completed',
+      steps_executed: chainResults.length,
+      remaining_steps: lastResult?.remaining_steps ?? 0,
+      plan_completed: chainResults.length > 0 && lastResult?.remaining_steps === 0,
+      chain_results: chainResults,
+    };
+  } finally {
+    await releaseObjective(supabase, objective_id);
   }
-
-  // Release the lock
-  await releaseObjective(supabase, objective_id);
-
-  const lastResult = chainResults[chainResults.length - 1];
-  return {
-    status: chainResults.some(r => r.status === 'failed') ? 'chain_partial' : 'chain_completed',
-    steps_executed: chainResults.length,
-    remaining_steps: lastResult?.remaining_steps ?? 0,
-    plan_completed: chainResults.length > 0 && lastResult?.remaining_steps === 0,
-    chain_results: chainResults,
-  };
 }
 
 async function handleProposeObjective(supabase: any, args: { goal: string; reason: string; constraints?: any; success_criteria?: any }) {
