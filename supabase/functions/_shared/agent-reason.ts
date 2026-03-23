@@ -1855,6 +1855,33 @@ async function handleSkillInstruct(supabase: any, args: { skill_name: string; in
   return { status: 'updated', skill: data };
 }
 
+async function handleSkillRead(supabase: any, args: { skill_name: string }) {
+  const { data, error } = await supabase
+    .from('agent_skills')
+    .select('id, name, description, handler, category, scope, trust_level, instructions, tool_definition, requires, requires_approval')
+    .eq('name', args.skill_name)
+    .maybeSingle();
+
+  if (error) return { status: 'error', error: error.message };
+  if (!data) return { status: 'not_found', error: `Skill "${args.skill_name}" not found` };
+
+  return {
+    status: 'loaded',
+    skill: {
+      name: data.name,
+      description: data.description,
+      handler: data.handler,
+      category: data.category,
+      scope: data.scope,
+      trust_level: data.trust_level,
+      requires_approval: data.requires_approval,
+      instructions: data.instructions || '(no instructions — consider adding with skill_instruct)',
+      parameters: data.tool_definition?.function?.parameters || null,
+      prerequisites: data.requires || [],
+    },
+  };
+}
+
 // ─── Soul Update ──────────────────────────────────────────────────────────────
 
 async function handleSoulUpdate(supabase: any, args: { field: string; value: any }) {
