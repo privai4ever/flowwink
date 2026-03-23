@@ -304,7 +304,9 @@ RULES:
     parts.push(objectiveContext);
   }
 
-  return parts.filter(Boolean).join('\n');
+  const assembled = parts.filter(Boolean).join('\n');
+  console.log(`[prompt-compiler] mode=${mode} prompt_chars=${assembled.length} (~${Math.ceil(assembled.length / 4)} tokens)`);
+  return assembled;
 }
 
 // AI Config — now in ai-config.ts (re-exported above)
