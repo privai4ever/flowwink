@@ -2992,6 +2992,16 @@ export async function reason(
         }
       }
 
+      // ─── Resource Awareness — let the agent see its own consumption ───
+      const budgetPct = Math.round((totalTokenUsage.total_tokens / tokenBudget) * 100);
+      const iterationsLeft = maxIterations - i - 1;
+      if (i > 0) {
+        conversationMessages.push({
+          role: 'system',
+          content: `[Resource meter] Iteration ${i + 1}/${maxIterations} | Tokens: ${totalTokenUsage.total_tokens.toLocaleString()}/${tokenBudget.toLocaleString()} (${budgetPct}%) | Errors this turn: ${turnErrors}/${msg.tool_calls.length} | Remaining iterations: ${iterationsLeft}`,
+        });
+      }
+
       // Lazy instruction loading
       if (calledSkillNames.length > 0) {
         const instrContext = await fetchSkillInstructions(supabase, calledSkillNames, loadedInstructions);
