@@ -344,26 +344,30 @@ export function buildWorkspacePrompt(soul: any, identity: any, agents: any): str
     if (identity.boundaries?.length) prompt += `\nBoundaries: ${identity.boundaries.join('; ')}`;
   }
 
-  // Layer 2b: Soul
-  if (soul.purpose) prompt += `\n\nSOUL:\nPurpose: ${soul.purpose}`;
-  if (soul.values?.length) prompt += `\nValues: ${soul.values.join('; ')}`;
-  if (soul.tone) prompt += `\nTone: ${soul.tone}`;
-  if (soul.philosophy) prompt += `\nPhilosophy: ${soul.philosophy}`;
+  // Layer 2b: Soul (truncated — OpenClaw §4.3)
+  let soulSection = '';
+  if (soul.purpose) soulSection += `\n\nSOUL:\nPurpose: ${soul.purpose}`;
+  if (soul.values?.length) soulSection += `\nValues: ${soul.values.join('; ')}`;
+  if (soul.tone) soulSection += `\nTone: ${soul.tone}`;
+  if (soul.philosophy) soulSection += `\nPhilosophy: ${soul.philosophy}`;
+  prompt += truncateSection(soulSection, MAX_SOUL_CHARS);
 
-  // Layer 3: Agents (operational rules from DB — overrides CORE_INSTRUCTIONS if present)
+  // Layer 3: Agents (truncated — OpenClaw §4.3)
   if (agents) {
-    prompt += `\n\nOPERATIONAL RULES (AGENTS):`;
-    if (agents.direct_action_rules) prompt += `\n${agents.direct_action_rules}`;
-    if (agents.self_improvement) prompt += `\n${agents.self_improvement}`;
-    if (agents.memory_guidelines) prompt += `\n${agents.memory_guidelines}`;
-    if (agents.browser_rules) prompt += `\n${agents.browser_rules}`;
-    if (agents.workflow_conventions) prompt += `\n${agents.workflow_conventions}`;
-    if (agents.a2a_conventions) prompt += `\n${agents.a2a_conventions}`;
-    if (agents.skill_pack_rules) prompt += `\n${agents.skill_pack_rules}`;
-    if (agents.custom_rules) prompt += `\n${agents.custom_rules}`;
+    let agentsSection = `\n\nOPERATIONAL RULES (AGENTS):`;
+    if (agents.direct_action_rules) agentsSection += `\n${agents.direct_action_rules}`;
+    if (agents.self_improvement) agentsSection += `\n${agents.self_improvement}`;
+    if (agents.memory_guidelines) agentsSection += `\n${agents.memory_guidelines}`;
+    if (agents.browser_rules) agentsSection += `\n${agents.browser_rules}`;
+    if (agents.workflow_conventions) agentsSection += `\n${agents.workflow_conventions}`;
+    if (agents.a2a_conventions) agentsSection += `\n${agents.a2a_conventions}`;
+    if (agents.skill_pack_rules) agentsSection += `\n${agents.skill_pack_rules}`;
+    if (agents.custom_rules) agentsSection += `\n${agents.custom_rules}`;
+    prompt += truncateSection(agentsSection, MAX_AGENTS_CHARS);
   }
 
-  return prompt;
+  // OpenClaw §4.3 — Global bootstrap cap
+  return truncateSection(prompt, MAX_BOOTSTRAP_TOTAL_CHARS);
 }
 
 // ─── CMS Schema Awareness ─────────────────────────────────────────────────────
