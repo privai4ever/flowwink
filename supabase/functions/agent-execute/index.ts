@@ -105,7 +105,12 @@ serve(async (req) => {
         },
         body: JSON.stringify(args),
       });
-      result = await response.json();
+      const edgeResult = await response.json();
+      // Propagate HTTP errors from edge functions so activity is correctly logged as failed
+      if (!response.ok && !edgeResult.error) {
+        edgeResult.error = `Edge function '${fnName}' returned HTTP ${response.status}`;
+      }
+      result = edgeResult;
 
     } else if (handler.startsWith('module:')) {
       // Module registry — route through the module's table
