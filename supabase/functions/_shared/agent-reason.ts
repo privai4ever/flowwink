@@ -2858,7 +2858,7 @@ export async function reason(
     let finalResponse = '';
     let totalTokenUsage: TokenUsage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
     const loadedInstructions = new Set<string>();
-    const tokenBudget = (config as any).tokenBudget || DEFAULT_TOKEN_BUDGET;
+    const tokenBudget = config.tokenBudget || DEFAULT_TOKEN_BUDGET;
     let consecutiveEmptyTurns = 0;
     let memoryFlushed = false; // OpenClaw §5.4 — track if we've already flushed
 
