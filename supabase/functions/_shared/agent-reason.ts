@@ -2815,13 +2815,22 @@ export async function reason(
     let finalResponse = '';
     let totalTokenUsage: TokenUsage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
     const loadedInstructions = new Set<string>();
+    const tokenBudget = (config as any).tokenBudget || DEFAULT_TOKEN_BUDGET;
+    let consecutiveEmptyTurns = 0;
 
     for (let i = 0; i < maxIterations; i++) {
-      // Token budget check (if provided via config)
-      const tokenBudget = (config as any).tokenBudget;
-      if (tokenBudget && totalTokenUsage.total_tokens >= tokenBudget) {
-        console.log(`[reason] trace=${traceId} Token budget exceeded (${totalTokenUsage.total_tokens}/${tokenBudget})`);
-        finalResponse = finalResponse || `Stopped: token budget reached (${totalTokenUsage.total_tokens} tokens).`;
+      // Token budget check
+      if (totalTokenUsage.total_tokens >= tokenBudget) {
+        console.log(`[reason] trace=${traceId} Token budget reached (${totalTokenUsage.total_tokens}/${tokenBudget})`);
+        finalResponse = finalResponse || `Heartbeat complete. Used ${totalTokenUsage.total_tokens} tokens in ${i} iterations.`;
+        break;
+      }
+
+      // Remaining budget guard — skip expensive AI call if <5% budget left
+      const remainingBudget = tokenBudget - totalTokenUsage.total_tokens;
+      if (remainingBudget < tokenBudget * 0.05 && i > 0) {
+        console.log(`[reason] trace=${traceId} Budget nearly exhausted (${remainingBudget} remaining), stopping early`);
+        finalResponse = finalResponse || `Heartbeat complete. ${actionsExecuted.length} actions in ${i} iterations.`;
         break;
       }
 
