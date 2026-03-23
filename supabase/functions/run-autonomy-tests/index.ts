@@ -21,8 +21,9 @@ import {
   tryAcquireLock,
   releaseLock,
   loadHeartbeatProtocol,
+  detectSiteMaturity,
 } from "../_shared/agent-reason.ts";
-import type { PromptCompilerInput, TokenUsage, HeartbeatState } from "../_shared/agent-reason.ts";
+import type { PromptCompilerInput, TokenUsage, HeartbeatState, SiteMaturity } from "../_shared/agent-reason.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
