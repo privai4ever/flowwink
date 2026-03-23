@@ -2997,11 +2997,15 @@ export async function reason(
 
   try {
     const { apiKey, apiUrl, model } = await resolveAiConfig(supabase, config.tier || 'fast');
+    const tokenBudget = config.tokenBudget || DEFAULT_TOKEN_BUDGET;
 
+    // ─── Three-tier skill budget degradation (OpenClaw §4.4) ───
+    const initialTier = resolveSkillBudgetTier(tokenBudget, 0);
     const builtInTools = getBuiltInTools(config.builtInToolGroups || ['memory', 'objectives', 'reflect']);
-    const skillTools = await loadSkillTools(supabase, config.scope, config.skillCategories);
-    console.log(`[reason] trace=${traceId} Loaded ${builtInTools.length} built-in + ${skillTools.length} skill tools${config.skillCategories ? ` (categories: ${config.skillCategories.join(',')})` : ' (ALL categories)'}`);
-    const allTools = [...builtInTools, ...(config.additionalTools || []), ...skillTools];
+    let currentSkillTier: SkillBudgetTier = initialTier;
+    let skillTools = await loadSkillTools(supabase, config.scope, config.skillCategories, currentSkillTier);
+    console.log(`[reason] trace=${traceId} Loaded ${builtInTools.length} built-in + ${skillTools.length} skill tools (tier: ${currentSkillTier})${config.skillCategories ? ` (categories: ${config.skillCategories.join(',')})` : ' (ALL categories)'}`);
+    let allTools = [...builtInTools, ...(config.additionalTools || []), ...skillTools];
 
     // Apply context pruning before starting the loop
     let conversationMessages = await pruneConversationHistory(messages, supabase);
