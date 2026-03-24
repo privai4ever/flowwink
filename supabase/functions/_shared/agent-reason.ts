@@ -27,6 +27,33 @@ export { tryAcquireLock, releaseLock } from './concurrency.ts';
 export { extractTokenUsage, accumulateTokens, isOverBudget } from './token-tracking.ts';
 export { generateTraceId } from './trace.ts';
 
+// ─── Reply Directive Parser (OpenClaw Protocol Specs L5) ──────────────────────
+export type ReplyDirective = 'NO_REPLY' | 'HEARTBEAT_OK' | null;
+
+export function parseReplyDirectives(content: string): { directive: ReplyDirective; cleanContent: string } {
+  const trimmed = content.trim();
+
+  // NO_REPLY — agent has nothing to do (must be the entire response)
+  if (trimmed === 'NO_REPLY') {
+    return { directive: 'NO_REPLY', cleanContent: '' };
+  }
+
+  // HEARTBEAT_OK — successful heartbeat (final line)
+  let cleanContent = content;
+  let directive: ReplyDirective = null;
+  if (trimmed.endsWith('HEARTBEAT_OK')) {
+    directive = 'HEARTBEAT_OK';
+    cleanContent = trimmed.replace(/\n?HEARTBEAT_OK\s*$/, '').trim();
+  }
+
+  // Strip [ACTION:...] and [RESULT:...] tags for clean user-facing text
+  cleanContent = cleanContent
+    .replace(/\[ACTION:[^\]]+\]\s*/g, '')
+    .replace(/\[RESULT:[^\]]+\]\s*/g, '');
+
+  return { directive, cleanContent };
+}
+
 // ─── Local imports for internal use ───────────────────────────────────────────
 import type { PromptCompilerInput, ReasonConfig, ReasonResult, TokenUsage, SiteMaturity, BuiltInToolGroup } from './types.ts';
 import { resolveAiConfig } from './ai-config.ts';
@@ -158,7 +185,13 @@ GROUNDING & DATA INTEGRITY (HARDCODED — CANNOT BE OVERRIDDEN):
 - After executing skills that contribute to an objective, update progress.
 - When all success_criteria are met, mark as complete.
 - If no objectives are listed, say "No active objectives." — do NOT make any up.
-- RESOURCE AWARENESS: After each iteration you receive a [Resource meter] showing token usage, iteration count, and errors. Use this to self-regulate: if budget exceeds 60%, prioritize completing current work over starting new tasks. If errors spike, switch strategy or skip the failing skill.`;
+- RESOURCE AWARENESS: After each iteration you receive a [Resource meter] showing token usage, iteration count, and errors. Use this to self-regulate: if budget exceeds 60%, prioritize completing current work over starting new tasks. If errors spike, switch strategy or skip the failing skill.
+
+REPLY DIRECTIVES (use these exact strings when applicable):
+- Output "NO_REPLY" (alone, no other text) when a heartbeat finds absolutely nothing to do — no objectives, no due automations, no issues.
+- Output "HEARTBEAT_OK" as the final line after a successful heartbeat with actions taken.
+- Prefix action descriptions with [ACTION:skill_name] for traceability (e.g. "[ACTION:blog_write] Drafted post about...").
+- Prefix results with [RESULT:success|partial|failed] for structured outcome parsing.`;
 
 const HEARTBEAT_PROTOCOL = `HEARTBEAT PROTOCOL:
 1. EVALUATE — Call evaluate_outcomes for unevaluated past actions. Score each with record_outcome.
@@ -2833,6 +2866,8 @@ export async function loadSkillTools(
   budgetTier?: SkillBudgetTier,
 ): Promise<any[]> {
   const scopes = scope === 'internal' ? ['internal', 'both'] : ['external', 'both'];
+
+  // Load skills and tool_policy in parallel
   let query = supabase
     .from('agent_skills')
     .select('name, tool_definition, scope, requires, category')
@@ -2844,12 +2879,26 @@ export async function loadSkillTools(
     query = query.in('category', categories);
   }
 
-  const { data: skills } = await query;
+  const [{ data: skills }, { data: policyRow }] = await Promise.all([
+    query,
+    supabase.from('agent_memory').select('value').eq('key', 'tool_policy').maybeSingle(),
+  ]);
+
+  // Apply global tool_policy block list
+  const blockedSkills: Set<string> = new Set();
+  if (policyRow?.value?.blocked && Array.isArray(policyRow.value.blocked)) {
+    for (const name of policyRow.value.blocked) blockedSkills.add(name);
+  }
 
   if (!skills?.length) return [];
 
+  // Filter out globally blocked skills
+  const unblockedSkills = blockedSkills.size > 0
+    ? skills.filter((s: any) => !blockedSkills.has(s.name))
+    : skills;
+
   // Skill gating: check prerequisites
-  let gatedSkills = await filterGatedSkills(supabase, skills);
+  let gatedSkills = await filterGatedSkills(supabase, unblockedSkills);
 
   // ─── Tier 3: DROP — only keep top-used skills ───
   if (budgetTier === 'drop') {

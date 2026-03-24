@@ -16,6 +16,7 @@ import {
   loadCMSSchema,
   tryAcquireLock,
   releaseLock,
+  parseReplyDirectives,
 } from "../_shared/agent-reason.ts";
 
 /**
@@ -178,7 +179,9 @@ serve(async (req) => {
               await sseEvent(writer, encoder, 'skill_results', allSkillResults);
             }
             const finalContent = assistantMessage.content || 'Done.';
-            await streamFinalResponse(apiUrl, apiKey, model, conversationMessages, writer, encoder, finalContent);
+            // Strip reply directives before streaming to client (OpenClaw L5)
+            const { cleanContent } = parseReplyDirectives(finalContent);
+            await streamFinalResponse(apiUrl, apiKey, model, conversationMessages, writer, encoder, cleanContent || finalContent);
             break;
           }
 

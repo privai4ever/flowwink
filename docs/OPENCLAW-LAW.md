@@ -16,7 +16,7 @@ OpenClaw assembles the system prompt from 9 ordered layers. Layers 1–6 are fra
 | 2 | **Tool Definitions** | JSON Schema for every tool available to the agent | `getBuiltInTools()` + `loadSkillTools()` → OpenAI function-calling format | ✅ |
 | 3 | **Skills Registry** | Auto-discovered capability modules from `~/skills/` | `agent_skills` table with `loadSkillTools(scope)` | ✅ |
 | 4 | **Model Aliases** | Short names → provider model IDs (`flash → gemini-2.5-flash`) | `resolveAiConfig()` with provider-agnostic routing | ✅ |
-| 5 | **Protocol Specs** | Reply tags, heartbeat signals, silent replies (`NO_REPLY`) | SSE streaming, heartbeat edge function, tool-call JSON format | ⚠️ Partial |
+| 5 | **Protocol Specs** | Reply tags, heartbeat signals, silent replies (`NO_REPLY`) | `REPLY_DIRECTIVES` in GROUNDING_RULES + `parseReplyDirectives()` utility | ✅ |
 | 6 | **Runtime Info** | Current time, OS, model, environment snapshot | CMS Schema Awareness (modules, integrations, block types) | ✅ Adapted |
 | 7 | **Workspace Files** | `SOUL.md`, `IDENTITY.md`, `AGENTS.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `MEMORY.md` | `agent_memory` table: keys `soul`, `identity`, `agents`, `heartbeat_protocol` + `visitor_profile` via `loadWorkspaceFiles()` | ✅ |
 | 8 | **Bootstrap Hooks** | Dynamic injection scripts (`agent:bootstrap`, `before_prompt_build`) | Lazy skill instruction loading via `fetchSkillInstructions()` + idempotent bootstrap | ✅ Adapted |
@@ -217,10 +217,7 @@ All agent surfaces (interactive, autonomous, visitor chat) MUST share `agent-rea
 
 ### ⚠️ Partially Implemented
 
-| Gap | OpenClaw Has | FlowWink Status | Impact |
-|-----|-------------|-----------------|--------|
-| **Protocol specs (L5)** | Structured reply tags, `NO_REPLY` sentinel, heartbeat signals | Basic SSE streaming, no reply tags | Less structured agent output parsing |
-| **Tool policy** | Layered allow/deny system (global → per-agent) | Scope-based + trust_level (auto/notify/approve) | Less granular but sufficient for CMS scope |
+*No remaining gaps — all items resolved.*
 
 ### ✅ Previously Partial — Now Resolved
 
@@ -234,6 +231,8 @@ All agent surfaces (interactive, autonomous, visitor chat) MUST share `agent-rea
 | **USER.md** | `chat_conversations.visitor_profile` JSONB + `loadVisitorContext()` + `save_visitor_profile` tool |
 | **Command queue** | `agent_locks` table + `try_acquire_agent_lock()` / `release_agent_lock()` with TTL |
 | **Workspace Files (L7)** | Enriched soul/identity/agents with structured markdown protocols (OpenClaw §5 memory, operational protocols) |
+| **Protocol Specs (L5)** | `REPLY_DIRECTIVES` in GROUNDING_RULES, `parseReplyDirectives()` utility, heartbeat detects `NO_REPLY`/`HEARTBEAT_OK`, agent-operate strips directive tags before streaming |
+| **Tool Policy** | `agent_memory(key='tool_policy')` with global blocked[] list, checked in `loadSkillTools()`. Combined with scope + trust_level + requires for layered access control |
 
 ### ❌ Not Implemented (Intentional — Low Priority for CMS)
 
