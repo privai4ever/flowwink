@@ -231,6 +231,8 @@ All agent surfaces (interactive, autonomous, visitor chat) MUST share `agent-rea
 | **USER.md** | `chat_conversations.visitor_profile` JSONB + `loadVisitorContext()` + `save_visitor_profile` tool |
 | **Command queue** | `agent_locks` table + `try_acquire_agent_lock()` / `release_agent_lock()` with TTL |
 | **Workspace Files (L7)** | Enriched soul/identity/agents with structured markdown protocols (OpenClaw §5 memory, operational protocols) |
+| **Protocol Specs (L5)** | `REPLY_DIRECTIVES` in GROUNDING_RULES, `parseReplyDirectives()` utility, heartbeat detects `NO_REPLY`/`HEARTBEAT_OK`, agent-operate strips directive tags before streaming |
+| **Tool Policy** | `agent_memory(key='tool_policy')` with global blocked[] list, checked in `loadSkillTools()`. Combined with scope + trust_level + requires for layered access control |
 
 ### ❌ Not Implemented (Intentional — Low Priority for CMS)
 
