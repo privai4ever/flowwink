@@ -65,6 +65,7 @@ class ModuleRegistry {
       browserControlModule,
       growthModule,
       federationModule,
+      openclawModule,
     ];
 
     for (const mod of builtIn) {
