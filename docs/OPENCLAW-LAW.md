@@ -217,10 +217,7 @@ All agent surfaces (interactive, autonomous, visitor chat) MUST share `agent-rea
 
 ### ⚠️ Partially Implemented
 
-| Gap | OpenClaw Has | FlowWink Status | Impact |
-|-----|-------------|-----------------|--------|
-| **Protocol specs (L5)** | Structured reply tags, `NO_REPLY` sentinel, heartbeat signals | Basic SSE streaming, no reply tags | Less structured agent output parsing |
-| **Tool policy** | Layered allow/deny system (global → per-agent) | Scope-based + trust_level (auto/notify/approve) | Less granular but sufficient for CMS scope |
+*No remaining gaps — all items resolved.*
 
 ### ✅ Previously Partial — Now Resolved
 
