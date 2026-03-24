@@ -1,56 +1,47 @@
 
 
-# Plan: OpenClaw Core Refactor — `_shared/pilot/`
+## JSON5 Raw Mode Editor for FlowPilot Config
 
-## Status: Phase 3 Complete ✅ + Documentation Complete ✅
+### Vad vi bygger
+En "Raw Mode"-editor i FlowPilot-panelen (ModuleDetailSheet) som visar alla `agent_memory`-nycklar med `category = 'config'` som en redigerbar JSON5-blob. Inkluderar Form/Raw toggle, validering, och snapshot-backup.
 
-### Completed Phases
+### Varför
+- Pilot kan ändra sin hela konfiguration i en enda `memory_upsert` istället för individuella anrop
+- JSON5 tillåter kommentarer (`//`) och relaxed syntax — säkrare för LLM-generering
+- Admin kan snabbt inspektera och bulk-editera config utan att navigera formulär
 
-#### Phase 1 — Extract Generic Core
-1. Created `_shared/pilot/prompt-compiler.ts` — 6-layer prompt compiler (298L)
-2. Created `_shared/pilot/built-in-tools.ts` — 40+ tool definitions (241L)
-3. Created `_shared/domains/cms-context.ts` — CMS domain pack (246L)
-4. Created `_shared/pilot/index.ts` — barrel re-exports
-5. Updated `_shared/types.ts` — added `freshSitePlaybook` to `PromptCompilerInput`
+---
 
-#### Phase 2 — Extract Handlers
-6. Created `_shared/pilot/handlers.ts` — 40+ built-in tool handlers (1401L)
+### Teknisk plan
 
-#### Phase 3 — Extract Reasoning Loop
-7. Created `_shared/pilot/reason.ts` — ReAct loop, skill loading, context pruning (871L)
-8. Converted `_shared/agent-reason.ts` to backward-compatible re-export facade (107L)
+#### 1. Installera dependencies
+- `json5` — parse/stringify med kommentarer och trailing commas
+- `@codemirror/lang-json` — syntax highlighting för JSON i CodeMirror (redan har `@uiw/react-codemirror`)
 
-#### Phase 4 — Documentation
-9. Created `docs/pilot/README.md` — Overview, architecture diagram, file map, domain pack guide
-10. Created `docs/pilot/architecture.md` — Deep technical reference (data flow, configs, internals)
-11. Created `docs/pilot/handlers-reference.md` — All 40+ handlers with what/when/behavior
+#### 2. Ny komponent: `ConfigRawEditor.tsx`
+Placeras i `src/components/admin/modules/`
 
-## Architecture (Final)
+Funktionalitet:
+- **Laddar** alla `agent_memory` rader med `category = 'config'` 
+- **Konverterar** till en samlad JSON5-blob: `{ reasoning_config: {...}, tool_policy: {...}, ... }`
+- **Form/Raw toggle** — Form-vy visar readonly key-cards med expand/collapse; Raw-vy visar CodeMirror-editor
+- **Validering vid spara** — parsar med `JSON5.parse()`, visar fel inline om ogiltig syntax
+- **Snapshot-backup** — innan överskrivning, sparar nuvarande state som `config_snapshot_<timestamp>` i `agent_memory` med `category = 'snapshot'`
+- **Spara** — upsert:ar varje top-level nyckel tillbaka till individuella `agent_memory`-rader
 
-```text
-supabase/functions/
-├── _shared/
-│   ├── pilot/                          ← GENERIC CORE (domain-agnostic)
-│   │   ├── index.ts                    Barrel re-exports
-│   │   ├── reason.ts            (871L) ReAct loop, skill loading, context pruning
-│   │   ├── prompt-compiler.ts   (298L) 6-layer system prompt assembly
-│   │   ├── handlers.ts         (1401L) 40+ built-in tool handlers
-│   │   └── built-in-tools.ts   (241L)  Tool JSON schemas
-│   │
-│   ├── domains/                        ← DOMAIN PACKS (vertical-specific)
-│   │   └── cms-context.ts       (246L) CMS schema, insights, maturity detection
-│   │
-│   ├── agent-reason.ts          (107L) Backward-compat facade (re-exports pilot/)
-│   ├── types.ts                        Shared TypeScript interfaces
-│   ├── ai-config.ts                    Model routing (OpenAI, Gemini, local, n8n)
-│   ├── concurrency.ts                  Lane-based lock manager
-│   ├── token-tracking.ts               Token extraction & budget tracking
-│   └── trace.ts                        Correlation IDs
+#### 3. Integrera i FlowPilotDetails
+Lägg till `ConfigRawEditor` som en ny sektion i `FlowPilotDetails.tsx`, mellan Bootstrap Status och Instance Health.
 
-docs/
-├── pilot/
-│   ├── README.md                       Overview + getting started for contributors
-│   ├── architecture.md                 Deep technical reference
-│   └── handlers-reference.md           All handler docs
-└── OPENCLAW-LAW.md                     Architectural law (unchanged)
-```
+#### 4. CodeMirror-konfiguration
+Återanvänd den befintliga `theme` från `CodeEditor.tsx` men med `json()`-language extension istället för `html()`.
+
+---
+
+### Filändringar
+
+| Fil | Ändring |
+|-----|---------|
+| `package.json` | Lägg till `json5`, `@codemirror/lang-json` |
+| `src/components/admin/modules/ConfigRawEditor.tsx` | **Ny fil** — hela editorn |
+| `src/components/admin/modules/FlowPilotDetails.tsx` | Importera och rendera `ConfigRawEditor` |
+
