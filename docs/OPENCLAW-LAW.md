@@ -86,9 +86,9 @@ OpenClaw's 4-layer memory stack:
 | OpenClaw | FlowWink |
 |----------|----------|
 | `~/skills/` directory with `SKILL.md` files | `agent_skills` table with `instructions` markdown field |
-| 3-tier resolution: workspace → managed → bundled | Single tier: `agent_skills` table |
-| Lazy loading: only metadata in prompt, model `read`s on demand | Lazy: `fetchSkillInstructions()` after first use |
-| Gating: `requires.bins`, `requires.env`, `requires.config`, `os` | No gating — all enabled skills are available |
+| 3-tier resolution: workspace → managed → bundled | `origin` enum: `bundled`, `managed`, `agent`, `user` |
+| Lazy loading: only metadata in prompt, model `read`s on demand | Lazy: `fetchSkillInstructions()` + `skill_read` tool for on-demand loading |
+| Gating: `requires.bins`, `requires.env`, `requires.config`, `os` | `agent_skills.requires` JSONB + `filterGatedSkills()` (skill, integration, module prerequisites) |
 | Skills created by agent or user | `skill_create`, `skill_instruct`, `skill_update` tools |
 | Handler: direct file execution | Handler strings: `edge:fn`, `module:name`, `db:table`, `webhook:url` |
 
