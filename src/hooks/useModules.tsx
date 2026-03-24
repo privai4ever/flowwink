@@ -50,6 +50,7 @@ export interface ModulesSettings {
   paidGrowth: ModuleConfig;
   companyInsights: ModuleConfig;
   flowpilot: ModuleConfig;
+  openclaw: ModuleConfig;
 }
 
 export const defaultModulesSettings: ModulesSettings = {
