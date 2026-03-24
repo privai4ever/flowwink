@@ -24,6 +24,7 @@ import {
   FileUser,
   Network,
   Megaphone,
+  Snowflake,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
