@@ -17,6 +17,7 @@ import {
   loadCrossModuleInsights,
   loadHeartbeatProtocol,
   reason,
+  parseReplyDirectives,
 } from "../_shared/agent-reason.ts";
 import { tryAcquireLock, releaseLock } from "../_shared/concurrency.ts";
 import { generateTraceId } from "../_shared/trace.ts";
