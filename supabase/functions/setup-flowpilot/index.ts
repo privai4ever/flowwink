@@ -2092,6 +2092,7 @@ Deno.serve(async (req) => {
       supabase_url,
       seed_skills = true,
       seed_soul = true,
+      register_cron = false,
       // Template-aware configuration
       template_id,
       template_flowpilot: template_flowpilot_body,
