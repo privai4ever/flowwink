@@ -675,6 +675,141 @@ export type Database = {
           },
         ]
       }
+      beta_test_exchanges: {
+        Row: {
+          content: string
+          created_at: string
+          direction: string
+          id: string
+          message_type: string
+          payload: Json | null
+          session_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          direction: string
+          id?: string
+          message_type?: string
+          payload?: Json | null
+          session_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          message_type?: string
+          payload?: Json | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beta_test_exchanges_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "beta_test_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beta_test_findings: {
+        Row: {
+          context: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          resolved_at: string | null
+          screenshot_url: string | null
+          session_id: string
+          severity: string
+          title: string
+          type: string
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved_at?: string | null
+          screenshot_url?: string | null
+          session_id: string
+          severity?: string
+          title: string
+          type: string
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved_at?: string | null
+          screenshot_url?: string | null
+          session_id?: string
+          severity?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beta_test_findings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "beta_test_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beta_test_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          duration_ms: number | null
+          id: string
+          metadata: Json | null
+          peer_id: string | null
+          peer_name: string
+          scenario: string
+          started_at: string
+          status: string
+          summary: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          metadata?: Json | null
+          peer_id?: string | null
+          peer_name?: string
+          scenario: string
+          started_at?: string
+          status?: string
+          summary?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          metadata?: Json | null
+          peer_id?: string | null
+          peer_name?: string
+          scenario?: string
+          started_at?: string
+          status?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beta_test_sessions_peer_id_fkey"
+            columns: ["peer_id"]
+            isOneToOne: false
+            referencedRelation: "a2a_peers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_categories: {
         Row: {
           created_at: string
