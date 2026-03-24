@@ -434,6 +434,9 @@ export function FlowPilotDetails() {
         </div>
       </div>
 
+      {/* Pilot Config Editor */}
+      <ConfigRawEditor />
+
       {/* Instance Health */}
       <HealthStatusCard />
 
