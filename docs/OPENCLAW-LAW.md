@@ -1,8 +1,8 @@
 # OpenClaw Law — FlowWink Agentic Architecture Standard
 
-> **This document is LAW.** All future development of the FlowAgent/FlowPilot system MUST follow these principles. They are aligned with the [OpenClaw](https://github.com/openclaw/openclaw) reference architecture for autonomous AI agents.
+> **This document is LAW.** All future development of the FlowAgent/FlowPilot system MUST follow these principles. They are **founded on** the [OpenClaw](https://github.com/openclaw/openclaw) reference architecture for autonomous AI agents — OpenClaw is the conceptual origin of this standard.
 >
-> *Revised 2026-03-20 against OpenClaw main branch (326k+ ★).*
+> *Revised 2026-03-24 against OpenClaw main branch (332k+ ★).*
 
 ---
 
