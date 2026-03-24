@@ -113,11 +113,11 @@ OpenClaw's workspace is a directory of editable Markdown files. FlowWink stores 
 | `SOUL.md` | Personality, values, tone, behavioral boundaries | `agent_memory(key='soul')` | ✅ |
 | `IDENTITY.md` | Name, role, goals, structured identity | `agent_memory(key='identity')` | ✅ |
 | `AGENTS.md` | Operating instructions, procedures, workflows | `agent_memory(key='agents')` | ✅ |
-| `USER.md` | User profile, preferences, personalization | Not implemented | ❌ |
-| `TOOLS.md` | Local tool notes, custom tool documentation | Not implemented (skill instructions serve partial role) | ❌ |
-| `HEARTBEAT.md` | Periodic task checklist | Hardcoded in `flowpilot-heartbeat` | ⚠️ |
+| `USER.md` | User profile, preferences, personalization | `chat_conversations.visitor_profile` + `loadVisitorContext()` + `save_visitor_profile` tool | ✅ |
+| `TOOLS.md` | Local tool notes, custom tool documentation | `agent_skills.instructions` + `tool_policy` in `agent_memory` | ✅ Adapted |
+| `HEARTBEAT.md` | Periodic task checklist | `agent_memory(key='heartbeat_protocol')` — editable via `heartbeat_protocol_update` | ✅ |
 | `MEMORY.md` | Curated long-term facts | `agent_memory` entries (fact/preference/context) | ✅ |
-| `BOOT.md` | Startup script | `useFlowPilotBootstrap.ts` (code-level) | ⚠️ |
+| `BOOT.md` | Startup script | Idempotent `setup-flowpilot` edge function (schema + skills + soul + cron) | ✅ |
 | `memory/YYYY-MM-DD.md` | Daily logs | `agent_memory` with created_at timestamps | ✅ Adapted |
 
 ---
