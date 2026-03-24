@@ -50,10 +50,10 @@ OpenClaw's runtime consists of five pillars:
 | WebSocket-first protocol with typed JSON frames | HTTP/SSE via `chat-completion`, `agent-operate` |
 | Channel bridges (WhatsApp, Telegram, Discord, Slack, Signal) | Single web channel (visitor chat + admin operate) |
 | Device pairing + trust model | Supabase Auth (JWT-based) |
-| Lane-based command queue (main, sub-agent, cron) | Atomic objective locking (`locked_at`, `locked_by`) |
+| Lane-based command queue (main, sub-agent, cron) | `agent_locks` table with lane-based TTL locking (`try_acquire_agent_lock` / `release_agent_lock`) |
 | Session routing (`dmScope`: main, per-peer, per-channel-peer) | `chat_conversations` with `conversation_id` |
 
-**Gap**: OpenClaw's command queue prevents concurrent agent runs with sophisticated lane routing. FlowWink only has objective-level locking — no queue for concurrent chat requests.
+**Resolved**: FlowWink now has lane-based concurrency guards via `agent_locks` with TTL auto-expiry. Heartbeat uses `heartbeat` lane, operate uses `operate:{conversationId}`.
 
 ### 2.2 Brain (Agent Runtime)
 
