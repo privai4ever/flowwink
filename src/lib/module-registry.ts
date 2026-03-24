@@ -33,6 +33,7 @@ import {
   browserControlModule,
   growthModule,
   federationModule,
+  openclawModule,
 } from '@/lib/modules';
 
 // =============================================================================
@@ -64,6 +65,7 @@ class ModuleRegistry {
       browserControlModule,
       growthModule,
       federationModule,
+      openclawModule,
     ];
 
     for (const mod of builtIn) {

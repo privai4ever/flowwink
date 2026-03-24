@@ -29,3 +29,4 @@ export { browserControlModule } from './browser-control-module';
 export { growthModule } from './growth-module';
 export { federationModule } from './federation-module';
 export { companyInsightsModule } from './company-insights-module';
+export { openclawModule } from './openclaw-module';

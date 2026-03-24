@@ -88,6 +88,7 @@ import FederationPage from "./pages/admin/FederationPage";
 import CompanyInsightsPage from "./pages/admin/CompanyInsightsPage";
 import AutonomyTestSuitePage from "./pages/admin/AutonomyTestSuitePage";
 import GrowthDashboardPage from "./pages/admin/GrowthDashboardPage";
+import OpenClawPage from "./pages/admin/OpenClawPage";
 
 const TemplateGalleryPage = lazy(() => import("./pages/admin/TemplateGalleryPage"));
 const SkillHubPage = lazy(() => import("./pages/admin/SkillHubPage"));
@@ -204,6 +205,7 @@ const router = createBrowserRouter([
       { path: "/admin/federation", element: <FederationPage /> },
       { path: "/admin/company-insights", element: <CompanyInsightsPage /> },
       { path: "/admin/growth", element: <GrowthDashboardPage /> },
+      { path: "/admin/openclaw", element: <OpenClawPage /> },
       { path: "/admin/autonomy-tests", element: <AutonomyTestSuitePage /> },
       { path: "/preview/:id", element: <PreviewPage /> },
       { path: "/:slug", element: <PublicPage /> },

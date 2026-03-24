@@ -50,6 +50,7 @@ export interface ModulesSettings {
   paidGrowth: ModuleConfig;
   companyInsights: ModuleConfig;
   flowpilot: ModuleConfig;
+  openclaw: ModuleConfig;
 }
 
 export const defaultModulesSettings: ModulesSettings = {
@@ -285,6 +286,15 @@ export const defaultModulesSettings: ModulesSettings = {
     autonomy: 'agent-capable',
     adminUI: true,
   },
+  openclaw: {
+    enabled: false,
+    name: 'OpenClaw Beta Tester',
+    description: 'A2A beta testing — an external OpenClaw instance tests your site and exchanges learnings with FlowPilot',
+    icon: 'Snowflake',
+    category: 'system',
+    autonomy: 'agent-capable',
+    adminUI: true,
+  },
 };
 
 // Map sidebar items to module IDs
@@ -314,6 +324,7 @@ export const SIDEBAR_TO_MODULE: Record<string, keyof ModulesSettings> = {
   '/admin/company-insights': 'companyInsights',
   '/admin/flowpilot': 'flowpilot',
   '/admin/skills': 'flowpilot',
+  '/admin/openclaw': 'openclaw',
 };
 
 export function useModules() {
