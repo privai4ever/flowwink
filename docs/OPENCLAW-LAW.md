@@ -219,26 +219,32 @@ All agent surfaces (interactive, autonomous, visitor chat) MUST share `agent-rea
 
 | Gap | OpenClaw Has | FlowWink Status | Impact |
 |-----|-------------|-----------------|--------|
-| ~~**Hybrid memory search**~~ | ~~BM25 + vector (70/30 weighted)~~ | ✅ `search_memories_hybrid()` — pg_trgm + pgvector (70/30) | ~~Exact keyword matches (IDs, errors) may be missed~~ **RESOLVED** |
-| ~~**Pre-compaction memory flush**~~ | ~~Silent agentic turn saves context before summarization~~ | ✅ `preCompactionFlush()` extracts facts via AI before pruning | ~~Risk of losing important context during pruning~~ **RESOLVED** |
 | **Protocol specs (L5)** | Structured reply tags, `NO_REPLY` sentinel, heartbeat signals | Basic SSE streaming, no reply tags | Less structured agent output parsing |
-| **Workspace: HEARTBEAT.md** | Editable checklist file the agent reads each heartbeat | Hardcoded 7-step protocol in edge function | Admin can't customize heartbeat behavior without code deploy |
-| **Workspace: BOOT.md** | Startup hook script | Code-level bootstrap in `useFlowPilotBootstrap.ts` | Same limitation — not admin-editable |
-| **Skill gating** | `requires.bins`, `requires.env`, `requires.config`, `os` checks | No gating — enabled = available | Skills may be offered when prerequisites aren't met |
-| **Tool policy** | Layered allow/deny system (global → per-agent) | Scope-based only (internal/external/both) | Less granular access control |
+| **Tool policy** | Layered allow/deny system (global → per-agent) | Scope-based + trust_level (auto/notify/approve) | Less granular but sufficient for CMS scope |
 
-### ❌ Not Implemented
+### ✅ Previously Partial — Now Resolved
+
+| Gap | Resolution |
+|-----|-----------|
+| **Hybrid memory search** | `search_memories_hybrid()` — pg_trgm + pgvector (70/30) |
+| **Pre-compaction memory flush** | `preCompactionFlush()` extracts facts via AI before pruning |
+| **Workspace: HEARTBEAT.md** | Protocol stored in `agent_memory(key='heartbeat_protocol')`, customizable via `heartbeat_protocol_update` tool |
+| **Workspace: BOOT.md** | Idempotent bootstrap via `setup-flowpilot` edge function |
+| **Skill gating** | `agent_skills.requires` JSONB + `filterGatedSkills()` — supports skill, integration, module prerequisites |
+| **USER.md** | `chat_conversations.visitor_profile` JSONB + `loadVisitorContext()` + `save_visitor_profile` tool |
+| **Command queue** | `agent_locks` table + `try_acquire_agent_lock()` / `release_agent_lock()` with TTL |
+| **Workspace Files (L7)** | Enriched soul/identity/agents with structured markdown protocols (OpenClaw §5 memory, operational protocols) |
+
+### ❌ Not Implemented (Intentional — Low Priority for CMS)
 
 | Gap | OpenClaw Has | Impact | Priority |
 |-----|-------------|--------|----------|
-| **USER.md** | Per-user context, preferences, personalization layer | Agent doesn't know user-specific preferences in visitor chat | Medium |
-| **TOOLS.md** | Local tool documentation, custom notes | Skill instructions partially cover this | Low |
-| ~~**Command queue**~~ | ~~Lane-based FIFO (main/sub-agent/cron, concurrency limits)~~ | ✅ `agent_locks` table + `try_acquire_agent_lock()` / `release_agent_lock()` with TTL | ~~No protection against concurrent agent runs~~ **RESOLVED** |
-| **Session isolation** | `dmScope` modes, per-session sandboxing, MEMORY.md security boundary | All conversations share same memory pool | Low |
-| **Thinking modes** | Reasoning budget control (fast vs deep) | Always same model depth | Low |
+| **TOOLS.md** | Local tool documentation, custom notes | Skill instructions fully cover this | Low |
+| **Session isolation** | `dmScope` modes, per-session sandboxing | All conversations share same memory pool | Low |
+| **Thinking modes** | Reasoning budget control (fast vs deep) | Token budget serves similar purpose | Low |
 | **Multi-channel gateway** | WhatsApp, Telegram, Discord, Slack, Signal bridges | Web-only (visitor chat + admin) | Low (CMS scope) |
-| **Docker sandboxing** | Container isolation with workspace mount modes | Edge Functions provide partial isolation | Low |
-| **Hooks & plugins** | Event-driven scripts with lifecycle hooks | Signal Ingest API + automations (different model) | Low |
+| **Docker sandboxing** | Container isolation with workspace mount modes | Edge Functions provide Deno isolation | Low |
+| **Hooks & plugins** | Event-driven scripts with lifecycle hooks | Signal Ingest API + automations | Low |
 
 ---
 
