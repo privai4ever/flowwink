@@ -21,14 +21,16 @@ export const openclawModule: ModuleDefinition<OpenClawSessionInput, OpenClawSess
     try {
       const validated = openclawSessionInputSchema.parse(input);
 
-      const { data, error } = await supabase
-        .from('beta_test_sessions')
-        .insert({
-          scenario: validated.scenario,
-          peer_name: validated.peer_name || 'openclaw',
-          metadata: validated.metadata || {},
-          status: 'running',
-        })
+      const insertData = {
+        scenario: validated.scenario,
+        peer_name: validated.peer_name || 'openclaw',
+        metadata: (validated.metadata || {}) as import('@/integrations/supabase/types').Json,
+        status: 'running',
+      };
+
+      const { data, error } = await (supabase
+        .from('beta_test_sessions') as any)
+        .insert(insertData)
         .select('id, scenario, status, started_at')
         .single();
 
