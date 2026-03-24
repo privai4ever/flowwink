@@ -2865,8 +2865,13 @@ export async function loadSkillTools(
 
   if (!skills?.length) return [];
 
+  // Filter out globally blocked skills
+  const unblockedSkills = blockedSkills.size > 0
+    ? skills.filter((s: any) => !blockedSkills.has(s.name))
+    : skills;
+
   // Skill gating: check prerequisites
-  let gatedSkills = await filterGatedSkills(supabase, skills);
+  let gatedSkills = await filterGatedSkills(supabase, unblockedSkills);
 
   // ─── Tier 3: DROP — only keep top-used skills ───
   if (budgetTier === 'drop') {
