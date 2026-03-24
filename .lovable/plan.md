@@ -1,67 +1,64 @@
 
 
-# Plan: Close Remaining OpenClaw Gaps
+# Plan: OpenClaw Core Refaktor — `_shared/pilot/`
 
-## Current State
-Two gaps remain at ⚠️ in `docs/OPENCLAW-LAW.md`:
+## Namnval
 
-1. **Protocol Specs (L5)** — OpenClaw uses structured reply tags (`NO_REPLY`, `HEARTBEAT_OK`, action tags) to allow programmatic parsing of agent output. FlowPilot currently uses free-form text + SSE events.
+`_shared/pilot/` — kort, rent, produktneutralt nog för återanvändning men tydligt kopplat till FlowPilot-varumärket. "openclaw" är standarden vi följer, inte mappnamnet.
 
-2. **Tool Policy** — OpenClaw has layered allow/deny per tool. FlowPilot has `scope` (internal/public) + `trust_level` (auto/notify/approve) which is functionally sufficient but not formally documented as equivalent.
+## Struktur
 
-## What to Build
+```text
+supabase/functions/
+├── _shared/
+│   ├── pilot/                    ← GENERISK KÄRNA
+│   │   ├── reason.ts             (LLM-loop, tool-calling)
+│   │   ├── prompt-compiler.ts    (6-lagers arkitektur)
+│   │   ├── concurrency.ts
+│   │   ├── token-tracking.ts
+│   │   ├── trace.ts
+│   │   ├── types.ts
+│   │   ├── ai-config.ts
+│   │   ├── integrity.ts
+│   │   └── built-in-tools.ts     (memory, objectives, skills, A2A, chain)
+│   │
+│   ├── domains/                   ← DOMÄNMODULER
+│   │   ├── cms-context.ts         (loadCMSSchema, CMS-instruktioner)
+│   │   └── cms-playbook.ts        (DAY_1_PLAYBOOK)
+│   │
+│   └── agent-reason.ts           ← SLIM RE-EXPORT (bakåtkompatibilitet)
+```
 
-### 1. Protocol Specs — Reply Directives
-Add structured reply directives to the agent prompt and SSE handling:
+## Steg
 
-- **`NO_REPLY` sentinel**: When the heartbeat determines no action is needed, it outputs `NO_REPLY` instead of generating filler text. The heartbeat handler detects this and logs a clean "idle" activity entry.
-- **`HEARTBEAT_OK` sentinel**: After successful heartbeat execution, signals clean completion.
-- **Action tags**: Structured output markers like `[ACTION:skill_name]` and `[RESULT:status]` that get parsed from agent output and stored in `agent_activity` for better traceability.
+### 1. Skapa `_shared/pilot/` och flytta generisk logik
+Flytta alla domänagnostiska delar från `agent-reason.ts` till `pilot/`-submoduler. `CORE_INSTRUCTIONS` generaliseras — CMS-specifik text tas bort och injiceras via `domainContext`-parameter.
 
-**Files changed:**
-- `supabase/functions/_shared/agent-reason.ts` — Add protocol directives to `GROUNDING_RULES` and `HEARTBEAT_PROTOCOL` constants. Add a `parseReplyDirectives()` utility function.
-- `supabase/functions/flowpilot-heartbeat/index.ts` — Detect `NO_REPLY` / `HEARTBEAT_OK` in agent response, log appropriate activity status.
-- `supabase/functions/agent-operate/index.ts` — Strip directive tags before streaming to client.
+### 2. Skapa `_shared/domains/cms-context.ts`
+Samla `loadCMSSchema()`, `DAY_1_PLAYBOOK`, och CMS-specifika instruktioner. Exportera en `cmsDomainPack` som heartbeat/operate importerar.
 
-### 2. Tool Policy — Formalize Existing Model
-Document and lightly enhance the existing scope + trust_level system to match OpenClaw's intent:
-
-- Add a `tool_policy` key to `agent_memory` that stores global allow/deny overrides (e.g., temporarily block a skill globally).
-- `loadSkillTools()` checks this policy before including tools.
-- This completes the gap without over-engineering — the existing `scope` + `trust_level` + `requires` already covers 95% of OpenClaw's tool policy.
-
-**Files changed:**
-- `supabase/functions/_shared/agent-reason.ts` — In `loadSkillTools()`, check `agent_memory(key='tool_policy')` for blocked skill names.
-- `supabase/functions/setup-flowpilot/index.ts` — Seed default `tool_policy` key (empty allow/deny lists).
-
-### 3. Update Gap Analysis Doc
-- `docs/OPENCLAW-LAW.md` — Move both gaps from ⚠️ to ✅ with resolution notes.
-
-## Technical Details
-
-### Reply Directive Constants
+### 3. Bakåtkompatibel re-export i `_shared/agent-reason.ts`
 ```typescript
-const REPLY_DIRECTIVES = `
-REPLY DIRECTIVES (use these exact strings when applicable):
-- Output "NO_REPLY" (alone, no other text) when the heartbeat finds nothing to do.
-- Output "HEARTBEAT_OK" as the final line after a successful heartbeat with actions taken.
-- Prefix action descriptions with [ACTION:skill_name] for traceability.
-`;
+export * from './pilot/reason.ts';
+```
+Så befintliga imports inte bryts direkt.
+
+### 4. Uppdatera imports i heartbeat, operate, setup
+```typescript
+import { reason } from '../_shared/pilot/reason.ts';
+import { cmsDomainPack } from '../_shared/domains/cms-context.ts';
 ```
 
-### Tool Policy Schema
-```json
-{
-  "blocked": ["skill_name_1"],
-  "notes": "Blocked due to repeated failures"
-}
-```
+### 5. Lägg till konfigurationsnycklar i setup-flowpilot
+Seeda `domain_pack` och `reasoning_config` i `agent_memory` vid bootstrap.
 
-### parseReplyDirectives(content: string)
-Returns `{ directive: 'NO_REPLY' | 'HEARTBEAT_OK' | null, cleanContent: string }`.
+### 6. Uppdatera `docs/OPENCLAW-LAW.md`
+Dokumentera den nya mappstrukturen och domänpack-konceptet.
 
-## Estimated Scope
-- 3 edge function files modified
-- 1 doc file updated
-- ~80 lines of new code
+## Omfattning
+- 1 ny subfolder: `_shared/pilot/` (refaktorerad kod)
+- 1 ny fil: `_shared/domains/cms-context.ts`
+- 1 re-export-fil uppdaterad
+- 4-5 filer med import-uppdateringar
+- ~200 rader ny kod, ~300 rader flyttad
 
