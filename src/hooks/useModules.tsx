@@ -285,6 +285,15 @@ export const defaultModulesSettings: ModulesSettings = {
     autonomy: 'agent-capable',
     adminUI: true,
   },
+  openclaw: {
+    enabled: false,
+    name: 'OpenClaw Beta Tester',
+    description: 'A2A beta testing — an external OpenClaw instance tests your site and exchanges learnings with FlowPilot',
+    icon: 'Snowflake',
+    category: 'system',
+    autonomy: 'agent-capable',
+    adminUI: true,
+  },
 };
 
 // Map sidebar items to module IDs
