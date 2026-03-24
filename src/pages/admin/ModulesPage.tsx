@@ -59,6 +59,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FileUser,
   Network,
   Megaphone,
+  Snowflake,
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
