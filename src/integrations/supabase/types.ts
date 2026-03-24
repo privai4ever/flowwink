@@ -3211,7 +3211,12 @@ export type Database = {
         | "pending_approval"
         | "approved"
         | "rejected"
-      agent_memory_category: "preference" | "context" | "fact"
+      agent_memory_category:
+        | "preference"
+        | "context"
+        | "fact"
+        | "config"
+        | "snapshot"
       agent_objective_status: "active" | "completed" | "paused" | "failed"
       agent_scope: "internal" | "external" | "both"
       agent_skill_category:
@@ -3410,7 +3415,13 @@ export const Constants = {
         "approved",
         "rejected",
       ],
-      agent_memory_category: ["preference", "context", "fact"],
+      agent_memory_category: [
+        "preference",
+        "context",
+        "fact",
+        "config",
+        "snapshot",
+      ],
       agent_objective_status: ["active", "completed", "paused", "failed"],
       agent_scope: ["internal", "external", "both"],
       agent_skill_category: [

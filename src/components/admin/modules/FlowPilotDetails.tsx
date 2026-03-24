@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ConfigRawEditor } from './ConfigRawEditor';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -432,6 +433,9 @@ export function FlowPilotDetails() {
           })}
         </div>
       </div>
+
+      {/* Pilot Config Editor */}
+      <ConfigRawEditor />
 
       {/* Instance Health */}
       <HealthStatusCard />
