@@ -18,8 +18,8 @@ OpenClaw assembles the system prompt from 9 ordered layers. Layers 1–6 are fra
 | 4 | **Model Aliases** | Short names → provider model IDs (`flash → gemini-2.5-flash`) | `resolveAiConfig()` with provider-agnostic routing | ✅ |
 | 5 | **Protocol Specs** | Reply tags, heartbeat signals, silent replies (`NO_REPLY`) | SSE streaming, heartbeat edge function, tool-call JSON format | ⚠️ Partial |
 | 6 | **Runtime Info** | Current time, OS, model, environment snapshot | CMS Schema Awareness (modules, integrations, block types) | ✅ Adapted |
-| 7 | **Workspace Files** | `SOUL.md`, `IDENTITY.md`, `AGENTS.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `MEMORY.md` | `agent_memory` table: keys `soul`, `identity`, `agents` via `loadWorkspaceFiles()` | ⚠️ Partial |
-| 8 | **Bootstrap Hooks** | Dynamic injection scripts (`agent:bootstrap`, `before_prompt_build`) | Lazy skill instruction loading via `fetchSkillInstructions()` | ⚠️ Partial |
+| 7 | **Workspace Files** | `SOUL.md`, `IDENTITY.md`, `AGENTS.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `MEMORY.md` | `agent_memory` table: keys `soul`, `identity`, `agents`, `heartbeat_protocol` + `visitor_profile` via `loadWorkspaceFiles()` | ✅ |
+| 8 | **Bootstrap Hooks** | Dynamic injection scripts (`agent:bootstrap`, `before_prompt_build`) | Lazy skill instruction loading via `fetchSkillInstructions()` + idempotent bootstrap | ✅ Adapted |
 | 9 | **Inbound Context** | Conversation history, user files, clipboard, tool results | `chat_messages` + conversation history + objectives + memory | ✅ |
 
 ### FlowWink's 6-Layer Compilation Order
