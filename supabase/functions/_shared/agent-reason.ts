@@ -27,6 +27,33 @@ export { tryAcquireLock, releaseLock } from './concurrency.ts';
 export { extractTokenUsage, accumulateTokens, isOverBudget } from './token-tracking.ts';
 export { generateTraceId } from './trace.ts';
 
+// ─── Reply Directive Parser (OpenClaw Protocol Specs L5) ──────────────────────
+export type ReplyDirective = 'NO_REPLY' | 'HEARTBEAT_OK' | null;
+
+export function parseReplyDirectives(content: string): { directive: ReplyDirective; cleanContent: string } {
+  const trimmed = content.trim();
+
+  // NO_REPLY — agent has nothing to do (must be the entire response)
+  if (trimmed === 'NO_REPLY') {
+    return { directive: 'NO_REPLY', cleanContent: '' };
+  }
+
+  // HEARTBEAT_OK — successful heartbeat (final line)
+  let cleanContent = content;
+  let directive: ReplyDirective = null;
+  if (trimmed.endsWith('HEARTBEAT_OK')) {
+    directive = 'HEARTBEAT_OK';
+    cleanContent = trimmed.replace(/\n?HEARTBEAT_OK\s*$/, '').trim();
+  }
+
+  // Strip [ACTION:...] and [RESULT:...] tags for clean user-facing text
+  cleanContent = cleanContent
+    .replace(/\[ACTION:[^\]]+\]\s*/g, '')
+    .replace(/\[RESULT:[^\]]+\]\s*/g, '');
+
+  return { directive, cleanContent };
+}
+
 // ─── Local imports for internal use ───────────────────────────────────────────
 import type { PromptCompilerInput, ReasonConfig, ReasonResult, TokenUsage, SiteMaturity, BuiltInToolGroup } from './types.ts';
 import { resolveAiConfig } from './ai-config.ts';
