@@ -77,11 +77,9 @@ OpenClaw's 4-layer memory stack:
 | **L1: Session Context** | Current conversation in context window (JSONL transcript) | `chat_messages` in current conversation | ✅ |
 | **L2: Daily Logs** | `memory/YYYY-MM-DD.md` (append-only) | `agent_memory` entries with timestamps | ✅ Adapted |
 | **L3: Long-term Memory** | `MEMORY.md` (curated facts, manually maintained) | `agent_memory` table (categories: preference, context, fact) | ✅ |
-| **L4: Semantic Vector Search** | SQLite + embeddings, hybrid BM25+vector (70/30) | pgvector with 768-dim embeddings, `search_memories_semantic()` | ⚠️ |
+| **L4: Semantic Vector Search** | SQLite + embeddings, hybrid BM25+vector (70/30) | pgvector + pg_trgm, `search_memories_hybrid()` (70% vector + 30% keyword) | ✅ |
 
-**Gap**: OpenClaw uses **hybrid search** (70% vector + 30% BM25 keyword). FlowWink only has vector similarity — no BM25 keyword fallback for exact matches (IDs, error strings, code symbols).
-
-**Gap**: OpenClaw has **pre-compaction memory flush** — a silent agentic turn that saves important context to disk *before* the context window is summarized. FlowWink's `pruneConversationHistory()` just summarizes without a pre-flush step.
+**Resolved**: `search_memories_hybrid()` combines pgvector cosine similarity with pg_trgm keyword matching (70/30 weighting). `preCompactionFlush()` extracts discrete facts via AI before context pruning.
 
 ### 2.4 Skills (Capability Modules)
 
