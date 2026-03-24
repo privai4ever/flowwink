@@ -2398,22 +2398,23 @@ Deno.serve(async (req) => {
         console.log('[setup-flowpilot] Seeded agents memory key');
       }
 
-      // Seed tool_policy (global allow/deny overrides) if missing
-      const { data: existingPolicy } = await supabase
-        .from('agent_memory')
-        .select('id')
-        .eq('key', 'tool_policy')
-        .maybeSingle();
+    }
 
-      if (!existingPolicy) {
-        await supabase.from('agent_memory').insert({
-          key: 'tool_policy',
-          value: { blocked: [], notes: 'Global tool policy — add skill names to blocked[] to prevent agent use' },
-          category: 'context',
-          created_by: 'flowpilot',
-        });
-        console.log('[setup-flowpilot] Seeded tool_policy memory key');
-      }
+    // 4b. Seed tool_policy (global allow/deny overrides) — always, regardless of seed_soul flag
+    const { data: existingPolicy } = await supabase
+      .from('agent_memory')
+      .select('id')
+      .eq('key', 'tool_policy')
+      .maybeSingle();
+
+    if (!existingPolicy) {
+      await supabase.from('agent_memory').insert({
+        key: 'tool_policy',
+        value: { blocked: [], notes: 'Global tool policy — add skill names to blocked[] to prevent agent use' },
+        category: 'context',
+        created_by: 'flowpilot',
+      });
+      console.log('[setup-flowpilot] Seeded tool_policy memory key');
     }
 
     // 5. Seed initial objectives from template
@@ -2562,6 +2563,7 @@ Deno.serve(async (req) => {
         details: {
           skills_seeded: skillsSeeded,
           soul_seeded: soulSeeded,
+          tool_policy_seeded: !existingPolicy,
           objectives_seeded: objectivesSeeded,
           cron_registered: cronRegistered,
           total_default_skills: DEFAULT_SKILLS.length,

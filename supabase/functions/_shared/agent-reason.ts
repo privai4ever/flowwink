@@ -714,7 +714,7 @@ export async function loadMemories(supabase: any): Promise<string> {
   const { data } = await supabase
     .from('agent_memory')
     .select('key, value, category')
-    .not('key', 'in', '("soul","identity","agents","heartbeat_state","heartbeat_protocol")')
+    .not('key', 'in', '("soul","identity","agents","heartbeat_state","heartbeat_protocol","tool_policy","expected_skill_hash")')
     .order('updated_at', { ascending: false })
     .limit(20);
 
