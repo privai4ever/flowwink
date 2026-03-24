@@ -1,80 +1,67 @@
 
 
-# Instance Health API & Drift Detection
+# Plan: Close Remaining OpenClaw Gaps
 
-## What We're Building
+## Current State
+Two gaps remain at ⚠️ in `docs/OPENCLAW-LAW.md`:
 
-A proactive monitoring system that automatically detects when a deployed FlowPilot instance has drifted from its expected state — without requiring manual test runs.
+1. **Protocol Specs (L5)** — OpenClaw uses structured reply tags (`NO_REPLY`, `HEARTBEAT_OK`, action tags) to allow programmatic parsing of agent output. FlowPilot currently uses free-form text + SSE events.
 
-## Architecture
+2. **Tool Policy** — OpenClaw has layered allow/deny per tool. FlowPilot has `scope` (internal/public) + `trust_level` (auto/notify/approve) which is functionally sufficient but not formally documented as equivalent.
 
-```text
-┌─────────────────────┐     ┌──────────────────────┐
-│  instance-health    │     │  setup-flowpilot      │
-│  (Edge Function)    │     │  (stores expected     │
-│                     │     │   skill_hash on       │
-│  - Skill hash check │     │   bootstrap)          │
-│  - Memory keys      │     └──────────────────────┘
-│  - Heartbeat age    │
-│  - Cron jobs        │     ┌──────────────────────┐
-│  - Edge fn ping     │     │  pg_cron (6h)        │
-│                     │◄────│  instance-health-chk │
-└────────┬────────────┘     └──────────────────────┘
-         │
-         ▼
-┌─────────────────────┐     ┌──────────────────────┐
-│  agent_activity     │     │  FlowPilotDetails.tsx │
-│  (logged result)    │     │  Health Status Card   │
-└─────────────────────┘     └──────────────────────┘
+## What to Build
+
+### 1. Protocol Specs — Reply Directives
+Add structured reply directives to the agent prompt and SSE handling:
+
+- **`NO_REPLY` sentinel**: When the heartbeat determines no action is needed, it outputs `NO_REPLY` instead of generating filler text. The heartbeat handler detects this and logs a clean "idle" activity entry.
+- **`HEARTBEAT_OK` sentinel**: After successful heartbeat execution, signals clean completion.
+- **Action tags**: Structured output markers like `[ACTION:skill_name]` and `[RESULT:status]` that get parsed from agent output and stored in `agent_activity` for better traceability.
+
+**Files changed:**
+- `supabase/functions/_shared/agent-reason.ts` — Add protocol directives to `GROUNDING_RULES` and `HEARTBEAT_PROTOCOL` constants. Add a `parseReplyDirectives()` utility function.
+- `supabase/functions/flowpilot-heartbeat/index.ts` — Detect `NO_REPLY` / `HEARTBEAT_OK` in agent response, log appropriate activity status.
+- `supabase/functions/agent-operate/index.ts` — Strip directive tags before streaming to client.
+
+### 2. Tool Policy — Formalize Existing Model
+Document and lightly enhance the existing scope + trust_level system to match OpenClaw's intent:
+
+- Add a `tool_policy` key to `agent_memory` that stores global allow/deny overrides (e.g., temporarily block a skill globally).
+- `loadSkillTools()` checks this policy before including tools.
+- This completes the gap without over-engineering — the existing `scope` + `trust_level` + `requires` already covers 95% of OpenClaw's tool policy.
+
+**Files changed:**
+- `supabase/functions/_shared/agent-reason.ts` — In `loadSkillTools()`, check `agent_memory(key='tool_policy')` for blocked skill names.
+- `supabase/functions/setup-flowpilot/index.ts` — Seed default `tool_policy` key (empty allow/deny lists).
+
+### 3. Update Gap Analysis Doc
+- `docs/OPENCLAW-LAW.md` — Move both gaps from ⚠️ to ✅ with resolution notes.
+
+## Technical Details
+
+### Reply Directive Constants
+```typescript
+const REPLY_DIRECTIVES = `
+REPLY DIRECTIVES (use these exact strings when applicable):
+- Output "NO_REPLY" (alone, no other text) when the heartbeat finds nothing to do.
+- Output "HEARTBEAT_OK" as the final line after a successful heartbeat with actions taken.
+- Prefix action descriptions with [ACTION:skill_name] for traceability.
+`;
 ```
 
-## Implementation Steps
+### Tool Policy Schema
+```json
+{
+  "blocked": ["skill_name_1"],
+  "notes": "Blocked due to repeated failures"
+}
+```
 
-### Step 1: Create `_shared/integrity.ts`
-Extract the integrity check logic from `setup-flowpilot` (lines 2432-2513) into a shared module. Add a `computeSkillHash()` function that creates a SHA256 of sorted skill names + instruction snippets.
+### parseReplyDirectives(content: string)
+Returns `{ directive: 'NO_REPLY' | 'HEARTBEAT_OK' | null, cleanContent: string }`.
 
-### Step 2: Create `instance-health` Edge Function
-Lightweight endpoint (~2s execution) that checks:
-- **Skill hash** vs expected baseline (from `agent_memory` key `expected_skill_hash`)
-- **Memory keys** present (soul, identity, agents)
-- **Heartbeat freshness** (last `agent_activity` with skill_name containing "heartbeat")
-- **Edge function reachability** (self-ping `agent-execute`)
-- **Skill count** + enabled ratio
-
-Returns `{ status: "healthy" | "degraded" | "unhealthy", version: {...}, checks: [...] }`.
-
-No JWT required — no sensitive data exposed (just counts and status).
-
-### Step 3: Store `expected_skill_hash` in bootstrap
-At end of `setup-flowpilot`, after skill seeding, compute hash and upsert into `agent_memory` with key `expected_skill_hash`. This becomes the drift detection baseline.
-
-### Step 4: Register health check cron job
-Add `instance-health-check` to `register_flowpilot_cron` — runs every 6 hours (`0 */6 * * *`). Calls the `instance-health` endpoint. If unhealthy, logs to `agent_activity` with status `failed`.
-
-### Step 5: Admin UI — Health Status Card
-Add a new card in `FlowPilotDetails.tsx` between Bootstrap Status and Scheduled Jobs:
-- Status badge (Healthy/Degraded/Unhealthy)
-- Last check timestamp
-- Drift warnings (skill hash mismatch, stale heartbeat)
-- "Run Health Check" button
-
-### Step 6: Add L4 test in `run-autonomy-tests`
-Add a test that calls `instance-health` and verifies the response shape and that status is not "unhealthy".
-
-## Files
-
-| File | Action |
-|------|--------|
-| `supabase/functions/_shared/integrity.ts` | Create |
-| `supabase/functions/instance-health/index.ts` | Create |
-| `supabase/functions/setup-flowpilot/index.ts` | Edit — use shared integrity, store skill hash |
-| `supabase/functions/run-autonomy-tests/index.ts` | Edit — add L4 health test |
-| `src/components/admin/modules/FlowPilotDetails.tsx` | Edit — add health card |
-
-## Deployment Order
-1. Shared integrity module
-2. `instance-health` edge function
-3. Update `setup-flowpilot` (store hash + register cron)
-4. Deploy all affected edge functions
-5. UI update
+## Estimated Scope
+- 3 edge function files modified
+- 1 doc file updated
+- ~80 lines of new code
 
