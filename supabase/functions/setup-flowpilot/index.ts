@@ -2563,6 +2563,7 @@ Deno.serve(async (req) => {
         details: {
           skills_seeded: skillsSeeded,
           soul_seeded: soulSeeded,
+          tool_policy_seeded: !existingPolicy,
           objectives_seeded: objectivesSeeded,
           cron_registered: cronRegistered,
           total_default_skills: DEFAULT_SKILLS.length,
