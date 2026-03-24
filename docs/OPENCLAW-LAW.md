@@ -50,10 +50,10 @@ OpenClaw's runtime consists of five pillars:
 | WebSocket-first protocol with typed JSON frames | HTTP/SSE via `chat-completion`, `agent-operate` |
 | Channel bridges (WhatsApp, Telegram, Discord, Slack, Signal) | Single web channel (visitor chat + admin operate) |
 | Device pairing + trust model | Supabase Auth (JWT-based) |
-| Lane-based command queue (main, sub-agent, cron) | Atomic objective locking (`locked_at`, `locked_by`) |
+| Lane-based command queue (main, sub-agent, cron) | `agent_locks` table with lane-based TTL locking (`try_acquire_agent_lock` / `release_agent_lock`) |
 | Session routing (`dmScope`: main, per-peer, per-channel-peer) | `chat_conversations` with `conversation_id` |
 
-**Gap**: OpenClaw's command queue prevents concurrent agent runs with sophisticated lane routing. FlowWink only has objective-level locking — no queue for concurrent chat requests.
+**Resolved**: FlowWink now has lane-based concurrency guards via `agent_locks` with TTL auto-expiry. Heartbeat uses `heartbeat` lane, operate uses `operate:{conversationId}`.
 
 ### 2.2 Brain (Agent Runtime)
 
@@ -77,20 +77,18 @@ OpenClaw's 4-layer memory stack:
 | **L1: Session Context** | Current conversation in context window (JSONL transcript) | `chat_messages` in current conversation | ✅ |
 | **L2: Daily Logs** | `memory/YYYY-MM-DD.md` (append-only) | `agent_memory` entries with timestamps | ✅ Adapted |
 | **L3: Long-term Memory** | `MEMORY.md` (curated facts, manually maintained) | `agent_memory` table (categories: preference, context, fact) | ✅ |
-| **L4: Semantic Vector Search** | SQLite + embeddings, hybrid BM25+vector (70/30) | pgvector with 768-dim embeddings, `search_memories_semantic()` | ⚠️ |
+| **L4: Semantic Vector Search** | SQLite + embeddings, hybrid BM25+vector (70/30) | pgvector + pg_trgm, `search_memories_hybrid()` (70% vector + 30% keyword) | ✅ |
 
-**Gap**: OpenClaw uses **hybrid search** (70% vector + 30% BM25 keyword). FlowWink only has vector similarity — no BM25 keyword fallback for exact matches (IDs, error strings, code symbols).
-
-**Gap**: OpenClaw has **pre-compaction memory flush** — a silent agentic turn that saves important context to disk *before* the context window is summarized. FlowWink's `pruneConversationHistory()` just summarizes without a pre-flush step.
+**Resolved**: `search_memories_hybrid()` combines pgvector cosine similarity with pg_trgm keyword matching (70/30 weighting). `preCompactionFlush()` extracts discrete facts via AI before context pruning.
 
 ### 2.4 Skills (Capability Modules)
 
 | OpenClaw | FlowWink |
 |----------|----------|
 | `~/skills/` directory with `SKILL.md` files | `agent_skills` table with `instructions` markdown field |
-| 3-tier resolution: workspace → managed → bundled | Single tier: `agent_skills` table |
-| Lazy loading: only metadata in prompt, model `read`s on demand | Lazy: `fetchSkillInstructions()` after first use |
-| Gating: `requires.bins`, `requires.env`, `requires.config`, `os` | No gating — all enabled skills are available |
+| 3-tier resolution: workspace → managed → bundled | `origin` enum: `bundled`, `managed`, `agent`, `user` |
+| Lazy loading: only metadata in prompt, model `read`s on demand | Lazy: `fetchSkillInstructions()` + `skill_read` tool for on-demand loading |
+| Gating: `requires.bins`, `requires.env`, `requires.config`, `os` | `agent_skills.requires` JSONB + `filterGatedSkills()` (skill, integration, module prerequisites) |
 | Skills created by agent or user | `skill_create`, `skill_instruct`, `skill_update` tools |
 | Handler: direct file execution | Handler strings: `edge:fn`, `module:name`, `db:table`, `webhook:url` |
 
@@ -99,10 +97,10 @@ OpenClaw's 4-layer memory stack:
 | OpenClaw | FlowWink |
 |----------|----------|
 | Gateway timer (default 30min) fires periodic agent turns | `flowpilot-heartbeat` edge function (12h cron) |
-| `HEARTBEAT.md` — editable checklist in workspace | Hardcoded 7-step protocol in edge function |
-| `HEARTBEAT_OK` sentinel = suppress output | Activity log only |
+| `HEARTBEAT.md` — editable checklist in workspace | `agent_memory(key='heartbeat_protocol')` — editable via `heartbeat_protocol_update` tool | ✅ |
+| `HEARTBEAT_OK` / `NO_REPLY` sentinels | `parseReplyDirectives()` + heartbeat idle detection | ✅ |
 | Cron system for exact-timing tasks | `agent_automations` with cron, event, signal triggers |
-| Cron sessions are isolated (fresh context) | Automations share heartbeat context |
+| Cron sessions are isolated (fresh context) | Each heartbeat gets fresh context (stateless edge function) |
 
 ---
 
@@ -115,11 +113,11 @@ OpenClaw's workspace is a directory of editable Markdown files. FlowWink stores 
 | `SOUL.md` | Personality, values, tone, behavioral boundaries | `agent_memory(key='soul')` | ✅ |
 | `IDENTITY.md` | Name, role, goals, structured identity | `agent_memory(key='identity')` | ✅ |
 | `AGENTS.md` | Operating instructions, procedures, workflows | `agent_memory(key='agents')` | ✅ |
-| `USER.md` | User profile, preferences, personalization | Not implemented | ❌ |
-| `TOOLS.md` | Local tool notes, custom tool documentation | Not implemented (skill instructions serve partial role) | ❌ |
-| `HEARTBEAT.md` | Periodic task checklist | Hardcoded in `flowpilot-heartbeat` | ⚠️ |
+| `USER.md` | User profile, preferences, personalization | `chat_conversations.visitor_profile` + `loadVisitorContext()` + `save_visitor_profile` tool | ✅ |
+| `TOOLS.md` | Local tool notes, custom tool documentation | `agent_skills.instructions` + `tool_policy` in `agent_memory` | ✅ Adapted |
+| `HEARTBEAT.md` | Periodic task checklist | `agent_memory(key='heartbeat_protocol')` — editable via `heartbeat_protocol_update` | ✅ |
 | `MEMORY.md` | Curated long-term facts | `agent_memory` entries (fact/preference/context) | ✅ |
-| `BOOT.md` | Startup script | `useFlowPilotBootstrap.ts` (code-level) | ⚠️ |
+| `BOOT.md` | Startup script | Idempotent `setup-flowpilot` edge function (schema + skills + soul + cron) | ✅ |
 | `memory/YYYY-MM-DD.md` | Daily logs | `agent_memory` with created_at timestamps | ✅ Adapted |
 
 ---
