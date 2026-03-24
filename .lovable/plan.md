@@ -2,63 +2,49 @@
 
 # Plan: OpenClaw Core Refaktor — `_shared/pilot/`
 
-## Namnval
+## Status: Phase 1 Complete ✅
 
-`_shared/pilot/` — kort, rent, produktneutralt nog för återanvändning men tydligt kopplat till FlowPilot-varumärket. "openclaw" är standarden vi följer, inte mappnamnet.
+### Completed
+1. **Created `_shared/pilot/prompt-compiler.ts`** — Generalized prompt compiler with no CMS references. Identity defaults changed from 'FlowPilot'/'CMS operator' to 'Agent'/'autonomous operator'. Added `freshSitePlaybook` parameter for domain-injected playbooks.
 
-## Struktur
+2. **Created `_shared/pilot/built-in-tools.ts`** — All 30+ built-in tool definitions extracted. Clean separation with `getBuiltInTools()` and `BUILT_IN_TOOL_NAMES` exports.
+
+3. **Created `_shared/domains/cms-context.ts`** — All CMS-specific logic extracted:
+   - `loadCMSSchema()` — data counts, modules, integrations
+   - `loadCrossModuleInsights()` — deals, leads, bookings, page views
+   - `detectSiteMaturity()` — fresh site detection
+   - `CMS_DAY_1_PLAYBOOK` — fresh site playbook
+   - `cmsDomainPack` aggregate export
+
+4. **Created `_shared/pilot/index.ts`** — Barrel file re-exporting all pilot modules.
+
+5. **Updated `_shared/types.ts`** — Added `freshSitePlaybook` field to `PromptCompilerInput`.
+
+### Phase 2 (Next)
+- **Move handler functions into `pilot/reason.ts`** — The 2500+ lines of handler logic (memory, objectives, workflows, A2A, skill CRUD, reflection, outcome evaluation, reason loop) still live in `agent-reason.ts`. Extract into `pilot/reason.ts`.
+- **Update `agent-reason.ts`** to be a slim re-export facade.
+- **Update imports** in heartbeat, operate, chat-completion, setup-flowpilot.
+- **Seed `domain_pack` and `reasoning_config`** in setup-flowpilot bootstrap.
+- **Update `docs/OPENCLAW-LAW.md`** with new architecture.
+
+## Architecture (Current)
 
 ```text
 supabase/functions/
 ├── _shared/
-│   ├── pilot/                    ← GENERISK KÄRNA
-│   │   ├── reason.ts             (LLM-loop, tool-calling)
-│   │   ├── prompt-compiler.ts    (6-lagers arkitektur)
-│   │   ├── concurrency.ts
-│   │   ├── token-tracking.ts
-│   │   ├── trace.ts
-│   │   ├── types.ts
-│   │   ├── ai-config.ts
-│   │   ├── integrity.ts
-│   │   └── built-in-tools.ts     (memory, objectives, skills, A2A, chain)
+│   ├── pilot/                          ← GENERIC CORE
+│   │   ├── index.ts                    (barrel re-exports)
+│   │   ├── prompt-compiler.ts          (6-layer prompt, workspace files) ✅
+│   │   └── built-in-tools.ts           (tool definitions) ✅
 │   │
-│   ├── domains/                   ← DOMÄNMODULER
-│   │   ├── cms-context.ts         (loadCMSSchema, CMS-instruktioner)
-│   │   └── cms-playbook.ts        (DAY_1_PLAYBOOK)
+│   ├── domains/                         ← DOMAIN PACKS
+│   │   └── cms-context.ts              (CMS schema, insights, maturity) ✅
 │   │
-│   └── agent-reason.ts           ← SLIM RE-EXPORT (bakåtkompatibilitet)
+│   ├── agent-reason.ts                 ← MONOLITH (to be split in Phase 2)
+│   ├── types.ts                        ✅ updated
+│   ├── ai-config.ts                    (already modular)
+│   ├── concurrency.ts                  (already modular)
+│   ├── token-tracking.ts              (already modular)
+│   ├── trace.ts                        (already modular)
+│   └── integrity.ts                    (already modular)
 ```
-
-## Steg
-
-### 1. Skapa `_shared/pilot/` och flytta generisk logik
-Flytta alla domänagnostiska delar från `agent-reason.ts` till `pilot/`-submoduler. `CORE_INSTRUCTIONS` generaliseras — CMS-specifik text tas bort och injiceras via `domainContext`-parameter.
-
-### 2. Skapa `_shared/domains/cms-context.ts`
-Samla `loadCMSSchema()`, `DAY_1_PLAYBOOK`, och CMS-specifika instruktioner. Exportera en `cmsDomainPack` som heartbeat/operate importerar.
-
-### 3. Bakåtkompatibel re-export i `_shared/agent-reason.ts`
-```typescript
-export * from './pilot/reason.ts';
-```
-Så befintliga imports inte bryts direkt.
-
-### 4. Uppdatera imports i heartbeat, operate, setup
-```typescript
-import { reason } from '../_shared/pilot/reason.ts';
-import { cmsDomainPack } from '../_shared/domains/cms-context.ts';
-```
-
-### 5. Lägg till konfigurationsnycklar i setup-flowpilot
-Seeda `domain_pack` och `reasoning_config` i `agent_memory` vid bootstrap.
-
-### 6. Uppdatera `docs/OPENCLAW-LAW.md`
-Dokumentera den nya mappstrukturen och domänpack-konceptet.
-
-## Omfattning
-- 1 ny subfolder: `_shared/pilot/` (refaktorerad kod)
-- 1 ny fil: `_shared/domains/cms-context.ts`
-- 1 re-export-fil uppdaterad
-- 4-5 filer med import-uppdateringar
-- ~200 rader ny kod, ~300 rader flyttad
-
