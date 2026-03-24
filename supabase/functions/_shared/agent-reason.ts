@@ -2839,6 +2839,8 @@ export async function loadSkillTools(
   budgetTier?: SkillBudgetTier,
 ): Promise<any[]> {
   const scopes = scope === 'internal' ? ['internal', 'both'] : ['external', 'both'];
+
+  // Load skills and tool_policy in parallel
   let query = supabase
     .from('agent_skills')
     .select('name, tool_definition, scope, requires, category')
@@ -2850,7 +2852,16 @@ export async function loadSkillTools(
     query = query.in('category', categories);
   }
 
-  const { data: skills } = await query;
+  const [{ data: skills }, { data: policyRow }] = await Promise.all([
+    query,
+    supabase.from('agent_memory').select('value').eq('key', 'tool_policy').maybeSingle(),
+  ]);
+
+  // Apply global tool_policy block list
+  const blockedSkills: Set<string> = new Set();
+  if (policyRow?.value?.blocked && Array.isArray(policyRow.value.blocked)) {
+    for (const name of policyRow.value.blocked) blockedSkills.add(name);
+  }
 
   if (!skills?.length) return [];
 
