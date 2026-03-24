@@ -99,10 +99,10 @@ OpenClaw's 4-layer memory stack:
 | OpenClaw | FlowWink |
 |----------|----------|
 | Gateway timer (default 30min) fires periodic agent turns | `flowpilot-heartbeat` edge function (12h cron) |
-| `HEARTBEAT.md` — editable checklist in workspace | Hardcoded 7-step protocol in edge function |
-| `HEARTBEAT_OK` sentinel = suppress output | Activity log only |
+| `HEARTBEAT.md` — editable checklist in workspace | `agent_memory(key='heartbeat_protocol')` — editable via `heartbeat_protocol_update` tool | ✅ |
+| `HEARTBEAT_OK` / `NO_REPLY` sentinels | `parseReplyDirectives()` + heartbeat idle detection | ✅ |
 | Cron system for exact-timing tasks | `agent_automations` with cron, event, signal triggers |
-| Cron sessions are isolated (fresh context) | Automations share heartbeat context |
+| Cron sessions are isolated (fresh context) | Each heartbeat gets fresh context (stateless edge function) |
 
 ---
 
