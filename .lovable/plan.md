@@ -1,67 +1,50 @@
 
 
-# Plan: Close Remaining OpenClaw Gaps
+# Plan: OpenClaw Core Refaktor — `_shared/pilot/`
 
-## Current State
-Two gaps remain at ⚠️ in `docs/OPENCLAW-LAW.md`:
+## Status: Phase 1 Complete ✅
 
-1. **Protocol Specs (L5)** — OpenClaw uses structured reply tags (`NO_REPLY`, `HEARTBEAT_OK`, action tags) to allow programmatic parsing of agent output. FlowPilot currently uses free-form text + SSE events.
+### Completed
+1. **Created `_shared/pilot/prompt-compiler.ts`** — Generalized prompt compiler with no CMS references. Identity defaults changed from 'FlowPilot'/'CMS operator' to 'Agent'/'autonomous operator'. Added `freshSitePlaybook` parameter for domain-injected playbooks.
 
-2. **Tool Policy** — OpenClaw has layered allow/deny per tool. FlowPilot has `scope` (internal/public) + `trust_level` (auto/notify/approve) which is functionally sufficient but not formally documented as equivalent.
+2. **Created `_shared/pilot/built-in-tools.ts`** — All 30+ built-in tool definitions extracted. Clean separation with `getBuiltInTools()` and `BUILT_IN_TOOL_NAMES` exports.
 
-## What to Build
+3. **Created `_shared/domains/cms-context.ts`** — All CMS-specific logic extracted:
+   - `loadCMSSchema()` — data counts, modules, integrations
+   - `loadCrossModuleInsights()` — deals, leads, bookings, page views
+   - `detectSiteMaturity()` — fresh site detection
+   - `CMS_DAY_1_PLAYBOOK` — fresh site playbook
+   - `cmsDomainPack` aggregate export
 
-### 1. Protocol Specs — Reply Directives
-Add structured reply directives to the agent prompt and SSE handling:
+4. **Created `_shared/pilot/index.ts`** — Barrel file re-exporting all pilot modules.
 
-- **`NO_REPLY` sentinel**: When the heartbeat determines no action is needed, it outputs `NO_REPLY` instead of generating filler text. The heartbeat handler detects this and logs a clean "idle" activity entry.
-- **`HEARTBEAT_OK` sentinel**: After successful heartbeat execution, signals clean completion.
-- **Action tags**: Structured output markers like `[ACTION:skill_name]` and `[RESULT:status]` that get parsed from agent output and stored in `agent_activity` for better traceability.
+5. **Updated `_shared/types.ts`** — Added `freshSitePlaybook` field to `PromptCompilerInput`.
 
-**Files changed:**
-- `supabase/functions/_shared/agent-reason.ts` — Add protocol directives to `GROUNDING_RULES` and `HEARTBEAT_PROTOCOL` constants. Add a `parseReplyDirectives()` utility function.
-- `supabase/functions/flowpilot-heartbeat/index.ts` — Detect `NO_REPLY` / `HEARTBEAT_OK` in agent response, log appropriate activity status.
-- `supabase/functions/agent-operate/index.ts` — Strip directive tags before streaming to client.
+### Phase 2 (Next)
+- **Move handler functions into `pilot/reason.ts`** — The 2500+ lines of handler logic (memory, objectives, workflows, A2A, skill CRUD, reflection, outcome evaluation, reason loop) still live in `agent-reason.ts`. Extract into `pilot/reason.ts`.
+- **Update `agent-reason.ts`** to be a slim re-export facade.
+- **Update imports** in heartbeat, operate, chat-completion, setup-flowpilot.
+- **Seed `domain_pack` and `reasoning_config`** in setup-flowpilot bootstrap.
+- **Update `docs/OPENCLAW-LAW.md`** with new architecture.
 
-### 2. Tool Policy — Formalize Existing Model
-Document and lightly enhance the existing scope + trust_level system to match OpenClaw's intent:
+## Architecture (Current)
 
-- Add a `tool_policy` key to `agent_memory` that stores global allow/deny overrides (e.g., temporarily block a skill globally).
-- `loadSkillTools()` checks this policy before including tools.
-- This completes the gap without over-engineering — the existing `scope` + `trust_level` + `requires` already covers 95% of OpenClaw's tool policy.
-
-**Files changed:**
-- `supabase/functions/_shared/agent-reason.ts` — In `loadSkillTools()`, check `agent_memory(key='tool_policy')` for blocked skill names.
-- `supabase/functions/setup-flowpilot/index.ts` — Seed default `tool_policy` key (empty allow/deny lists).
-
-### 3. Update Gap Analysis Doc
-- `docs/OPENCLAW-LAW.md` — Move both gaps from ⚠️ to ✅ with resolution notes.
-
-## Technical Details
-
-### Reply Directive Constants
-```typescript
-const REPLY_DIRECTIVES = `
-REPLY DIRECTIVES (use these exact strings when applicable):
-- Output "NO_REPLY" (alone, no other text) when the heartbeat finds nothing to do.
-- Output "HEARTBEAT_OK" as the final line after a successful heartbeat with actions taken.
-- Prefix action descriptions with [ACTION:skill_name] for traceability.
-`;
+```text
+supabase/functions/
+├── _shared/
+│   ├── pilot/                          ← GENERIC CORE
+│   │   ├── index.ts                    (barrel re-exports)
+│   │   ├── prompt-compiler.ts          (6-layer prompt, workspace files) ✅
+│   │   └── built-in-tools.ts           (tool definitions) ✅
+│   │
+│   ├── domains/                         ← DOMAIN PACKS
+│   │   └── cms-context.ts              (CMS schema, insights, maturity) ✅
+│   │
+│   ├── agent-reason.ts                 ← MONOLITH (to be split in Phase 2)
+│   ├── types.ts                        ✅ updated
+│   ├── ai-config.ts                    (already modular)
+│   ├── concurrency.ts                  (already modular)
+│   ├── token-tracking.ts              (already modular)
+│   ├── trace.ts                        (already modular)
+│   └── integrity.ts                    (already modular)
 ```
-
-### Tool Policy Schema
-```json
-{
-  "blocked": ["skill_name_1"],
-  "notes": "Blocked due to repeated failures"
-}
-```
-
-### parseReplyDirectives(content: string)
-Returns `{ directive: 'NO_REPLY' | 'HEARTBEAT_OK' | null, cleanContent: string }`.
-
-## Estimated Scope
-- 3 edge function files modified
-- 1 doc file updated
-- ~80 lines of new code
-
