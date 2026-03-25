@@ -302,7 +302,7 @@ export default function FederationPage() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreatePeer} disabled={!newPeerName || !newPeerUrl || createPeer.isPending}>
+                <Button onClick={handleCreatePeer} disabled={!newPeerName || createPeer.isPending}>
                   {createPeer.isPending ? 'Creating...' : 'Create'}
                 </Button>
               </DialogFooter>
