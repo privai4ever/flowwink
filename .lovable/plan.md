@@ -1,46 +1,92 @@
 
 
-## JSON5 Raw Mode Editor for FlowPilot Config
+## Plan: Baka in skill instructions i DEFAULT_SKILLS (Option B)
 
-### Vad vi bygger
-En "Raw Mode"-editor i FlowPilot-panelen (ModuleDetailSheet) som visar alla `agent_memory`-nycklar med `category = 'config'` som en redigerbar JSON5-blob. Inkluderar Form/Raw toggle, validering, och snapshot-backup.
+### Bakgrund — varför detta är rätt val
 
-### Varför
-- Pilot kan ändra sin hela konfiguration i en enda `memory_upsert` istället för individuella anrop
-- JSON5 tillåter kommentarer (`//`) och relaxed syntax — säkrare för LLM-generering
-- Admin kan snabbt inspektera och bulk-editera config utan att navigera formulär
+Du förstår helt rätt. Utmaningen med self-hosting utan ORM/Prisma:
 
----
+1. **Bootstrap-logiken insertar bara NYA skills** (rad 2338: `filter(s => !existingNames.has(s.name))`). Re-run uppdaterar INTE befintliga skills.
+2. **Ingen automatisk schema-sync** — ni förlitar er på edge functions + migrationer, inte Prisma-migrations som kan diffas.
+3. **Integrity gate flaggar redan** att instructions saknas (integrity.ts rad 47-49) — men kan inte fixa det själv.
+4. **Agent-driven approach (Option A)** kräver att heartbeat + AI-provider fungerar perfekt vid första start — en risk för nya installationer.
 
-### Teknisk plan
-
-#### 1. Installera dependencies
-- `json5` — parse/stringify med kommentarer och trailing commas
-- `@codemirror/lang-json` — syntax highlighting för JSON i CodeMirror (redan har `@uiw/react-codemirror`)
-
-#### 2. Ny komponent: `ConfigRawEditor.tsx`
-Placeras i `src/components/admin/modules/`
-
-Funktionalitet:
-- **Laddar** alla `agent_memory` rader med `category = 'config'` 
-- **Konverterar** till en samlad JSON5-blob: `{ reasoning_config: {...}, tool_policy: {...}, ... }`
-- **Form/Raw toggle** — Form-vy visar readonly key-cards med expand/collapse; Raw-vy visar CodeMirror-editor
-- **Validering vid spara** — parsar med `JSON5.parse()`, visar fel inline om ogiltig syntax
-- **Snapshot-backup** — innan överskrivning, sparar nuvarande state som `config_snapshot_<timestamp>` i `agent_memory` med `category = 'snapshot'`
-- **Spara** — upsert:ar varje top-level nyckel tillbaka till individuella `agent_memory`-rader
-
-#### 3. Integrera i FlowPilotDetails
-Lägg till `ConfigRawEditor` som en ny sektion i `FlowPilotDetails.tsx`, mellan Bootstrap Status och Instance Health.
-
-#### 4. CodeMirror-konfiguration
-Återanvänd den befintliga `theme` från `CodeEditor.tsx` men med `json()`-language extension istället för `html()`.
+Med instructions i koden får varje ny kund **100% integrity score från dag 1**, utan beroende på att agenten hinner köra heartbeat först.
 
 ---
 
-### Filändringar
+### Steg
 
-| Fil | Ändring |
-|-----|---------|
-| `package.json` | Lägg till `json5`, `@codemirror/lang-json` |
-| `src/components/admin/modules/ConfigRawEditor.tsx` | **Ny fil** — hela editorn |
-| `src/components/admin/modules/FlowPilotDetails.tsx` | Importera och rendera `ConfigRawEditor` |
+#### 1. Lägg till `instructions`-fält på alla ~61 skills i DEFAULT_SKILLS
+**Fil:** `supabase/functions/setup-flowpilot/index.ts`
+
+Varje skill får en `instructions`-sträng i Markdown-format enligt LAW 1:
+- **What**: Vad den gör
+- **When to use**: Beslutstabell
+- **Parameters**: Nyanser bortom JSON-schemat  
+- **Edge cases**: Vanliga fallgropar
+- **Provider notes**: Om relevant (t.ex. AI-beroende skills)
+
+Exempel:
+```typescript
+{
+  name: 'write_blog_post',
+  instructions: `## write_blog_post
+### What
+Creates a draft blog post in the CMS.
+### When to use
+- User asks to write/create/draft a blog post
+- Content pipeline workflow step
+- NOT for updating existing posts (use update_page)
+### Parameters
+- **content**: Always provide full markdown. Never leave empty expecting AI generation inside the handler.
+- **tone**: Defaults to 'professional' if omitted.
+### Edge cases
+- If no content provided, handler generates via AI — but quality is lower than agent-written content.
+- Title must be unique; duplicates get a suffix.`,
+  // ... rest of skill definition
+}
+```
+
+#### 2. Ändra seeding-logik: backfill instructions på befintliga skills
+**Fil:** `supabase/functions/setup-flowpilot/index.ts` (~rad 2330-2360)
+
+Efter nya skills inserts, lägg till en **backfill-loop** som uppdaterar befintliga skills som saknar instructions:
+
+```typescript
+// Backfill instructions on existing skills that lack them
+const skillsToBackfill = DEFAULT_SKILLS.filter(
+  s => existingNames.has(s.name) && s.instructions
+);
+for (const skill of skillsToBackfill) {
+  await supabase.from('agent_skills')
+    .update({ instructions: skill.instructions })
+    .eq('name', skill.name)
+    .is('instructions', null);  // Only if currently empty
+}
+```
+
+Detta säkerställer att:
+- Nya installationer → instructions finns direkt
+- Uppgraderingar → befintliga skills som saknar instructions fylls i
+- Agent-modifierade instructions → bevaras (`.is('instructions', null)`)
+
+#### 3. Uppdatera skill-hash beräkning
+Automatiskt — `computeSkillHash()` inkluderar redan `instructions` (integrity.ts rad 18), så hashen blir korrekt efter backfill.
+
+---
+
+### Teknisk detalj
+
+| Scenario | Före | Efter |
+|----------|------|-------|
+| Ny installation | 0/73 instructions → integrity ~60% | 73/73 → integrity 100% |
+| Uppgradering (git pull + update-funcs) | 8/73 instructions | 73/73 (backfill via `.is(null)`) |
+| Agent har modifierat | — | Bevaras (backfill skippar non-null) |
+
+**Storleksuppskattning:** ~61 skills × ~15 rader instructions = ~900 rader ny kod i setup-flowpilot.
+
+### Risker
+- Filen är redan 2641 rader — blir ~3500. Acceptabelt för en seed-fil.
+- Instructions skrivs av oss, inte agenten — men agenten kan förbättra dem via `skill_instruct` efteråt (hybrid-strategin).
+
