@@ -173,14 +173,54 @@ export default function FederationPage() {
           </Card>
         </div>
 
-        {/* Token reveal dialog */}
+        {/* Inbound token reveal dialog */}
+        <Dialog open={!!generatedInboundToken} onOpenChange={() => setGeneratedInboundToken(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Inbound Token — Share with Peer</DialogTitle>
+              <DialogDescription>
+                Give this token to the peer. They must include it as <code className="bg-muted px-1 rounded">Authorization: Bearer &lt;token&gt;</code> when calling your A2A endpoint. This is shown only once.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Token for peer</Label>
+              <div className="flex items-center gap-2 p-3 bg-muted rounded-md font-mono text-sm break-all">
+                <span className="flex-1">{generatedInboundToken}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => generatedInboundToken && handleCopyToken(generatedInboundToken)}
+                >
+                  {copiedToken ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Endpoint</Label>
+              <div className="flex items-center gap-2 p-3 bg-muted rounded-md font-mono text-xs break-all">
+                <span className="flex-1">POST {import.meta.env.VITE_SUPABASE_URL}/functions/v1/a2a-ingest</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleCopyToken(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/a2a-ingest`)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setGeneratedInboundToken(null)}>Done</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Outbound token reveal dialog */}
         <Dialog open={!!showToken} onOpenChange={() => setShowToken(null)}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Outbound Token Generated</DialogTitle>
               <DialogDescription>
-                Share this token with the peer so they can authenticate requests from your instance.
-                This is shown only once.
+                This token is used when your instance calls the peer's API.
               </DialogDescription>
             </DialogHeader>
             <div className="flex items-center gap-2 p-3 bg-muted rounded-md font-mono text-sm break-all">
