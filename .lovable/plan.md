@@ -44,4 +44,3 @@ Lägg till `ConfigRawEditor` som en ny sektion i `FlowPilotDetails.tsx`, mellan 
 | `package.json` | Lägg till `json5`, `@codemirror/lang-json` |
 | `src/components/admin/modules/ConfigRawEditor.tsx` | **Ny fil** — hela editorn |
 | `src/components/admin/modules/FlowPilotDetails.tsx` | Importera och rendera `ConfigRawEditor` |
-
