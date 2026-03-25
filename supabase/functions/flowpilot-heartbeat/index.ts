@@ -195,8 +195,8 @@ serve(async (req) => {
     ]);
 
     // 1. Token budget — give fresh sites more room to work
-    const TOKEN_BUDGET = siteMaturity.isFresh ? 120_000 : 80_000;
-    const maxIter = siteMaturity.isFresh ? 15 : 12;
+    const TOKEN_BUDGET = siteMaturity.isFresh ? 180_000 : 120_000;
+    const maxIter = siteMaturity.isFresh ? 18 : 15;
 
     console.log(`[heartbeat] trace=${traceId} Site maturity: ${siteMaturity.isFresh ? 'FRESH' : 'mature'}, budget: ${TOKEN_BUDGET}${customProtocol ? ', custom protocol' : ''}`);
 
@@ -233,7 +233,7 @@ serve(async (req) => {
       tokenBudget: TOKEN_BUDGET,
       // Essential categories for autonomous work (~42 skills instead of 91)
       // CRM + communication skills are available via chain_skills if needed
-      skillCategories: ['content', 'analytics', 'system', 'growth'],
+      skillCategories: ['content', 'analytics', 'system', 'growth', 'crm', 'communication', 'search'],
     });
 
     const timeoutPromise = new Promise<never>((_, reject) =>
